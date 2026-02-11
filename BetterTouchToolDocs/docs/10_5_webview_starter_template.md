@@ -1,0 +1,134 @@
+A simple example menu that shows various possibilities:
+
+
+It should look like this:
+![mcc](media/webviewexample.png)
+
+
+
+```HTML
+<html>
+<head>
+<style>
+
+
+
+.wrapper {
+  display: grid;
+  grid-template-columns: 100px 100px 100px;
+  grid-gap: 10px;
+  color: #444;
+}
+
+.box {
+  background-color: #444;
+  color: #fff;
+  border-radius: 5px;
+  padding:15px;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.box:hover {
+    cursor:hand;
+    background: red;
+}
+
+#status {
+  padding:5px;
+  color: red;
+  font-weight: bold;
+}
+</style>
+<script>
+
+/* This is called after the webview content has loaded*/
+function BTTInitialize() {
+  document.getElementById('status').innerHTML = 'did initialize';
+}
+
+/* This is called before the webview exits and destroys its content*/
+function BTTWillCloseWindow() {
+
+}
+
+/* This is called before the webview hides*/
+function BTTWillHideWindow() {
+
+}
+
+/* This is called when the webview becomes visible*/
+function BTTWindowWillBecomeVisible() {
+
+}
+
+/* This is called when a script variable in BTT changes. */
+async function BTTNotification(note) {
+   let data = JSON.parse(note);
+   console.log(data.note, data.name);
+
+     if(data.note == 'BTTNowPlayingInfoChanged') {
+       let currentlyPlayingSong = await get_string_variable({variable_name: 'BTTNowPlayingInfoTitle'});
+         document.getElementById('status').innerHTML = currentlyPlayingSong;
+
+   }
+
+
+
+}
+
+/* custom set brightness method using one of BTT's built-in dynamic variables */
+async function ChangeBrightness(value) {
+  await set_number_variable( {variable_name: 'BuiltInDisplayBrightness', to:value})
+}
+
+async function SayHelloWorld() {
+  let shellScript = {script: 'say hello world'};
+  let result = await runShellScript(shellScript);
+}
+
+async function ShowAppleScriptDialog(title) {
+ let appleScript = `
+      set theDialogText to "${title}! The curent date and time is " &   (current date) & "."
+      set result to display dialog theDialogText
+      return result
+    `;
+
+  let appleScriptResult = await runAppleScript({script: appleScript});
+  document.getElementById('status').innerHTML = appleScriptResult;
+
+}
+
+function closeTheWebView() {
+  // every BTT scriptinbg function does close the webview as long as it contains the closeFloatingWebView:1 parameter
+  trigger_named({trigger_name: '', closeFloatingWebView:1});
+}
+
+async function getCurrentlyPlayingSong() {
+  // this is special - as soon as the BTTCurrentlyPlaying is requested, BTT will start observing
+  // media information and call the BTTNotification function above if they changed.
+   let currentlyPlaying = get_number_variable({variable_name: 'BTTCurrentlyPlaying'});
+
+}
+
+</script>
+</head>
+<body>
+<!-- adding BTTDraggable to an element will allow you to drag the window when dragging it -->
+<div class="wrapper BTTDraggable">
+
+<!-- The first example uses the bttweb:// link to execute a named trigger which must be defined in BTT. -->
+  <a href="bttweb://trigger_named/?trigger_name=test">
+<div class="box a">Named Trigger: Test</div>
+</a>
+  <div class="box b" onclick="ChangeBrightness(0.6)">Set Brightness to 60%</div>
+  <div class="box c" onclick="SayHelloWorld()">Say Hello World</div>
+  <div class="box d" onclick="ShowAppleScriptDialog('hello')">Show Apple Script Dialog</div>
+  <div class="box e" onclick="closeTheWebView()">Close the Webview</div>
+  <div class="box f" onclick="getCurrentlyPlayingSong()">Get Currently Playing Song</div>
+</div>
+<div id="status" class="BTTDraggable"></div>
+</body>
+</html>
+
+```

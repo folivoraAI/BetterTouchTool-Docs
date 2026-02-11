@@ -1,0 +1,38 @@
+# BetterTouchTool Notch Bar Customization
+
+## Standard Customization
+
+Every item or widget you put onto the Notch Bar does offer the option to add extra CSS styles or classes to it (scroll to the very bottom of the UI/Colors section).  This is the easiest way to achieve customization.
+![notchbar-customization](media/notchbar_css.jpg)
+
+## HTML Widgets
+
+BetterTouchTool allows you to add completely custom HTML, CSS and Java Script widgets.
+These widgets can contain any HTML/CSS/JS that is supported by the latest Safari.
+
+To trigger the actions assigned to the custom HTML widget in BTT, use the triggerAssignedActions function like this:
+```HTML
+<div onclick="triggerAssignedActions(event.target)">Something</div>
+```
+
+
+![notchbar-html-widget](media/notchbar_custom_widget.png)
+
+
+
+
+## Full Customization
+
+The BTT Notch Bar is **completely** customizable because it is based on HTML5. All templates are located in ~/Library/Application Support/BetterTouchTool/NotchBar
+
+You can use any function available to the BTT floating webview, see 
+* [Floating HTML Menu] (10_0_floating_html_menu.md)
+
+However these files can change when upgrading to a newer BTT version (BTT will ask what to do when a new version contains changes). In general it's best to just edit the two user files which will not be changed on BTT updates.:
+
+BTTNotchBarUser.css
+BTTNotchBarUser.js
+
+In case you need to include custom Notch Bar layouts in your presets, you can also move them to ~/Library/Application Support/BetterTouchTool/PresetBundles/YOURPRESETFOLDER, then they will be exported when you export your preset.
+
+![notchbar](media/notchbar_fullscreen.png)

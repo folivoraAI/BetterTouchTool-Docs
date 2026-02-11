@@ -1,0 +1,13 @@
+## How to make BetterTouchTool recognize your Mouse Buttons
+BetterTouchTool can recognize mouse button presses if the mouse driver generates standard button events. Unfortunately many newer mice don't do this by default.
+
+## Logitech Mice
+
+Starting with BetterTouchTool version 5.777, BetterTouchTool natively supports Logitech Mice (by implementing parts of Logitech's HID++ 2.0 protocol - https://github.com/Logitech/cpg-docs/tree/master/hidpp20)
+
+See [Logitech Support](4000_logitech.md) for details on how to configure your Logitech Mouse with BetterTouchTool.
+
+## Other Mice
+
+If you have installed any driver/software for your mouse, make sure to not assign any actions to the buttons in that software. If this doesn't help try to uninstall the driver/software. If your mouse buttons are still not being recognized afterwards, your mouse is most likely not supported in BTT. Some mice also act as keyboard - you may try if a shortcut is recognized in BTT's keyboard tab when pressing a button.
+

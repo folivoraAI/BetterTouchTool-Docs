@@ -1,0 +1,9 @@
+# Creating Desktop Widgets
+
+The floating menus an also be used as interactive Desktop widgets. For now they are fully handled by BTT. In the future BTT might make use of the native desktop widget functionality provided by macOS.
+
+To make a floating menu into a Desktop widget, just change the "Window Level" property in the menu configuration. If you select "Same as Desktop Icons" it will stick to your Desktop, just like the native macOS Sonoma widgets.
+
+**Note**: I recommend to first configure your menu with window level "Standard Float On Top". Once you got the positioning and content right, you can change the window level to stick it to the Desktop.
+
+<img src="media/desktop_widgets.png" style="width:80%">

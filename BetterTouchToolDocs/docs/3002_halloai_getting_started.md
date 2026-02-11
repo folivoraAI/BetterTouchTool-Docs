@@ -1,0 +1,24 @@
+# h@llo.ai - Getting Started
+
+1. To get started you need to assign the predefined action "h@llo.ai - Show Customizable AI Assistant" to any trigger in BetterTouchTool (e.g. to a keyboard shortcut)
+2. Next you need to configure at least one AI API that shall be used. BetterTouchTool does not itself offer any AI services - you need to use an external provider like OpenAI, Anthropic or some local model. 
+   1. Retrieve an API key from your provider, if you need help have a look here: [Retrieve API Key](3001_hallo_ai_api_keys.md)
+   2. Select the API type & model and enter the API Key ![API Keys](media/hallo_ai_api_key_setup.png)
+   3. Note: When using gpt-5 models, add these extra parameters - otherwise they'll be too slow: {"reasoning_effort": "low", "verbosity": "low"}
+   
+3. Now you could already launch your AI Assistant, it will immediately be able to answer your questions:
+![alt text](media/hallo_ai_model_selection.png)   
+
+1. To make it more useful, select some of the tools and context options in , e.g. make it able to run shell scripts or apple scripts. 
+![Context](media/hallo_ai_context_settings.png)
+
+
+Here is an example assistant that you can import which has a lot of automation permissions - make sure you have a good backup system in place because in theory this assistant can do everything to your system.
+
+[Example Automation Assistant](media/ai-assistant-example.bttpreset)
+
+This example assistant shows when pressing cmd+opt+ctrl+C
+
+
+
+... more coming later today, come to https://community.folivora.ai for discussion.

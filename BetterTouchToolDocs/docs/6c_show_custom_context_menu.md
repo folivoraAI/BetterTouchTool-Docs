@@ -1,0 +1,20 @@
+# Show Custom Context Menu
+
+You can use the predefined action "Show Custom Context Menu (New)" to show a context menu with items you define. Each item defined in the menu can execute a sequence of actions. You can also add submenus.
+
+You can also let the items be retrieved dynamically via Java Script. See [Define Items via Simple JSON Format](1108_simple_format.md)
+
+Also custom context menus work great with [Custom Menu Bar Status Items](1008_custom_statusbar_items.md)
+
+
+![custom context menu 1](media/custom_context_menu_action_setup.png)
+![custom context menu configuration](media/custom_context_menu_configure_button.png)
+
+Showing anywhere on your screen:
+
+![how it will look like](media/custom_context_menu_with_submenu.png)
+
+Showing via a custom menu bar status item
+
+![via custom menu bar status item](media/custom_context_menu_from_menubar.png)
+
