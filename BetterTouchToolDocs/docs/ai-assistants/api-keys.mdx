@@ -9,7 +9,7 @@ slug: "/docs/ai-assistants/api-keys"
 
 1. **Create your personal OpenAI account** at https://platform.openai.com.
 You will need to verify your email before you can login and retrieve your API key.
-2. Go to https://platform.openai.com/api-keys 
+2. Go to https://platform.openai.com/api-keys
 
 3. Click the "Create new secret key" button and create a key with the default options. Make sure to copy that key, you won't be able to view it again later (but you can create as many as you want)
 
@@ -28,6 +28,38 @@ You will need to verify your email before you can login and retrieve your API ke
 4. Set spending limit on https://console.anthropic.com/settings/limits (to make sure you never pay more than what you expected)
 
 5. Top up your account balance on https://console.anthropic.com/settings/billing.
+
+# Apple Foundation Models (on-device)
+
+Starting with macOS 26, BetterTouchTool supports Apple's on-device Foundation Models. This runs AI inference entirely on your Mac — no API key, no cloud, no data leaving your device.
+
+**Requirements:**
+- macOS 26 (Tahoe) or later
+- Apple Silicon Mac (M1 or newer recommended)
+
+**Setup:**
+1. In your assistant configuration, select **Apple Foundation Models** as the API type.
+2. No API key or URL is needed — the model runs locally via Apple's `FoundationModels` framework.
+
+**Limitations:**
+- Smaller context window (~4K tokens) compared to cloud models
+- Tool support is more limited than cloud providers
+- Model capabilities depend on your hardware
+
+# Claude Code CLI
+
+BetterTouchTool can use the Claude Code CLI as a local AI backend. This runs Claude via the `claude` command-line tool as a subprocess, with tools exposed via an MCP server.
+
+**Requirements:**
+- The `claude` CLI must be installed (e.g., `npm install -g @anthropic-ai/claude-code`)
+- A valid Anthropic API key configured in the CLI
+
+**Setup:**
+1. Install the Claude CLI: `npm install -g @anthropic-ai/claude-code`
+2. In your assistant configuration, select **Claude CLI** as the API type.
+3. No separate API key is needed in BetterTouchTool — the CLI uses its own authentication.
+
+BetterTouchTool will search for the `claude` binary in common locations (`~/.local/bin/claude`, `/usr/local/bin/claude`, `/opt/homebrew/bin/claude`). You can also specify a custom path in the extra parameters.
 
 # Groq
 
@@ -64,3 +96,7 @@ You don't need an API key, however you need to select the API url. For ollama th
 This is a service that allows you to access most AI models through one API. For more details see
 
 https://openrouter.ai
+
+# Other OpenAI-compatible providers
+
+Any provider that offers an OpenAI-compatible API endpoint can be used with h@llo.ai. This includes services like xAI (Grok), Together AI, Fireworks, and many others. Simply select the **OpenAI** API type, enter your API key, and set the provider's API URL.

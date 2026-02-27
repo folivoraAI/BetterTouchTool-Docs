@@ -1,13 +1,95 @@
 ---
 title: "Usage Without UI"
-sidebar_position: 9
+sidebar_position: 12
 slug: "/docs/ai-assistants/usage-without-ui"
 ---
 # Usage Without Showing UI
 
-There are situations where you might want an AI assistant do a task without showing any UI. In BetterTouchTool's AI assistants you can do that by providing your task description in the initial user message text area in AI Configuration => Tools & Context and by additionally activating these options:
+There are several ways to run AI tasks without a visible chat window — useful for automations, scheduled reports, background processing, and more.
+
+---
+
+## Option 1: Invisible AI Assistant
+
+The simplest approach is to make an existing AI assistant run invisibly. In your assistant's AI Configuration => Tools & Context, provide your task description in the initial user message text area and activate these options:
 
 * Stop & Close After Processing Initial User Message
 * Invisible Operation / Don't Show UI
 
  ![WithoutUI](/media/hallo_ai_without_ui_setup.png)
+
+---
+
+## Option 2: Run AI Task In Background (Action)
+
+The **"h@llo.ai - Run AI Task In Background"** predefined action lets you execute an AI task silently from any trigger. Unlike the invisible assistant approach, this is a standalone action you can attach to any BTT trigger (keyboard shortcut, gesture, Named Trigger, etc.).
+
+### Configuration
+
+| Option | Description |
+|--------|-------------|
+| **AI Assistant** | Which h@llo.ai assistant to use for this task |
+| **User Message** | The prompt to send. Supports `\{variable\}` substitution for dynamic content. |
+| **File Attachment** | None, Capture Screenshot (automatically attaches a screenshot), or Choose File |
+| **Show Progress Indicator** | Display a subtle progress indicator during execution |
+| **Reuse Existing Conversation** | Maintain conversation context across multiple executions instead of starting fresh |
+| **Disabled Skills** | Optionally disable specific skills for this task |
+
+### How It Works
+
+1. The action sends the configured message to the selected AI assistant in the background.
+2. The assistant processes the request using its configured tools, context, and model — just like it would in the chat UI.
+3. The result is stored in the **`BTTLastAIResult`** variable.
+4. You can use `BTTLastAIResult` in subsequent actions (show in HUD, paste, use in scripts, etc.).
+
+### Example Use Cases
+
+- **Summarize clipboard**: Trigger via keyboard shortcut, message = "Summarize: \{clipboard_content\}", then paste the result.
+- **Screenshot analysis**: Attach a screenshot automatically and ask the AI to describe what's on screen.
+- **Process selected text**: Use `\{selected_text\}` in the message to transform or analyze the current selection.
+
+---
+
+## Option 3: Scheduled AI Trigger
+
+The **"Scheduled AI Trigger"** is a dedicated trigger type that runs AI tasks on a recurring schedule — no user interaction needed. Find it in the "Automations, Named & Other Triggers" section.
+
+### Schedule Modes
+
+**Simple interval:**
+Run the AI task every N seconds. For example, every 3600 seconds (1 hour).
+
+**CRON-like schedule:**
+Use CRON-style syntax for precise scheduling. Each field supports:
+- `*` — every unit
+- `*/5` — every 5 units
+- `1,5,10` — specific values
+- `1-5` — range of values
+
+| Field | Range | Example |
+|-------|-------|---------|
+| Hour | 0–23 | `9,17` (9 AM and 5 PM) |
+| Minute | 0–59 | `0` (on the hour) |
+| Weekday | 0–6 (0 = Sunday) | `1-5` (weekdays only) |
+| Day | 1–31 | `*` (every day) |
+| Month | 1–12 | `*` (every month) |
+
+### Configuration
+
+| Option | Description |
+|--------|-------------|
+| **AI Assistant** | Which h@llo.ai assistant to use |
+| **Schedule** | Interval in seconds or CRON-like date/time conditions |
+| **User Message** | The prompt to send on each execution. Supports `\{variable\}` substitution. |
+| **Show Progress Indicator** | Display progress during execution |
+| **Reuse Existing Conversation** | Keep conversation context across scheduled runs |
+
+### Example Use Cases
+
+- **Daily briefing**: Schedule at 9:00 AM on weekdays to summarize your calendar and tasks.
+- **Periodic monitoring**: Every 30 minutes, check a URL or log file for changes.
+- **Automated reports**: At end of day, gather data and generate a summary.
+
+### How It Differs from Time-Based Triggers
+
+Regular time-based triggers can execute any action. The Scheduled AI Trigger is specifically designed for recurring AI tasks — it automatically uses the "Run AI Task In Background" action and provides a streamlined configuration UI for both the schedule and the AI task in one place.

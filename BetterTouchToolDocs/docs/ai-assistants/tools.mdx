@@ -16,30 +16,30 @@ By default the AI Assistants do not have access to any of BTT's tools. You need 
 Use these to find UI elements in running apps and interact with them reliably.
 
 ### 1) Discover running apps
-**get_running_apps_for_ui** → List apps with `process_identifier`, `bundleId`, name, etc.  
+**get_running_apps_for_ui** → List apps with `process_identifier`, `bundleId`, name, etc.
 Use the `process_identifier` in the next steps.
 
 ### 2) Inspect UI hierarchy
-**get_app_ui_structure** → Returns the UI tree for a given process.  
-Includes an `interactive_summary` of clickable and text-input elements.  
+**get_app_ui_structure** → Returns the UI tree for a given process.
+Includes an `interactive_summary` of clickable and text-input elements.
 Options: `max_depth` (default 4, up to 20).
 
 ### 3) Search elements
-**find_ui_elements** → Search by role/title/value/description across attributes.  
-- Supports `use_regex`  
-- Returns elements with `path` like `0,2,1` and matched criteria.  
+**find_ui_elements** → Search by role/title/value/description across attributes.
+- Supports `use_regex`
+- Returns elements with `path` like `0,2,1` and matched criteria.
 **Tip:** Use this `path` for clicks or typing.
 
 ### 4A) Click an element
-**click_ui_element** → Click by `path` and `process_identifier`.  
+**click_ui_element** → Click by `path` and `process_identifier`.
 Returns `{success, path, click_method, element_info}`.
 
 ### 4B) Type into an element
-**type_in_ui_element** → Type text into fields/search boxes by `path`.  
+**type_in_ui_element** → Type text into fields/search boxes by `path`.
 Returns `{success, path, text, element_info, value_verified}`.
 
 ### 4C) Diagnose when things fail
-**diagnose_accessibility_element** → Get details, state, available actions, and recommendations for a `path`.  
+**diagnose_accessibility_element** → Get details, state, available actions, and recommendations for a `path`.
 Great for flaky or non-standard controls.
 
 ---
@@ -64,6 +64,9 @@ Great for flaky or non-standard controls.
 ### Haptics & clipboard
 - **haptic_feedback** → Trigger light/medium/heavy haptics.
 - **set_clipboard_content** → Set clipboard text (optionally with a specific pasteboard format).
+- **paste_clipboard_item** → Paste an item from clipboard history by `index` (0 = most recent).
+- **show_clipboard_manager** → Open the BetterTouchTool clipboard manager UI.
+- **check_clipboard_changes** → Check for recent clipboard changes and return current clipboard content.
 
 ### Wait helper
 - **wait_for_x_seconds** → Pause execution for a number of seconds (use this instead of `setTimeout`).
@@ -83,7 +86,7 @@ Use these when you need holistic, step-by-step desktop control.
 
 ## Browser & Web
 
-- **safari_automation** → Execute JavaScript in Safari’s active window. Modes: `active` (fast, active window) or `webdriver` (faster when possible, falls back). Supports batching via `batch` array.
+- **safari_automation** → Execute JavaScript in Safari's active window. Modes: `active` (fast, active window) or `webdriver` (faster when possible, falls back). Supports batching via `batch` array.
 - **get_browser_html** → Grab HTML/text/metadata from Safari, Chrome, Edge, Arc, Brave, Firefox, Opera, Vivaldi, etc. Target the `active` tab, `all` tabs, or a specific tab id. Optional `cleanHTML` and `extractText`.
 - **web_search** → DuckDuckGo-based web search. Returns top results with titles, snippets, and URLs.
 - **web_fetch** → Fetch a URL and return `text`, `markdown`, `html`, or `json`. Handles redirects and timeouts.
@@ -96,7 +99,7 @@ Use these when you need holistic, step-by-step desktop control.
 - **screenshot** → Capture the whole space, a screen, or a specific window. Use `target` to pick scope; `window_id` when targeting a single window.
 - **get_windows_sorted_front_to_back** → List visible windows in z-order (front to back). Each includes app, pid, bounds, id, title.
 - **activate_window** → Bring a window to the front by `id`.
-- **set_window_frame** → Move/resize a window: provide `id` and `frame` 
+- **set_window_frame** → Move/resize a window: provide `id` and `frame`
 - **screenshot_window** → Screenshot a single window by `id`.
 - **ocr_window** → OCR text from a window (no need to screenshot first). Returns text with global bounds.
 
@@ -112,8 +115,8 @@ Use these when you need holistic, step-by-step desktop control.
 
 ### Edit & patch
 - **file_edit** → Simple find/replace (optionally replace all).
-- **file_edit_smart** → Context-aware edits using surrounding lines to uniquely match; preview & rollback supported.
-- **file_edit_multi** → Multiple edits applied in one atomic operation; optional conflict validation.
+- **file_edit_smart** → Context-aware edits using surrounding lines to uniquely match the target location. Supports preview and rollback.
+- **file_edit_multi** → Apply multiple edits in one atomic operation with optional conflict validation. Useful for coordinated changes across a file.
 - **file_patch** → Apply unified diff patches (multi-file supported). Preview via dry-run; reverse or strict modes available.
 
 ### Find files & content
@@ -133,18 +136,106 @@ Use these when you need holistic, step-by-step desktop control.
 
 ---
 
-## Diagnostics for Code
+## Diagnostics for Code (LSP)
 
-- **lsp_diagnostics** → Run language server checks (TS/JS/Swift/Python/Go/Rust) to surface errors/warnings.
-- **read_file_with_lsp_diagnostics** → Read a file with inline comments showing diagnostics next to the lines.
+### Core diagnostics
+- **lsp_diagnostics** → Run language server checks (TypeScript/JavaScript/Swift/Python/Go/Rust) to surface errors and warnings for a given file.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `filePath` | string (required) | Path to the file to analyze |
+| `waitForAnalysis` | boolean | Wait for fresh results (default: true) |
+
+### Reading files with diagnostics
+- **read_file_with_lsp_diagnostics** → Read a file with inline comments showing diagnostics next to the relevant lines.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `path` | string (required) | Path to the file to read |
+| `lineNumbers` | boolean | Include line numbers (default: true) |
+| `startLine` | integer | Starting line number (1-based) |
+| `endLine` | integer | Ending line number (1-based, inclusive) |
+
+### Exploring projects with diagnostics
 - **explore_with_diagnostics** → Scan a folder and list files with error/warning counts (optionally recursive or filtered by file types).
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `path` | string (required) | Directory path to explore |
+| `recursive` | boolean | Include subdirectories (default: false) |
+| `fileTypes` | array of strings | Filter by extensions, e.g. `["ts", "js"]` |
 
 ---
 
-## Variables, Clipboard, Haptics, Wait
+## Memory (Persistent)
+
+The memory system gives your AI assistant the ability to remember information across conversations. Memories are stored locally in a SQLite database and are searchable via keyword, semantic, and graph-based search. See [Memory](/docs/ai-assistants/memory) for a detailed guide.
+
+### memory_save
+Save information to persistent memory that will be available across all future conversations.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `content` | string (required) | The information to remember. Be specific and self-contained. |
+| `memory_type` | string (required) | One of: `fact`, `preference`, `decision`, `identity`, `event`, `observation`, `goal`, `todo` |
+| `importance` | number | Importance score from 0.0 to 1.0. Defaults to a type-appropriate value. |
+| `associations` | array | Optional links to existing memories: `[{memory_id, relation_type}]`. Relation types: `related_to`, `updates`, `contradicts`, `caused_by`, `part_of` |
+
+### memory_recall
+Search and retrieve information from persistent memory.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `query` | string | Search query (required for `hybrid` mode) |
+| `mode` | string | `hybrid` (default — keyword + semantic + graph), `recent`, `important`, or `typed` |
+| `memory_type` | string | Filter by type |
+| `max_results` | integer | 1–25, default 10 |
+
+### memory_forget
+Soft-delete a memory so it no longer appears in searches or the memory bulletin.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `memory_id` | string (required) | The ID of the memory to forget (from `memory_recall` results) |
+| `reason` | string | Optional reason for forgetting (logged for audit) |
+
+---
+
+## Interactive Content
+
+### render_interactive_content
+Render interactive HTML/CSS/JavaScript content inline in the chat. Use for charts, forms, interactive demos, data visualizations, custom UIs, games, etc. The content is displayed in an embedded web view within the chat message.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `html` | string (required) | Complete HTML content. Can include inline `<style>` and `<script>` tags. Rendered in a sandboxed web view. |
+| `width` | number | Width in points. If omitted, fills the available chat width. |
+| `height` | number | Height in points. Default: 300. |
+| `enable_add_message_callback` | boolean | If true, the HTML can call `window.BTT.addUserMessage(text)` to add a user message to the chat. |
+| `enable_tool_grant_callback` | boolean | If true, the HTML can call `window.BTT.grantToolUsage(toolName, argsObject)` to execute a tool directly. |
+| `granted_tools` | array of strings | Tool names that the HTML is allowed to invoke via `grantToolUsage`. Only used when `enable_tool_grant_callback` is true. |
+
+---
+
+## File Delivery
+
+### provide_file_to_user
+Provide one or more files to the user, displayed inline in the chat with file icon, name, and size. The user can Quick Look, drag & drop, Save As, Open With, or Reveal in Finder.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `files` | array (required) | Array of file objects (see below) |
+
+Each file object can contain:
+- **Existing file**: `path` (absolute path to the file)
+- **Generated file**: `content` (text) or `base64_content` (binary) + `file_name` + `file_extension`
+- **Optional**: `mime_type` to override auto-detection
+
+---
+
+## Variables, Haptics, Wait
 
 - **get_variable_value** / **set_variable_value** → Read/write persistent BetterTouchTool variables (store text, numbers, or JSON). Use in triggers, conditions, and scripts.
-- **set_clipboard_content** → Put text on the clipboard (optionally with format type).
 - **haptic_feedback** → Light/medium/heavy feedback for quick confirmations.
 - **wait_for_x_seconds** → Pause tool execution for timing/sequencing.
 
@@ -152,19 +243,19 @@ Use these when you need holistic, step-by-step desktop control.
 
 ## Calendars & Reminders
 
-**manage_calendar_and_reminders**  
-- **get_events**: Pull events/reminders in a date range.  
-- **create_event / create_reminder**: Add items (supports title, times, all-day, location, notes).  
-- **list_calendars / list_reminder_lists**: Discover available calendars/lists.  
+**manage_calendar_and_reminders**
+- **get_events**: Pull events/reminders in a date range.
+- **create_event / create_reminder**: Add items (supports title, times, all-day, location, notes).
+- **list_calendars / list_reminder_lists**: Discover available calendars/lists.
 Returns structured JSON with titles, dates, times, location, notes, calendar name, and identifiers. Reminders include `dueDate`, `completed`, and `priority`.
 
 ---
 
 ## Menubar & Triggers
 
-- **retrieve_app_menubar_items** → Query an app’s menubar (enabled/checked state). Provide a path (or empty for root) to get that level’s items.
+- **retrieve_app_menubar_items** → Query an app's menubar (enabled/checked state). Provide a path (or empty for root) to get that level's items.
 - **find_menubar_item** → Search a menubar item by name (supports regex). Returns the full path string.
-- **trigger_menubar_item** → Trigger a menubar item using the full path and `pid` (or focused app).  
+- **trigger_menubar_item** → Trigger a menubar item using the full path and `pid` (or focused app).
 - **trigger_named_trigger** → Fire a BetterTouchTool Named Trigger by name.
 - **import_trigger_json** → Import a trigger from its JSON (into a specific app or globally).
 - **add_action_to_trigger** → Import an action JSON and attach it to an existing trigger by UUID.
@@ -201,9 +292,5 @@ These are available globally in your JS execution context (not via tool calls):
 
 ---
 
-
----
-
-**Tip:** For reliable UI automation, follow the flow:  
+**Tip:** For reliable UI automation, follow the flow:
 `get_running_apps_for_ui → get_app_ui_structure → find_ui_elements → (click_ui_element | type_in_ui_element) → diagnose_accessibility_element (if needed)`
-

@@ -1,0 +1,171 @@
+---
+title: "Persistent Memory"
+sidebar_position: 8
+slug: "/docs/ai-assistants/memory"
+---
+# h@llo.ai - Persistent Memory
+
+The persistent memory system allows your AI assistant to remember information across conversations. Memories are stored locally in a SQLite database on your Mac and are never sent to external servers beyond the normal AI API calls.
+
+---
+
+## How It Works
+
+When memory tools are enabled, the assistant can:
+
+1. **Save** facts, preferences, decisions, and other information to persistent storage.
+2. **Recall** memories using keyword search, semantic search, or by browsing recent/important items.
+3. **Forget** memories that are outdated or no longer relevant.
+
+A **memory bulletin** — a summary of key stored memories — is automatically injected into the system prompt at the start of each conversation, giving the assistant context about what it already knows.
+
+---
+
+## Memory Types
+
+Each memory is categorized by type, which affects its default importance and how it's organized in the memory bulletin:
+
+| Type | Default Importance | Purpose |
+|------|-------------------|---------|
+| **identity** | 1.0 | Core information about the user (name, role, etc.) |
+| **goal** | 0.9 | Active goals and objectives |
+| **decision** | 0.8 | Important decisions that have been made |
+| **todo** | 0.8 | Tasks to be completed |
+| **preference** | 0.7 | User preferences (tools, workflows, style, etc.) |
+| **fact** | 0.6 | General facts and information |
+| **event** | 0.4 | Events that occurred |
+| **observation** | 0.3 | General observations and notes |
+
+---
+
+## Tools
+
+### memory_save
+
+Save information to persistent memory.
+
+```
+memory_save({
+  content: "User prefers dark mode in all applications",
+  memory_type: "preference",
+  importance: 0.8,
+  associations: [
+    { memory_id: "abc123", relation_type: "related_to" }
+  ]
+})
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `content` | string | Yes | The information to remember. Should be specific and self-contained. |
+| `memory_type` | string | Yes | One of the types listed above |
+| `importance` | number | No | 0.0–1.0. Defaults to the type's default importance. |
+| `associations` | array | No | Links to existing memories (see Associations below) |
+
+### memory_recall
+
+Search and retrieve stored memories.
+
+```
+memory_recall({
+  query: "dark mode preferences",
+  mode: "hybrid",
+  max_results: 5
+})
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | string | For `hybrid` mode | Search query text |
+| `mode` | string | No | Search mode (see below). Default: `hybrid` |
+| `memory_type` | string | No | Filter results by type |
+| `max_results` | integer | No | 1–25. Default: 10 |
+
+### memory_forget
+
+Soft-delete a memory so it no longer appears in searches or the bulletin.
+
+```
+memory_forget({
+  memory_id: "abc123",
+  reason: "Information is outdated"
+})
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `memory_id` | string | Yes | ID of the memory (from `memory_recall` results) |
+| `reason` | string | No | Reason for forgetting (logged for audit) |
+
+Forgotten memories are excluded from all searches. Memories that have been forgotten for more than 30 days are automatically hard-deleted.
+
+---
+
+## Search Modes
+
+| Mode | Query Required | Description |
+|------|---------------|-------------|
+| **hybrid** | Yes | Combines keyword search (FTS5), semantic search (vector similarity), and graph-based search using Reciprocal Rank Fusion (RRF). Best for finding specific information. |
+| **recent** | No | Returns the most recently created memories, sorted by date. |
+| **important** | No | Returns the highest-importance memories, sorted by importance score. |
+| **typed** | No | Returns memories filtered by `memory_type`, sorted by importance. |
+
+---
+
+## Associations
+
+Memories can be linked together to form a knowledge graph. When saving a memory, you can associate it with existing memories using one of these relation types:
+
+| Relation | Description |
+|----------|-------------|
+| **related_to** | General relationship between two memories |
+| **updates** | This memory updates or replaces the target |
+| **contradicts** | This memory contradicts the target |
+| **caused_by** | This memory was caused by the target |
+| **part_of** | This memory is part of a larger concept |
+
+Associations influence search results — the hybrid search mode uses graph traversal (BFS, depth 2) to find related memories and boost their ranking. Different relation types have different weight multipliers (e.g., `updates` has a 1.5x multiplier, `contradicts` has 0.5x).
+
+---
+
+## Memory Bulletin
+
+The memory bulletin is a context item (`BTTAIContextMemoryBulletin`) that automatically summarizes stored memories and injects them into the system prompt. It refreshes every 60 minutes and is capped at ~2000 characters.
+
+The bulletin is organized by priority:
+1. Identity & Core Facts
+2. Active Goals
+3. Key Decisions
+4. User Preferences
+5. Todos
+6. Recent Events (last 7 days)
+7. Important Facts
+8. Observations
+
+---
+
+## Importance Decay
+
+Memory importance scores decay automatically over time:
+- **Base decay**: 0.5% per day
+- **Access boost**: Memories accessed within the last 7 days decay slower (1.1x multiplier)
+- **Neglect penalty**: Memories not accessed for 30+ days decay faster (0.9x multiplier)
+- **Exempt**: Identity-type memories are exempt from decay
+- **Auto-cleanup**: Memories that fall below a minimum importance threshold are automatically soft-deleted
+
+---
+
+## Storage
+
+Memories are stored in a local SQLite database at:
+```
+~/Library/Application Support/BetterTouchTool/AI/Memory/memory.db
+```
+
+The database uses WAL mode for concurrent read access and includes FTS5 full-text search indexes and vector embeddings for semantic search.

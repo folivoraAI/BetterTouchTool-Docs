@@ -1,0 +1,78 @@
+---
+title: "Extended Thinking"
+sidebar_position: 7
+slug: "/docs/ai-assistants/extended-thinking"
+---
+# h@llo.ai - Extended Thinking
+
+Extended thinking (also called chain-of-thought reasoning) allows the AI to reason through complex problems before responding. When enabled, the model produces internal "thinking" blocks where it works through the problem step by step, then provides a final answer.
+
+This typically leads to better results for tasks that require multi-step reasoning, planning, debugging, or analysis.
+
+---
+
+## Thinking Levels
+
+The thinking budget controls how many tokens the model can use for internal reasoning. Higher budgets allow deeper analysis but increase latency and cost.
+
+| Level | Budget | Description |
+|-------|--------|-------------|
+| **Minimal** | ~1,024 tokens | Quick reasoning — good for simple clarifications |
+| **Low** | ~4,096 tokens | Light reasoning — good for straightforward coding tasks |
+| **Medium** | ~10,000 tokens | Moderate reasoning — good for most tasks (default) |
+| **High** | ~32,000 tokens | Deep reasoning — good for complex debugging, architecture decisions |
+| **Maximum** | ~100,000 tokens | Maximum reasoning — for the most complex analytical tasks |
+
+You can also set a custom token budget that overrides the level default.
+
+---
+
+## Supported Models
+
+Extended thinking is currently supported on **Anthropic Claude** models only:
+
+- Claude 3.5 Sonnet and newer
+- Claude 3 Opus
+- Claude 4.x models (Haiku, Sonnet, Opus)
+
+Other providers (OpenAI, local models, etc.) do not support this feature.
+
+---
+
+## How to Enable
+
+Extended thinking can be enabled in two ways:
+
+### Via Skills
+When configuring a skill, you can set the thinking level in the skill editor. The skill's thinking configuration applies whenever that skill is active.
+
+### Via Assistant Configuration
+In the assistant configuration, enable extended thinking and select a thinking level. You can also toggle whether thinking blocks are shown in the chat UI.
+
+---
+
+## Thinking in the UI
+
+When `showThinkingInUI` is enabled (the default), thinking blocks appear in the chat as collapsible sections. You can expand them to see the model's reasoning process.
+
+When disabled, the model still uses extended thinking internally, but the thinking content is hidden from the chat — only the final response is shown.
+
+---
+
+## Technical Details
+
+When extended thinking is enabled, BetterTouchTool automatically:
+
+- Adds the `thinking` parameter to the Anthropic API request with the configured budget
+- Increases `max_tokens` to accommodate both thinking and response tokens
+- Sets `temperature` to 1 (required by Anthropic when thinking is enabled)
+- Parses streaming `thinking` and `thinking_delta` events to display thinking blocks in real time
+
+---
+
+## Tips
+
+- Start with **Low** or **Medium** for most tasks — you can always increase if results aren't good enough.
+- Extended thinking adds latency. For quick Q&A or simple tasks, consider leaving it disabled.
+- The thinking budget is a maximum, not a minimum. The model may use fewer tokens than budgeted.
+- When multiple skills are active, the highest thinking level among them wins.

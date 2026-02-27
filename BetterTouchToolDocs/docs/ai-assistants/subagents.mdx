@@ -5,6 +5,10 @@ slug: "/docs/ai-assistants/subagents"
 ---
 # h@llo.ai - Specialized Sub Agents
 
+Subagents allow you to delegate specific tasks to specialized AI models with different instructions, tools, and configurations. The main chat calls subagents when it needs focused expertise — for example, a code reviewer, a refactoring agent, or an automation specialist.
+
+## Setting Up Subagents
+
 Subagents can be configured in the "Automations, Named & Other Triggers" section:
 ![Agent](/media/hallo_ai_subagent_config.png)
 
@@ -14,4 +18,59 @@ To make them available in your main assistant, you need to enable them in the "a
 
 In case your subagent doesn't show up there, try to open & close your main assistant once.
 
-More coming soon!
+---
+
+## Tool Access Modes
+
+Each subagent can use one of three tool access modes, which control how it interacts with BetterTouchTool's tools:
+
+| Mode | Description |
+|------|-------------|
+| **directOnly** | The subagent calls tools directly (no JavaScript). Best for simple, focused agents that only need a few specific tools. |
+| **javascriptOnly** | The subagent generates JavaScript code that calls tools via `run_javascript`. This is the traditional BTT approach and produces reusable code. |
+| **mixed** | The subagent can both call tools directly and generate JavaScript. Offers maximum flexibility. |
+
+For `javascriptOnly` mode, only the `run_javascript` tool is registered. For `mixed` mode, `run_javascript` is added alongside the agent's other tools.
+
+---
+
+## Configuration Options
+
+Each subagent supports the following configuration:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| **System Prompt** | string | (required) | Custom instructions for the subagent |
+| **Tools** | set of strings | `[]` | Which tools the subagent can access |
+| **Tool Access Mode** | enum | `directOnly` | How the agent accesses tools (see above) |
+| **Max Iterations** | integer | 10 (max 50) | Maximum number of tool-call rounds before the agent stops |
+| **Max Execution Time** | seconds | 60 | Time limit for the entire subagent execution |
+| **Custom Model** | config | (inherited) | Use a different AI model/provider than the parent |
+| **Icon** | SF Symbol | `cpu` | Icon shown in the chat UI |
+| **Short Description** | string | — | Brief description shown when the agent is listed |
+| **Context Configuration** | config | (inherited) | Custom context items for this subagent |
+
+---
+
+## Inheritance vs Override
+
+Subagents inherit most settings from the parent assistant by default:
+
+- **Model & API**: If no custom model configuration is provided, the subagent uses the parent's API and model.
+- **Context**: If no custom context configuration is set, the subagent uses a standard agent context preset (lighter than the full parent context).
+- **Tools**: Tools are **not** inherited — you must explicitly configure which tools the subagent can access.
+- **System prompt**: Each subagent has its own system prompt. The parent's system prompt is not inherited.
+
+---
+
+## Activity Tracking
+
+While a subagent is running, its activity is visible in the parent chat:
+
+- **Tool calls**: Each tool the subagent invokes is displayed with its parameters and results.
+- **Screenshots**: If the subagent takes screenshots, they appear in the parent chat.
+- **Thinking**: If extended thinking is enabled, thinking blocks are visible.
+- **Progress**: The parent chat shows a live status of the subagent's execution (iterations, elapsed time).
+- **Final result**: When the subagent completes, its final response is displayed in the parent conversation.
+
+This transparency lets you monitor what the subagent is doing without having to wait for it to finish.

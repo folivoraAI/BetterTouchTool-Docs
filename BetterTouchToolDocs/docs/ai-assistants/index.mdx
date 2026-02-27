@@ -3,20 +3,16 @@ title: "h@llo.AI - AI Assistants"
 sidebar_position: 1
 slug: "/docs/ai-assistants/overview"
 ---
-# h@llo.ai - Beta - BetterTouchTool integrated AI Assistants
+# h@llo.ai - BetterTouchTool integrated AI Assistants
 
 ![Building Blocks](/media/hallo_ai_logo.png)
 **Building Blocks for custom AI macOS automation assistants**
 
 Starting with version 5.611 BetterTouchTool allows you to create custom AI Assistants tailored to your specific needs. They come with many building blocks that allow for macOS automation but also generic usage. You can create one or multiple AI Assistants that can be triggered via any of BTT's triggers.
 
-I call this feature h@llo.ai :-) 
+I call this feature h@llo.ai :-)
 
-**Note:** This is very much a work in progress. Be cautious when using the custom AI assistants. At the moment, h@llo.ai is basically a big experimental playground that enables many things, but even I myself am still in the process of figuring out what works best. Please come to https://community.folivora.ai to share your experiences and ideas!
-
-I suggest to start with a very simple assistant and then allow it to do more things step by step.
-
-**Note2:** BetterTouchTool does not offer the AI services for h@llo.ai assistants itself. This means you will need to use your own API Keys. 
+**Note:** BetterTouchTool does not offer the AI services for h@llo.ai assistants itself. This means you will need to use your own API Keys (or use on-device models like Apple Foundation Models).
 
 h@llo.ai assistants always directly communicate with the AI provider (e.g. OpenAI, Anthropic, local LLMs etc.). No chat data is sent to our servers. Make sure to accept the terms of the specific provider you chose to use.
 
@@ -44,10 +40,12 @@ BetterTouchTool integrates many tools the AI Assistants can use. By default the 
 Many of the tools are super powerful, but also pretty dangerous. Make sure you have a good backup system in place and be wary of prompt injections.
 
 Some examples for powerful tools are:
-* **run_shell_script**: to run arbitrary shell / terminal commands. 
+* **run_shell_script**: to run arbitrary shell / terminal commands.
 * **run_apple_script**: automate apps via AppleScript. Same security considerations as for run_shell_script apply
 * **transform_selected_text**: To transform any selected text with AI.
 * **safari_automation**: Execute JavaScript in Safari
+* **render_interactive_content**: Render interactive HTML/CSS/JS inline in the chat (charts, forms, games, etc.)
+* **provide_file_to_user**: Deliver files to the user with Quick Look and drag & drop support
 
 For a list of all available tools and instructions how to configure them have a look here: [Available Tools and How To Configure Them](/docs/ai-assistants/tools)
 
@@ -69,6 +67,28 @@ However just like tools, BTT doesn't add context by default as it is a complex b
 It is also possible to retrieve custom context via scripts if required.
 
 See [h@llo.ai - Context](/docs/ai-assistants/context) for more details on how to configure your Assistant's context.
+
+## Persistent Memory
+
+h@llo.ai assistants can remember information across conversations using a built-in persistent memory system. Memories are stored locally in a SQLite database and searchable via keyword, semantic, and graph-based search.
+
+The AI can save facts, preferences, decisions, goals, and more — and recall them in future conversations. A memory bulletin is automatically included in the system prompt so the assistant starts each conversation with relevant context.
+
+See [Memory](/docs/ai-assistants/memory) for details on how the memory system works.
+
+## Extended Thinking
+
+For complex tasks, h@llo.ai supports extended thinking (chain-of-thought reasoning). When enabled, the AI model reasons through the problem before responding, producing better results for multi-step tasks, coding, and analysis.
+
+You can configure the thinking budget from minimal (~1K tokens) to maximum (~100K tokens) depending on task complexity.
+
+See [Extended Thinking](/docs/ai-assistants/extended-thinking) for configuration details.
+
+## Skills
+
+Skills are preconfigured bundles of tools, context items, system prompt additions, and thinking settings. They make it easy to quickly set up an assistant for a specific use case (e.g., coding, desktop automation, general assistance) without manually configuring each tool.
+
+Built-in skills include **General Assistant**, **Code Assistant**, and **Desktop Automation**. You can also create custom skills.
 
 ## Reusable Code Generation
 
