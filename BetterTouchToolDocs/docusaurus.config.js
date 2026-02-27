@@ -66,6 +66,11 @@ const config = {
             label: 'BetterTouchTool Website',
             position: 'right',
           },
+          {
+            href: 'https://github.com/folivoraAI/BetterTouchTool-Docs',
+            label: 'Docs GitHub',
+            position: 'right',
+          },
         ],
       },
       algolia: {
@@ -107,6 +112,10 @@ const config = {
               {
                 label: 'Website',
                 href: 'https://folivora.ai',
+              },
+              {
+                label: 'Documentation GitHub',
+                href: 'https://github.com/folivoraAI/BetterTouchTool-Docs',
               },
             ],
           },
