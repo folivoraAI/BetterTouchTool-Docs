@@ -1,0 +1,33 @@
+---
+title: "Extending Finder Context Menu"
+sidebar_position: 10
+slug: "/docs/actions/finder-context-menu"
+---
+# Extending the Finder Context Menu
+
+Starting with BetterTouchTool v4.560 you can extend the Finder context menu with custom menu items. For example this allows you to add "New File Here" items.
+
+ ‼️ **Important** you need to enable the BetterTouchTool Finder Extension in System Settings => Extensions => Added Extensions ‼️
+
+
+Here is an example preset that shows how to configure a custom context menu, which when triggered creates a new file in the current folder:
+[https://share.folivora.ai/sP/f6b2c92e-c621-4dae-b050-8bbb172b2cd5](https://share.folivora.ai/sP/f6b2c92e-c621-4dae-b050-8bbb172b2cd5)
+
+![newfolder](/media/new_folder.png)
+
+The setup is done in the "Automations & Named & Other Triggers" section in BTT by adding a "Custom Finder Context Menu Items" trigger and assigning the "Configure Custom Context Menu Items" action.
+![finder1](/media/finder_context_1.png)
+
+When the context menu item is triggered, BTT will make these variables available that can be used e.g. in terminal commands or scripts:
+
+* **BTTFinderContextMenuTargetPath** (the path of the current folder)
+* **BTTFinderContextMenuSelectedItemPaths** (the paths of the selected items, separated by ;; )
+* **BTTFinderContextMenuTriggeredUUID** (the UUID of the context menu item in BTT)
+
+For example with the "Run Terminal Command" action in BTT you can create a new file like this:
+
+```
+touch "{BTTFinderContextMenuTargetPath/newfile.txt}"
+```
+
+![finder2](/media/finder_context_2.png)

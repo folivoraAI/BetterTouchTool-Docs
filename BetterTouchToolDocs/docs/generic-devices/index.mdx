@@ -1,0 +1,22 @@
+---
+title: "Generic Devices"
+sidebar_position: 1
+slug: "/docs/generic-devices/overview"
+---
+import VimeoEmbed from '@site/src/components/VimeoEmbed';
+
+# Generic Device Support
+
+Many input devices produce relatively simple output, however, they can be difficult to use without proper software support. To make it possible to use almost any input device with BetterTouchTool, I have begun working on "Generic Device Support." The concept is straightforward. BTT connects to a device and provides you with raw input data. You write a small JavaScript function that interprets the input data and activates triggers in BTT.
+
+This is a work in progress and there is not much documentation available yet. In this example video I'm using the Siri Remote as an example and show how to make BetterTouchTool recognize its buttons:
+
+
+<VimeoEmbed videoId="793341135" />
+
+![](/media/generic_siri_remote.png)  
+![](/media/generic_triggers_analyzer.png)  
+![](/media/offered_triggers.png)  
+![](/media/generic_triggers_in_menu.png)  
+
+

@@ -1,0 +1,209 @@
+---
+title: "Tools"
+sidebar_position: 5
+slug: "/docs/ai-assistants/tools"
+---
+# h@llo.ai Available Tools
+
+By default the AI Assistants do not have access to any of BTT's tools. You need to enable access for each (or all) tools you want to allow in the configuration of the predefined action "h@llo.ai - Show Customizable AI Assistant". There go to the AI Configuration => Tools & Context section and scroll down.
+
+![Tools](/media/hallo_ai_tools_config.png)
+
+---
+
+## UI Automation: End‑to‑End Flow
+
+Use these to find UI elements in running apps and interact with them reliably.
+
+### 1) Discover running apps
+**get_running_apps_for_ui** → List apps with `process_identifier`, `bundleId`, name, etc.  
+Use the `process_identifier` in the next steps.
+
+### 2) Inspect UI hierarchy
+**get_app_ui_structure** → Returns the UI tree for a given process.  
+Includes an `interactive_summary` of clickable and text-input elements.  
+Options: `max_depth` (default 4, up to 20).
+
+### 3) Search elements
+**find_ui_elements** → Search by role/title/value/description across attributes.  
+- Supports `use_regex`  
+- Returns elements with `path` like `0,2,1` and matched criteria.  
+**Tip:** Use this `path` for clicks or typing.
+
+### 4A) Click an element
+**click_ui_element** → Click by `path` and `process_identifier`.  
+Returns `{success, path, click_method, element_info}`.
+
+### 4B) Type into an element
+**type_in_ui_element** → Type text into fields/search boxes by `path`.  
+Returns `{success, path, text, element_info, value_verified}`.
+
+### 4C) Diagnose when things fail
+**diagnose_accessibility_element** → Get details, state, available actions, and recommendations for a `path`.  
+Great for flaky or non-standard controls.
+
+---
+
+## Mouse, Keyboard & Text
+
+### Pointer & clicks
+- **move_mouse** → Move (and optionally drag) the mouse to (`x`,`y`). Supports `anchorPoint` (screen origin), `duration`, `drag`.
+- **click** → Click at current or specific coordinates; supports `type` (left|right|middle|double), `count`, modifiers (`mods`), and optional move & click in one call.
+- **save_mouse_pos** / **restore_mouse_pos** → Store/recall a named cursor position.
+
+### Keyboard & text
+- **type_or_paste_text** → Type or paste text; optionally provide `format` (RTF/HTML/PDF/PNG/URL) or set `type: true` to simulate typing.
+- **send_shortcut** → Send keys/shortcuts to an app (or the focused app): specify `key` and `mods` (e.g., `cmd+shift`).
+- **get_selected_text** → Read the current selection. *(Use mainly to refresh the selection after other tools.)*
+- **transform_selected_text** → Run your JS transformer on the current selection and return the result.
+- **replace_selected_text** → Replace the current selection with your provided text.
+
+### Heads-up display
+- **show_hud** → Show a temporary HUD message (supports SF Symbols via `icon` and a `duration`).
+
+### Haptics & clipboard
+- **haptic_feedback** → Trigger light/medium/heavy haptics.
+- **set_clipboard_content** → Set clipboard text (optionally with a specific pasteboard format).
+
+### Wait helper
+- **wait_for_x_seconds** → Pause execution for a number of seconds (use this instead of `setTimeout`).
+
+---
+
+## Computer Control (Full Desktop Agents)
+
+Two agent-style tools that can move the mouse, click, type, scroll, drag, press keys, wait, and take screenshots.
+
+- **computer_20250124** → Actions like `screenshot`, `left_click`, `drag`, `scroll {direction, amount}`, `key`, `type {text}`, `wait {seconds}` with coordinates where needed.
+- **computer_use_preview** → Similar capabilities with explicit `environment` (`mac`, `windows`, `ubuntu`, `browser`) and optional `display_width/height` for context.
+
+Use these when you need holistic, step-by-step desktop control.
+
+---
+
+## Browser & Web
+
+- **safari_automation** → Execute JavaScript in Safari’s active window. Modes: `active` (fast, active window) or `webdriver` (faster when possible, falls back). Supports batching via `batch` array.
+- **get_browser_html** → Grab HTML/text/metadata from Safari, Chrome, Edge, Arc, Brave, Firefox, Opera, Vivaldi, etc. Target the `active` tab, `all` tabs, or a specific tab id. Optional `cleanHTML` and `extractText`.
+- **web_search** → DuckDuckGo-based web search. Returns top results with titles, snippets, and URLs.
+- **web_fetch** → Fetch a URL and return `text`, `markdown`, `html`, or `json`. Handles redirects and timeouts.
+
+---
+
+## Screen, Windows & OCR
+
+- **get_screens** → Info on all connected screens.
+- **screenshot** → Capture the whole space, a screen, or a specific window. Use `target` to pick scope; `window_id` when targeting a single window.
+- **get_windows_sorted_front_to_back** → List visible windows in z-order (front to back). Each includes app, pid, bounds, id, title.
+- **activate_window** → Bring a window to the front by `id`.
+- **set_window_frame** → Move/resize a window: provide `id` and `frame` 
+- **screenshot_window** → Screenshot a single window by `id`.
+- **ocr_window** → OCR text from a window (no need to screenshot first). Returns text with global bounds.
+
+---
+
+## Files & Projects
+
+### Create, read, write
+- **file_create** → Create a new file (fails if it exists).
+- **file_read** → Read text files with line numbers (up to ~250KB).
+- **file_write** → Overwrite a file with new content (read first to avoid data loss).
+- **file_write_enhanced** → Safer write: backups, permission checks, encoding handling, atomic writes, auto-create directories.
+
+### Edit & patch
+- **file_edit** → Simple find/replace (optionally replace all).
+- **file_edit_smart** → Context-aware edits using surrounding lines to uniquely match; preview & rollback supported.
+- **file_edit_multi** → Multiple edits applied in one atomic operation; optional conflict validation.
+- **file_patch** → Apply unified diff patches (multi-file supported). Preview via dry-run; reverse or strict modes available.
+
+### Find files & content
+- **file_list** → Show files/folders as a flat list or tree (includes hidden files and sizes).
+- **file_glob** → Glob-based matching (e.g., `**/*.swift`, `src/**/*.js`). Results sorted newest first.
+- **file_search** → Powerful file search by name/type/size/date; supports regex and depth limits.
+- **file_grep** → Regex search inside files with optional context and line numbers.
+- **file_find_content** → Simple text search across files; returns file path, line number, and matching line.
+
+---
+
+## Versioning & History
+
+- **file_diff** → Compare file versions (current vs previous or any two versions). Unified or split diff; ignore whitespace; control context lines; show line numbers.
+- **file_undo** → Undo by transaction ID or by the last N operations; restore specific versions; view history.
+- **file_redo** → Redo an undone change (limited). For anything else, use **file_undo** with `restore`.
+
+---
+
+## Diagnostics for Code
+
+- **lsp_diagnostics** → Run language server checks (TS/JS/Swift/Python/Go/Rust) to surface errors/warnings.
+- **read_file_with_lsp_diagnostics** → Read a file with inline comments showing diagnostics next to the lines.
+- **explore_with_diagnostics** → Scan a folder and list files with error/warning counts (optionally recursive or filtered by file types).
+
+---
+
+## Variables, Clipboard, Haptics, Wait
+
+- **get_variable_value** / **set_variable_value** → Read/write persistent BetterTouchTool variables (store text, numbers, or JSON). Use in triggers, conditions, and scripts.
+- **set_clipboard_content** → Put text on the clipboard (optionally with format type).
+- **haptic_feedback** → Light/medium/heavy feedback for quick confirmations.
+- **wait_for_x_seconds** → Pause tool execution for timing/sequencing.
+
+---
+
+## Calendars & Reminders
+
+**manage_calendar_and_reminders**  
+- **get_events**: Pull events/reminders in a date range.  
+- **create_event / create_reminder**: Add items (supports title, times, all-day, location, notes).  
+- **list_calendars / list_reminder_lists**: Discover available calendars/lists.  
+Returns structured JSON with titles, dates, times, location, notes, calendar name, and identifiers. Reminders include `dueDate`, `completed`, and `priority`.
+
+---
+
+## Menubar & Triggers
+
+- **retrieve_app_menubar_items** → Query an app’s menubar (enabled/checked state). Provide a path (or empty for root) to get that level’s items.
+- **find_menubar_item** → Search a menubar item by name (supports regex). Returns the full path string.
+- **trigger_menubar_item** → Trigger a menubar item using the full path and `pid` (or focused app).  
+- **trigger_named_trigger** → Fire a BetterTouchTool Named Trigger by name.
+- **import_trigger_json** → Import a trigger from its JSON (into a specific app or globally).
+- **add_action_to_trigger** → Import an action JSON and attach it to an existing trigger by UUID.
+- **get_trigger_json** → Retrieve the JSON representation for a trigger by UUID.
+
+---
+
+## Scripting
+
+- **run_shell_script** → Run any shell command or script. Use `directory`, `environmentVariables`, and `background` as needed. For long-running servers, use `autoReturnTimeout` to return after inactivity.
+- **run_apple_script** → Run AppleScript code (with optional function/arguments). Perfect for deep macOS automation.
+
+---
+
+## BetterTouchTool Knowledge Search
+
+- **search_bettertouchtool_documentation** → Ask anything about BTT; returns the most relevant docs from a vector search.
+- **search_bettertouchtool_trigger_and_action_definitions** → Find trigger/action definitions when creating automations.
+- **retrieve_floating_menu_definition** → Retrieve JSON definitions for Floating Menus (optionally filter results).
+
+---
+
+## Global JavaScript Utilities
+
+These are available globally in your JS execution context (not via tool calls):
+
+### Internet access
+- `fetch` (standard modern fetch)
+- `fetchURLAsBase64(url, readAsBase64)` → Synchronous fetch helper returning base64 if desired.
+
+### File access
+- `readFile(path, readAsBase64)` → Synchronous read.
+- `writeStringToFile(dataString, path, stringIsBase64)` → Synchronous write (supports base64 input).
+
+---
+
+
+---
+
+**Tip:** For reliable UI automation, follow the flow:  
+`get_running_apps_for_ui → get_app_ui_structure → find_ui_elements → (click_ui_element | type_in_ui_element) → diagnose_accessibility_element (if needed)`
+

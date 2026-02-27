@@ -1,0 +1,88 @@
+---
+title: "Logitech Mouse Support"
+sidebar_position: 3
+slug: "/docs/normal-mouse/logitech"
+---
+# Logitech Mouse Support
+
+Current versions of BetterTouchTool natively support Logitech Mice (by implementing parts of Logitech's HID++ 2.0 protocol - https://github.com/Logitech/cpg-docs/tree/master/hidpp20)
+
+Huge thanks to the many testers! Now most of the Logitech mice and [keyboards](/docs/keyboard-shortcuts/logitech-keyboards) are supported directly in BetterTouchTool without the need for any other mouse driver/software! Here are some of the mice/keyboards that have been tested successfully: MX Master 3, MX Master 3S, MX Master 4, MX Master 3S For Mac, MX Anywhere 3, MX Anywhere 3S, MX Vertical, MX Ergo Precision, M720, G402, All G502 variants (Proteus Core, Proteus Spectrum, HERO, HERO Wireless, X, X PLUS, X Wireless), G903 / G903 HERO. Others might also work fine!
+
+
+**Note** This is supposed to be a full alternative/replacement to the Logitech apps like Logitech Options+ or G-Hub. Actually BTT won't work correctly while any of these are installed.
+
+## Setup
+
+Go to the "Normal Mouse" section in BetterTouchTool and add a "Logitech Mouse Configuration" item there:
+![Logitech Mouse Configuration](/media/logitech_mouse_mx_master_config.png)
+
+Then select the correct mouse and experiment with the best settings for your use case.
+
+If you want to remap the mouse buttons make sure to check the "Make All Buttons Available For Remapping in BTT" option.
+
+## Example Preset: MX Master
+
+Here is an example preset for MX Master (3, 3S, 4) mice that you can import and adapt to your needs. It shows some advanced configuration, you might not need all of it.
+
+https://folivora.ai/releases/mx_master_example2.bttpreset
+
+![alt text](/media/4000_logitech2026-01-31T13:57:50.362Z.png)
+
+## Example Preset: MX Vertical
+Here is an example preset for MX Vertical mice that you can import and adapt to your needs. It shows some advanced configuration, you might not need all of it.
+
+https://folivora.ai/releases/MX_Vertical_Preset.bttpreset
+
+![alt text](/media/4000_logitech2026-01-31T13:59:14.590Z.jpeg)
+
+## Example Preset: MX Anywhere 3 / MX Anywhere 3S
+
+https://folivora.ai/releases/MXAnywhere3or3s.bttpreset
+
+![alt text](/media/4000_logitech2026-02-10T11:02:37.272Z.png)
+
+
+
+## Remapping Buttons
+
+After you have added the Logitech Mouse Configuration, your mouse buttons should be recognized and you can configure them like described in [Assigning Actions To Normal Mice](/docs/normal-mouse/assigning-actions)
+
+
+![alt text](/media/logitech_mouse_buttons_overview.png)
+
+Hover the click recognition area with your mouse, then press the button you want to use:
+![alt text](/media/logitech_mouse_scroll_settings.png)
+
+Afterwards you can assign any action sequence to that button:
+![alt text](/media/logitech_mouse_button_config.png)
+
+![alt text](/media/logitech_mouse_gestures.png)
+
+## Smooth Scrolling
+
+BetterTouchTool supports smooth scrolling for any mouse, not just Logitech mice. To enable it add a [Smooth Scroll Modifier](/docs/normal-mouse/scroll-modifiers)
+
+## Configure Tilt Wheel Buttons To Scroll
+
+BTT will record your tilt wheel left / right direction as button presses. If you want to use that for scrolling you need to assign the predefined action "Start Smooth Scrolling" on button press and "Stop Smooth Scrolling" on button RELEASE. Positive speed values will scroll right, negative left.
+
+## Trackpad Like Gestures (Zooming, Rotating, Space Switching)
+
+Trackpad like gestures can also be configured via scroll modifiers: [Scroll Modifier](/docs/normal-mouse/scroll-modifiers)
+
+## Action Ring & Other Fancy Menus
+
+If you want to replicate the Action Ring, you can easily do that using BetterTouchTool's floating menus.
+
+Here is an example preset that shows such a menu when the middle mouse button / scroll wheel is pressed:
+
+https://folivora.ai/releases/action_ring_example.bttpreset
+
+![alt text](/media/4000_logitech2026-02-10T12:32:06.271Z.png)
+![alt text](/media/4000_logitech2026-02-10T12:32:28.165Z.png)
+![alt text](/media/4000_logitech2026-02-10T12:32:53.656Z.png)
+
+### Bugs, Feature Requests & Discussion:
+
+Please come to https://community.folivora.ai/t/support-for-logitech-mx-master-mice/37397/78 and report any non-working mouse. I have mostly tested with MX Master and some G-series mice, but it is quite likely I have not covered all combinations.

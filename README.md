@@ -9,5 +9,5 @@ The BetterTouchTool documentation can be found [here](https://docs.folivora.ai/)
 To build the BetterTouchTool Documentation follow these steps:
 
 * cd into the BetterTouchToolDocs directory and run ``npm install``
-* run ``npx honkit serve`` to build and run the documentation
-* run ``npx honkit build`` to just build the documentation
+* run ``npm start`` to start the local development server
+* run ``npm run build`` to create a production build

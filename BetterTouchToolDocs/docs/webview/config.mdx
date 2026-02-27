@@ -1,0 +1,38 @@
+---
+title: "Appearance & Config Options"
+sidebar_position: 3
+slug: "/docs/webview/config"
+---
+## Configuration Options
+Most of the configuration options you see when clicking the config tab should be self-explanatory, but let's have a quick look:
+![mcc](/media/webviewconfig.png)
+
+
+* **Width/Height** - The size of the webview
+* **Resizable** - when activated the webview allows to be resized by dragging the edges/corners like normal windows. Known issue: the resize cursor might not show up, you'll still be able to resize.
+
+* **Center on Monitor With Mouse (Default)**: Will center the floating webview on the monitor that currently contains the mouse cursor.
+
+* **Specify Position**: Various options on where to place the webview.
+* **Update above position & size after manually moving or resizing**: This will automatically save & restore the latest position & size if you have moved the webview around. 
+
+* **Use White Background**: This will make the background of the webview white. By default it is transparent and you can set the background color using css. In some cases (e.g. for external websites) you might not want the transparent background.
+
+* **Show Window Buttons**: By default the webview doesn't show the window buttons on the top left. This checkbox enables them.
+* **Draw Title Bar Bezel**: By default the webview doesn't have a title bar. This checkbox enables that (e.g. for easier dragging).
+* **Close When Clicking Outside**: Will close the webview as soon as clicking on some other window. Known issue: might not work while BTT preferences are open.
+* **Show BTT Dock Icon**: This will show the BTT icon in the Dock while the webview is active. It will make the webview active when clicked.
+* **Z-Index**: Using this you can select the window level for the webview. By default it is floating on top of all other windows. You can also stick it to the desktop, so it will only be visible when showing the desktop. You can also specify a custom NSWindowLevel number, see <a href="http://www.gietal.net/blog/nswindowlevel-shenanigans">http://www.gietal.net/blog/nswindowlevel-shenanigans</a>
+
+## Advanced
+
+![mcc](/media/webview_advanced.png)
+
+* **Do NOT keep content active in background**: By default the webview only loads the web content once and then keeps it active in the background. This might not be wanted for various reasons. For example you might not want to have music playing while the webview is hidden. 
+* **Custom User Agent**: Allows you to set a custom user agent. Can be helpful in order to get a smaller mobile version of a website.
+* **Open URLs with prefix in System Browser**: You might want to open http links in the system browser.
+
+* **Move Window by dragging content**: This allows to move the webview by dragging the web content. This can result in unwanted clicks, thus might not work on all websites. Use "only move while holding CMD" to prevent accidental clicks. 
+
+## Security:
+* **Shared Secret**: The shared secret is only necessary if you load a website from an external server and that website tries to trigger functions within BTT.

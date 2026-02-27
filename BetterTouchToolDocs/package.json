@@ -1,26 +1,41 @@
 {
-  "name": "bettertouchtool_documentation",
+  "name": "bettertouchtool-docs",
   "version": "1.0.0",
-  "description": "This is the official BetterTouchTool documentation (work in progress)",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
+  "private": true,
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "docusaurus deploy",
+    "clear": "docusaurus clear",
+    "serve": "docusaurus serve"
   },
   "dependencies": {
-    "gitbook": "3.2.2",
-    "gitbook-plugin-expandable-chapters": "0.2.0",
-    "gitbook-plugin-retina": "1.0.4",
-    "gitbook-plugin-theme-default": "1.0.6",
-    "gitbook-plugin-wide-page": "1.0.0"
+    "@docusaurus/core": "^3.9.0",
+    "@docusaurus/preset-classic": "^3.9.0",
+    "@mdx-js/react": "^3.0.0",
+    "prism-react-renderer": "^2.3.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/fifafu/BetterTouchTool.git"
-  },
-  "author": "Andreas Hegenberg",
-  "license": "ISC",
   "devDependencies": {
-    "cheerio": "^1.2.0",
-    "honkit": "^6.1.6"
+    "@docusaurus/module-type-aliases": "^3.9.0",
+    "@docusaurus/types": "^3.9.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 3 chrome version",
+      "last 3 firefox version",
+      "last 5 safari version"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0"
   }
 }

@@ -1,0 +1,662 @@
+[
+  { "actionId": 0, "actionName": "Use Apple Default Or Do Nothing" },
+  { "actionId": 1, "actionName": "Middle Click" },
+  { "actionId": 2, "actionName": "CMD(⌘)+Click" },
+  { "actionId": 3, "actionName": "Left Click" },
+  { "actionId": 4, "actionName": "Right Click" },
+  { "actionId": 5, "actionName": "Mission Control" },
+  { "actionId": 6, "actionName": "Application Expose" },
+  { "actionId": 7, "actionName": "Show Spaces" },
+  { "actionId": 8, "actionName": "Show Dashboard" },
+  { "actionId": 9, "actionName": "Switch to Login Screen" },
+  { "actionId": 10, "actionName": "Open Finder" },
+  { "actionId": 11, "actionName": "Zoom In" },
+  { "actionId": 12, "actionName": "Zoom Out" },
+  { "actionId": 13, "actionName": "Sleep Display" },
+  { "actionId": 14, "actionName": "Sleep Computer" },
+  { "actionId": 15, "actionName": "Logout" },
+  { "actionId": 16, "actionName": "Show / Hide Hidden Files in Finder" },
+  { "actionId": 17, "actionName": "Move Window Left" },
+  { "actionId": 18, "actionName": "Move Window Right" },
+  { "actionId": 19, "actionName": "Maximize Window Left Half" },
+  { "actionId": 20, "actionName": "Maximize Window Right Half" },
+  { "actionId": 21, "actionName": "Maximize Window" },
+  { "actionId": 22, "actionName": "Mute" },
+  { "actionId": 23, "actionName": "Play/Pause" },
+  { "actionId": 24, "actionName": "Volume Up" },
+  { "actionId": 25, "actionName": "Volume Down" },
+  { "actionId": 26, "actionName": "Previous" },
+  { "actionId": 27, "actionName": "Next" },
+  { "actionId": 28, "actionName": "Brightness Up" },
+  { "actionId": 29, "actionName": "Brightness Down" },
+  { "actionId": 30, "actionName": "Eject" },
+  { "actionId": 31, "actionName": "Keyboard Illumination Up" },
+  { "actionId": 32, "actionName": "Keyboard Illumination Down" },
+  {
+    "actionId": 33,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  {
+    "actionId": 34,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  {
+    "actionId": 35,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  {
+    "actionId": 36,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  {
+    "actionId": 37,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  {
+    "actionId": 38,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  {
+    "actionId": 39,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  {
+    "actionId": 40,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  {
+    "actionId": 41,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  {
+    "actionId": 42,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  {
+    "actionId": 43,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  {
+    "actionId": 44,
+    "actionName": "Please delete this gesture and add it again using the shortcuts field. F keys are no longer available as predefined actions"
+  },
+  { "actionId": 45, "actionName": "Show Desktop" },
+  { "actionId": 46, "actionName": "Application Switcher" },
+  { "actionId": 47, "actionName": "Move Window to Next Monitor" },
+  { "actionId": 48, "actionName": "Maximize Window to Next Monitor" },
+  {
+    "actionId": 49,
+    "actionName": "Launch Application / Open File / Start Apple Script …"
+  },
+  { "actionId": 50, "actionName": "Hide All Windows" },
+  { "actionId": 51, "actionName": "Browser: Back" },
+  { "actionId": 52, "actionName": "Browser: Forward" },
+  { "actionId": 53, "actionName": "Hide Other Applications Windows" },
+  { "actionId": 54, "actionName": "Double Click" },
+  { "actionId": 55, "actionName": "Restart BetterTouchTool" },
+  { "actionId": 56, "actionName": "Quit BetterTouchTool" },
+  { "actionId": 57, "actionName": "" },
+  { "actionId": 58, "actionName": "Search Selected Text With Google" },
+  { "actionId": 59, "actionName": "Open URL / Open URL With Selection" },
+  { "actionId": 60, "actionName": "Page Up" },
+  { "actionId": 61, "actionName": "Page Down" },
+  { "actionId": 62, "actionName": "Home (Beginning of the Page)" },
+  { "actionId": 63, "actionName": "End (End of the Page)" },
+  { "actionId": 64, "actionName": "Forward Delete" },
+  { "actionId": 65, "actionName": "Start Mouse Drag" },
+  { "actionId": 66, "actionName": "Stop Mouse Drag" },
+  { "actionId": 67, "actionName": "" },
+  { "actionId": 68, "actionName": "Magic Mouse Touchpad Mode On / Off" },
+  { "actionId": 69, "actionName": "Start Moving" },
+  { "actionId": 70, "actionName": "Stop Moving" },
+  { "actionId": 71, "actionName": "Start Resizing" },
+  { "actionId": 72, "actionName": "Stop Resizing" },
+  { "actionId": 73, "actionName": "Toggle Start/Stop Resizing" },
+  { "actionId": 74, "actionName": "Toggle Start/Stop Moving" },
+  { "actionId": 75, "actionName": "" },
+  { "actionId": 76, "actionName": "" },
+  { "actionId": 77, "actionName": "3F Swipe Left (Page Back)" },
+  { "actionId": 78, "actionName": "3F Swipe Right (Page Forward)" },
+  { "actionId": 79, "actionName": "3 Finger Swipe Up" },
+  { "actionId": 80, "actionName": "3 Finger Swipe Down" },
+  { "actionId": 81, "actionName": "Rotate Left" },
+  { "actionId": 82, "actionName": "Rotate Right" },
+  { "actionId": 83, "actionName": "" },
+  { "actionId": 84, "actionName": "Restore Old Window Size" },
+  { "actionId": 85, "actionName": "Create New File in Current Folder" },
+  { "actionId": 86, "actionName": "Hide Menu Bar Items Temporarily" },
+  { "actionId": 87, "actionName": "Ctrl(⌃)+Click" },
+  { "actionId": 88, "actionName": "Option(⌥)+Click" },
+  { "actionId": 89, "actionName": "Shift(⇧)+Click" },
+  {
+    "actionId": 90,
+    "actionName": "Resize Window to Top Left Quarter / Corner"
+  },
+  {
+    "actionId": 91,
+    "actionName": "Resize Window to Bottom Left Quarter / Corner"
+  },
+  {
+    "actionId": 92,
+    "actionName": "Resize Window to Top Right Quarter / Corner"
+  },
+  {
+    "actionId": 93,
+    "actionName": "Resize Window to Bottom Right Quarter / Corner"
+  },
+  { "actionId": 94, "actionName": "Show Color Picker" },
+  { "actionId": 95, "actionName": "Maximize Window to Bottom Half" },
+  { "actionId": 96, "actionName": "Maximize Window to Top Half" },
+  { "actionId": 97, "actionName": "Center Window" },
+  { "actionId": 98, "actionName": "Center Window on Next Monitor" },
+  { "actionId": 99, "actionName": "Show Window Switcher for Active App" },
+  { "actionId": 100, "actionName": "Show Window Switcher for All Open Apps" },
+  { "actionId": 101, "actionName": "Enable / Disable BetterTouchTool" },
+  {
+    "actionId": 102,
+    "actionName": "Close Window Under Cursor (Works in Mission Control)"
+  },
+  { "actionId": 103, "actionName": "Expose And Sort" },
+  { "actionId": 104, "actionName": "Quit BetterTouchTool" },
+  { "actionId": 105, "actionName": "Show BTT Preferences" },
+  { "actionId": 106, "actionName": "Minimize Window Under Cursor" },
+  { "actionId": 107, "actionName": "Zoom Window Under Cursor" },
+  { "actionId": 108, "actionName": "Resize window to Left Third" },
+  { "actionId": 109, "actionName": "Resize window to Middle Third" },
+  { "actionId": 110, "actionName": "Resize window to Right Third" },
+  { "actionId": 111, "actionName": "CMD(⌘)+Shift(⇧)-Click" },
+  { "actionId": 112, "actionName": "Enter Fullscreen (If Supported)" },
+  { "actionId": 113, "actionName": "Move Left a Space" },
+  { "actionId": 114, "actionName": "Move Right a Space" },
+  { "actionId": 115, "actionName": "Open Launchpad" },
+  { "actionId": 116, "actionName": "Lookup Word Under Cursor" },
+  { "actionId": 117, "actionName": "Smart Zoom" },
+  { "actionId": 118, "actionName": "Insert / Type / Paste Custom Text" },
+  { "actionId": 119, "actionName": "Custom Mouse Buttons & Modifiers(⌃⌥⇧⌘)" },
+  { "actionId": 120, "actionName": "Brightness Up (External Display)" },
+  { "actionId": 121, "actionName": "Brightness Down (External Display)" },
+  { "actionId": 122, "actionName": "Show Notification Center" },
+  { "actionId": 123, "actionName": "Toggle Between Big and Normal Cursor" },
+  { "actionId": 124, "actionName": "Trigger Menu Bar Menu-Item" },
+  { "actionId": 125, "actionName": "Show Menu Bar in Context Menu" },
+  { "actionId": 126, "actionName": "Toggle Mouse Speed" },
+  { "actionId": 127, "actionName": "Enable Airplay Mirroring" },
+  { "actionId": 128, "actionName": "Send Shortcut to Specific App" },
+  { "actionId": 129, "actionName": "Delay Next Action (blocking)" },
+  { "actionId": 130, "actionName": "F13" },
+  { "actionId": 131, "actionName": "F14" },
+  { "actionId": 132, "actionName": "F15" },
+  { "actionId": 133, "actionName": "F16" },
+  { "actionId": 134, "actionName": "F17" },
+  { "actionId": 135, "actionName": "F18" },
+  { "actionId": 136, "actionName": "Post Distributed Notification with Name" },
+  {
+    "actionId": 137,
+    "actionName": "Execute Terminal Command (Async, non-blocking)"
+  },
+  { "actionId": 138, "actionName": "Start Automator Workflow" },
+  {
+    "actionId": 139,
+    "actionName": "Switch to Preset / Enable Specific Presets"
+  },
+  { "actionId": 140, "actionName": "Show/Hide Mouse Cursor" },
+  { "actionId": 141, "actionName": "Enable / Disable Leap Motion Gestures" },
+  {
+    "actionId": 142,
+    "actionName": "Application Switcher Backward (After Forward)"
+  },
+  {
+    "actionId": 143,
+    "actionName": "Enable / Disable Leap Motion Mouse Control"
+  },
+  {
+    "actionId": 144,
+    "actionName": "Disable Gesture Recognition for X Seconds"
+  },
+  { "actionId": 145, "actionName": "" },
+  { "actionId": 146, "actionName": "" },
+  { "actionId": 147, "actionName": "" },
+  { "actionId": 148, "actionName": "" },
+  {
+    "actionId": 149,
+    "actionName": "CMD(⌘)+Double Click (Open in New Finder Tab)"
+  },
+  { "actionId": 150, "actionName": "Activate Currently Hovered App in Dock" },
+  { "actionId": 151, "actionName": "Move Window One Space/Desktop Left" },
+  { "actionId": 152, "actionName": "Move Window One Space/Desktop Right" },
+  { "actionId": 153, "actionName": "Move Mouse To Position" },
+  { "actionId": 154, "actionName": "Save Current Mouse Position" },
+  { "actionId": 155, "actionName": "Restore Saved Mouse Position" },
+  { "actionId": 156, "actionName": "Empty Trash" },
+  {
+    "actionId": 157,
+    "actionName": "Open Current Finder Selection With Specific App"
+  },
+  { "actionId": 158, "actionName": "Lock Screen" },
+  { "actionId": 159, "actionName": "Unlock Screen" },
+  { "actionId": 160, "actionName": "Start Recording Drawing / Mouse Gesture" },
+  { "actionId": 161, "actionName": "Stop Recording Drawing / Mouse Gesture" },
+  { "actionId": 162, "actionName": "Trigger Context Menu Item" },
+  {
+    "actionId": 163,
+    "actionName": "Open Native macOS Split View for Window (Left)"
+  },
+  {
+    "actionId": 164,
+    "actionName": "Open Native macOS Split View for Window (Right)"
+  },
+  {
+    "actionId": 165,
+    "actionName": "Mission Control & Immediately Show Desktop Preview"
+  },
+  {
+    "actionId": 166,
+    "actionName": "Toggle Siri Remote Mouse Control Mode On/Off"
+  },
+  { "actionId": 167, "actionName": "Show Emoji & Symbol / Character Palette" },
+  { "actionId": 168, "actionName": "Trigger Snap Area" },
+  { "actionId": 169, "actionName": "Capture Screenshot (Configurable)" },
+  { "actionId": 170, "actionName": "Show Screenshot Tool Window" },
+  {
+    "actionId": 171,
+    "actionName": "Capture Screenshot then edit in BTT (easiest)"
+  },
+  { "actionId": 172, "actionName": "Run Apple Script (blocking)" },
+  { "actionId": 173, "actionName": "Start Siri" },
+  { "actionId": 174, "actionName": "Resize window to Left Two Thirds" },
+  { "actionId": 175, "actionName": "Resize window to Right Two Thirds" },
+  {
+    "actionId": 176,
+    "actionName": "Open Active/Selected Folder With Specific App"
+  },
+  { "actionId": 177, "actionName": "Show / Hide Specific Application" },
+  { "actionId": 178, "actionName": "⇧ Shift Key Down" },
+  { "actionId": 179, "actionName": "⇧ Shift Key Up" },
+  { "actionId": 180, "actionName": "fn Key Down" },
+  { "actionId": 181, "actionName": "fn Key Up" },
+  { "actionId": 182, "actionName": "⌃ Ctrl Key Down" },
+  { "actionId": 183, "actionName": "⌃ Ctrl Key Up" },
+  { "actionId": 184, "actionName": "⌥ Opt Key Down" },
+  { "actionId": 185, "actionName": "⌥ Opt Key Up" },
+  { "actionId": 186, "actionName": "⌘ CMD Key Down" },
+  { "actionId": 187, "actionName": "⌘ CMD Key Up" },
+  { "actionId": 188, "actionName": "Toggle BetterTouchTool Touch Bar" },
+  {
+    "actionId": 189,
+    "actionName": "ESC (Escape Key, respects pressed modifiers)"
+  },
+  {
+    "actionId": 190,
+    "actionName": "Force Show/Hide Global BTT Touch Bar Actions"
+  },
+  { "actionId": 191, "actionName": "Close currently open Touch Bar group" },
+  { "actionId": 192, "actionName": "" },
+  { "actionId": 193, "actionName": "Type Custom Text" },
+  { "actionId": 194, "actionName": "Toggle Caps Lock On/Off" },
+  { "actionId": 195, "actionName": "Run Apple Script (async in background)" },
+  { "actionId": 196, "actionName": "Add New Space to Mission Control" },
+  { "actionId": 197, "actionName": "Toggle Dark Mode" },
+  { "actionId": 198, "actionName": "Volume Up (Small Step)" },
+  { "actionId": 199, "actionName": "Volume Down (Small Step)" },
+  { "actionId": 200, "actionName": "Toggle Do Not Disturb On/Off" },
+  { "actionId": 201, "actionName": "Toggle Night Shift" },
+  { "actionId": 202, "actionName": "Start Screen Saver" },
+  { "actionId": 203, "actionName": "Show Clipboard / Pasteboard History" },
+  {
+    "actionId": 204,
+    "actionName": "Activate/Bring to Front Window Under Cursor"
+  },
+  { "actionId": 205, "actionName": "Open Touch Bar Group With Name" },
+  { "actionId": 206, "actionName": "Execute Shell Script / Task" },
+  { "actionId": 207, "actionName": "Switch To Desktop 1" },
+  { "actionId": 208, "actionName": "Switch To Desktop 2" },
+  { "actionId": 209, "actionName": "Switch To Desktop 3" },
+  { "actionId": 210, "actionName": "Switch To Desktop 4" },
+  { "actionId": 211, "actionName": "Switch To Desktop 5" },
+  { "actionId": 212, "actionName": "Switch To Desktop 6" },
+  { "actionId": 213, "actionName": "Switch To Desktop 7" },
+  { "actionId": 214, "actionName": "Switch To Desktop 8" },
+  { "actionId": 215, "actionName": "Switch To Desktop 9" },
+  { "actionId": 216, "actionName": "Move Window To Desktop 1" },
+  { "actionId": 217, "actionName": "Move Window To Desktop 2" },
+  { "actionId": 218, "actionName": "Move Window To Desktop 3" },
+  { "actionId": 219, "actionName": "Move Window To Desktop 4" },
+  { "actionId": 220, "actionName": "Move Window To Desktop 5" },
+  { "actionId": 221, "actionName": "" },
+  { "actionId": 222, "actionName": "Move Window To Desktop 6" },
+  { "actionId": 223, "actionName": "Move Window To Desktop 7" },
+  { "actionId": 224, "actionName": "Move Window To Desktop 8" },
+  { "actionId": 225, "actionName": "Move Window To Desktop 9" },
+  { "actionId": 226, "actionName": "Switch To Desktop 10" },
+  { "actionId": 227, "actionName": "Switch To Desktop 11" },
+  { "actionId": 228, "actionName": "Switch To Desktop 12" },
+  { "actionId": 229, "actionName": "Switch To Desktop 13" },
+  { "actionId": 230, "actionName": "Switch To Desktop 14" },
+  { "actionId": 231, "actionName": "Switch To Desktop 15" },
+  { "actionId": 232, "actionName": "Switch To Desktop 16" },
+  { "actionId": 233, "actionName": "Switch To Desktop 17" },
+  { "actionId": 234, "actionName": "Switch To Desktop 18" },
+  { "actionId": 235, "actionName": "Switch To Desktop 19" },
+  { "actionId": 236, "actionName": "Move Window To Desktop 10" },
+  { "actionId": 237, "actionName": "Move Window To Desktop 11" },
+  { "actionId": 238, "actionName": "Move Window To Desktop 12" },
+  { "actionId": 239, "actionName": "Move Window To Desktop 13" },
+  { "actionId": 240, "actionName": "Move Window To Desktop 14" },
+  { "actionId": 241, "actionName": "Move Window To Desktop 15" },
+  { "actionId": 242, "actionName": "Move Window To Desktop 16" },
+  { "actionId": 243, "actionName": "Move Window To Desktop 17" },
+  { "actionId": 244, "actionName": "Move Window To Desktop 18" },
+  { "actionId": 245, "actionName": "Move Window To Desktop 19" },
+  {
+    "actionId": 246,
+    "actionName": "Execute Terminal Command (Synchronous, blocking)"
+  },
+  { "actionId": 247, "actionName": "Quit App Under Cursor" },
+  {
+    "actionId": 248,
+    "actionName": "Trigger Named Trigger (Configured in Other Tab)"
+  },
+  { "actionId": 249, "actionName": "Show Floating WebView/HTML Menu" },
+  {
+    "actionId": 250,
+    "actionName": "Paste specific items from Clipboard Manager (customizable)"
+  },
+  { "actionId": 251, "actionName": "Custom Move / Resize Window" },
+  {
+    "actionId": 252,
+    "actionName": "Run JavaScript for Automation (async in background)"
+  },
+  { "actionId": 253, "actionName": "Run JavaScript for Automation (blocking)" },
+  { "actionId": 254, "actionName": "Show HUD Overlay" },
+  { "actionId": 255, "actionName": "Perform Haptic Feedback on Trackpad" },
+  {
+    "actionId": 256,
+    "actionName": "Save selected text to variable selected_text"
+  },
+  {
+    "actionId": 257,
+    "actionName": "Toggle True Tone (only on supported systems)"
+  },
+  { "actionId": 258, "actionName": "Toggle Presets Enabled/Disabled" },
+  { "actionId": 259, "actionName": "Brightness Up (Small Step)" },
+  { "actionId": 260, "actionName": "Brightness Down  (Small Step)" },
+  {
+    "actionId": 261,
+    "actionName": "Brightness Up (Small Step, External Display)"
+  },
+  {
+    "actionId": 262,
+    "actionName": "Brightness Down  (Small Step, External Display)"
+  },
+  {
+    "actionId": 263,
+    "actionName": "Capture & Edit Screenshot or Video (using new Mojave tools)"
+  },
+  { "actionId": 264, "actionName": "" },
+  {
+    "actionId": 265,
+    "actionName": "Show / Hide Menu Bar Icons left of BTT Icon"
+  },
+  { "actionId": 266, "actionName": "Toggle Display Mirroring On/Off" },
+  {
+    "actionId": 267,
+    "actionName": "Move & maximize all windows to mouse display"
+  },
+  { "actionId": 268, "actionName": "Save / restore specific window layout" },
+  { "actionId": 269, "actionName": "Save current window layout" },
+  { "actionId": 270, "actionName": "Restore last saved window layout" },
+  { "actionId": 271, "actionName": "Connect Bluetooth MIDI Device with Name" },
+  { "actionId": 272, "actionName": "Send Scroll Event" },
+  { "actionId": 273, "actionName": "" },
+  { "actionId": 274, "actionName": "Connect Bluetooth Device" },
+  { "actionId": 275, "actionName": "Disconnect Bluetooth Device" },
+  { "actionId": 276, "actionName": "Toggle Bluetooth Device Connection" },
+  { "actionId": 277, "actionName": "Enable Bluetooth" },
+  { "actionId": 278, "actionName": "Disable Bluetooth" },
+  { "actionId": 279, "actionName": "Toggle Bluetooth Enabled/Disabled" },
+  { "actionId": 280, "actionName": "Custom Plugin Action" },
+  { "actionId": 281, "actionName": "Run Real JavaScript" },
+  { "actionId": 282, "actionName": "Show Touch Bar" },
+  { "actionId": 283, "actionName": "Hide Touch Bar" },
+  {
+    "actionId": 284,
+    "actionName": "Transform & Replace Selection With Java Script"
+  },
+  { "actionId": 285, "actionName": "Drag Mouse To Position" },
+  { "actionId": 286, "actionName": "" },
+  {
+    "actionId": 287,
+    "actionName": "Transform & Copy Selection With Java Script"
+  },
+  { "actionId": 288, "actionName": "Show Custom Context Menu (OLD)" },
+  {
+    "actionId": 289,
+    "actionName": "Close All Notification Alerts / Notification Center"
+  },
+  { "actionId": 290, "actionName": "Show Control Center" },
+  { "actionId": 291, "actionName": "Find Image on Screen & Move Mouse" },
+  { "actionId": 292, "actionName": "Assign/Set Value for Variable" },
+  { "actionId": 293, "actionName": "Act as Hyper Key" },
+  { "actionId": 294, "actionName": "Hide App Under Cursor" },
+  { "actionId": 295, "actionName": "Run Shortcut from Shortcuts App" },
+  { "actionId": 296, "actionName": "Start Mouse Drag By Double-Click" },
+  { "actionId": 297, "actionName": "Upload image in clipboard to Imgur" },
+  { "actionId": 298, "actionName": "Show Shortcuts in Context Menu" },
+  { "actionId": 299, "actionName": "Temporarily hide BTT Notch Bar" },
+  { "actionId": 300, "actionName": "Toggle Notch / Action Bar Mode" },
+  { "actionId": 301, "actionName": "Toggle BTT Notch Bars Visible/Hidden" },
+  { "actionId": 302, "actionName": "Notch Bar: Refresh Status Item Icons" },
+  { "actionId": 303, "actionName": "F19" },
+  { "actionId": 304, "actionName": "F20" },
+  { "actionId": 305, "actionName": "F21" },
+  { "actionId": 306, "actionName": "F22" },
+  { "actionId": 307, "actionName": "F23" },
+  { "actionId": 308, "actionName": "F24" },
+  { "actionId": 309, "actionName": "Close currently open Notch Bar group" },
+  { "actionId": 310, "actionName": "Open/Close Notch Bar Group With Name" },
+  { "actionId": 311, "actionName": "Hide Notch Bar" },
+  { "actionId": 312, "actionName": "Show Notch Bar" },
+  { "actionId": 313, "actionName": "Make Notch Bar completely black (toggle)" },
+  { "actionId": 314, "actionName": "Rotate Right" },
+  { "actionId": 315, "actionName": "Rotate Left" },
+  { "actionId": 316, "actionName": "Capture Screenshot to Clipboard" },
+  {
+    "actionId": 317,
+    "actionName": "Frontmost Windows Side By Side (First Left)"
+  },
+  {
+    "actionId": 318,
+    "actionName": "Frontmost Windows Side By Side (First Right)"
+  },
+  { "actionId": 319, "actionName": "Frontmost Windows In Thirds (First Left)" },
+  {
+    "actionId": 320,
+    "actionName": "Frontmost Windows In Thirds (First Right)"
+  },
+  {
+    "actionId": 321,
+    "actionName": "Frontmost Windows In Quarters (First Bottom Right)"
+  },
+  {
+    "actionId": 322,
+    "actionName": "Frontmost Windows In Quarters (First Top Left)"
+  },
+  { "actionId": 323, "actionName": "" },
+  {
+    "actionId": 324,
+    "actionName": "Enable super brightness / HDR for current display"
+  },
+  {
+    "actionId": 325,
+    "actionName": "Disable super brightness / HDR for current display"
+  },
+  {
+    "actionId": 326,
+    "actionName": "Toggle super brightness / HDR for current display"
+  },
+  { "actionId": 327, "actionName": "Show Custom Context Menu (NEW)" },
+  {
+    "actionId": 328,
+    "actionName": "Force immediate clipboard check (for Clipboard Manager)"
+  },
+  { "actionId": 329, "actionName": "Start Repeat / For Loop" },
+  { "actionId": 330, "actionName": "If Condition" },
+  { "actionId": 331, "actionName": "Break Repeat" },
+  { "actionId": 332, "actionName": "End Repeat / For Loop" },
+  { "actionId": 333, "actionName": "Else" },
+  { "actionId": 334, "actionName": "END If Condition" },
+  {
+    "actionId": 335,
+    "actionName": "Cycle through multiple actions (on repeated trigger)"
+  },
+  { "actionId": 336, "actionName": "" },
+  {
+    "actionId": 337,
+    "actionName": "Toggle Pin/Unpin Focused Window To Float On Top"
+  },
+  { "actionId": 338, "actionName": "Disable Float On Top For All Windows" },
+  { "actionId": 339, "actionName": "Show Custom Menu" },
+  { "actionId": 340, "actionName": "Close currently open Stream Deck group" },
+  { "actionId": 341, "actionName": "Open Stream Deck Group with Name" },
+  { "actionId": 342, "actionName": "" },
+  { "actionId": 343, "actionName": "Stream Deck: Change Brightness" },
+  { "actionId": 344, "actionName": "Stream Deck: Set Brightness" },
+  { "actionId": 345, "actionName": "Delay Next Action (async / not blocking)" },
+  { "actionId": 346, "actionName": "Configure Actions for Toggle On / Off" },
+  { "actionId": 347, "actionName": "Turn Stream Deck Off" },
+  { "actionId": 348, "actionName": "Turn Stream Deck On" },
+  { "actionId": 349, "actionName": "Toggle Stream Deck On/Off " },
+  {
+    "actionId": 350,
+    "actionName": "Refresh Conditional Activation Group Variables"
+  },
+  {
+    "actionId": 351,
+    "actionName": "Execute Action Sequence after Timeout / Delay"
+  },
+  { "actionId": 352, "actionName": "Cancel Timed Action Sequence" },
+  { "actionId": 353, "actionName": "Show Context Menu for Selected Item" },
+  {
+    "actionId": 354,
+    "actionName": "Show Cheat Sheet (Configured trigger overview)"
+  },
+  { "actionId": 355, "actionName": "Hide Cheat Sheet" },
+  { "actionId": 356, "actionName": "Toggle Cheat Sheet" },
+  {
+    "actionId": 357,
+    "actionName": "Stage Manager: Activate Stage by Position"
+  },
+  {
+    "actionId": 358,
+    "actionName": "Stage Manager: Cycle Through Stages (Forward)"
+  },
+  {
+    "actionId": 359,
+    "actionName": "Stage Manager: Activate Stage Containing Specific Apps / Windows"
+  },
+  { "actionId": 360, "actionName": "Stage Manager: Turn On/Off" },
+  { "actionId": 361, "actionName": "Stage Manager: Show in Context Menu" },
+  { "actionId": 362, "actionName": "Stage Manager: Turn Recent Apps On/Off" },
+  {
+    "actionId": 363,
+    "actionName": "Stage Manager: Cycle Through Stages (Backwards)"
+  },
+  { "actionId": 364, "actionName": "Activate Specific Window" },
+  { "actionId": 365, "actionName": "Show / Hide Stream Deck Emulator" },
+  { "actionId": 366, "actionName": "Empty Placeholder" },
+  { "actionId": 367, "actionName": "Activate Previous App" },
+  { "actionId": 368, "actionName": "Save currently active window" },
+  { "actionId": 369, "actionName": "Go back to saved active window" },
+  { "actionId": 370, "actionName": "Set Display Brightness" },
+  { "actionId": 371, "actionName": "Show Notification" },
+  { "actionId": 372, "actionName": "Hide Floating Webview" },
+  { "actionId": 373, "actionName": "Set System Volume" },
+  {
+    "actionId": 374,
+    "actionName": "Go to Specific Trigger Category / Section in BetterTouchTool Setup"
+  },
+  { "actionId": 375, "actionName": "Click Menu Bar Status Item" },
+  {
+    "actionId": 376,
+    "actionName": "Activate Stream Deck+ Touch Screen Configuration Group"
+  },
+  {
+    "actionId": 377,
+    "actionName": "Temporarily Display Of Specific Stream Deck Item"
+  },
+  {
+    "actionId": 378,
+    "actionName": "Move Selection In Active Window Switcher Up"
+  },
+  { "actionId": 379, "actionName": "Send Data To Generic Device" },
+  { "actionId": 380, "actionName": "Execute Generic Device Command" },
+  { "actionId": 381, "actionName": "Start to Block Scrolling" },
+  { "actionId": 382, "actionName": "End/Stop Block Scrolling" },
+  { "actionId": 383, "actionName": "Activate Previous Window" },
+  {
+    "actionId": 384,
+    "actionName": "Transform & Replace Selection With ChatGPT"
+  },
+  { "actionId": 385, "actionName": "Reset ChatGPT History" },
+  { "actionId": 386, "actionName": "Show Floating Menu" },
+  { "actionId": 387, "actionName": "Hide Floating Menu" },
+  { "actionId": 388, "actionName": "Toggle Floating Menu Hidden/Shown" },
+  { "actionId": 389, "actionName": "Evaluate Scripts In Floating Menu" },
+  { "actionId": 390, "actionName": "Re-Position Floating Menu" },
+  {
+    "actionId": 391,
+    "actionName": "Create Snap Area Using Focused Window As Template"
+  },
+  { "actionId": 392, "actionName": "Edit Snap Areas" },
+  { "actionId": 393, "actionName": "Trigger Hovered Menu Item" },
+  {
+    "actionId": 394,
+    "actionName": "Activate Simulated Hover For Floating Menu"
+  },
+  {
+    "actionId": 395,
+    "actionName": "Deactivate Simulated Hover For Floating Menu"
+  },
+  { "actionId": 396, "actionName": "Toggle Simulated Hover For Floating Menu" },
+  {
+    "actionId": 397,
+    "actionName": "Load New HTML Or URL For Web View Menu Item"
+  },
+  { "actionId": 398, "actionName": "Execute JavaScript In Web View Menu Item" },
+  {
+    "actionId": 399,
+    "actionName": "Move Free Moving Menus To Currently Active Screen"
+  },
+  {
+    "actionId": 400,
+    "actionName": "Execute Actions For Existing Configured Trigger"
+  },
+  { "actionId": 401, "actionName": "Unpin Focused Window To Float On Top" },
+  { "actionId": 402, "actionName": "Pin Focused Window To Float On Top" },
+  { "actionId": 403, "actionName": "Ask For Input (Save To Variable)" },
+  {
+    "actionId": 404,
+    "actionName": "Trigger Hovered Menu Item And Hide Floating Menu"
+  },
+  { "actionId": 405, "actionName": "If Image Visible On Screen" },
+  { "actionId": 406, "actionName": "ADMIN: Will Sleep" },
+  { "actionId": 407, "actionName": "ADMIN: DID WAKE" },
+  { "actionId": 408, "actionName": "ADMIN: Session Begin" },
+  { "actionId": 409, "actionName": "ADMIN: Session End" },
+  { "actionId": 410, "actionName": "ADMIN: Did Wake IOKIT" },
+  { "actionId": 411, "actionName": "Set/Change Cursor Size" },
+  { "actionId": 412, "actionName": "Increase Variable Value By X" },
+  { "actionId": 413, "actionName": "Wait For Specific App To Launch" },
+  { "actionId": 414, "actionName": "Wait For Specific App To Terminate" },
+  { "actionId": 415, "actionName": "Wait For Specific App To Activate" },
+  { "actionId": 416, "actionName": "Wait For Specific App To Deactivate" },
+  { "actionId": 417, "actionName": "Wait For Conditions to Become True" },
+  {
+    "actionId": 418,
+    "actionName": "CANCEL Wait For Conditions to Become True"
+  },
+  {
+    "actionId": 419,
+    "actionName": "Wait For Image To Become Visible On Screen & Move Mouse"
+  }
+]

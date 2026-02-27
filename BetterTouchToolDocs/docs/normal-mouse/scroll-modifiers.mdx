@@ -1,0 +1,342 @@
+---
+title: "Scroll Modifiers"
+sidebar_position: 5
+slug: "/docs/normal-mouse/scroll-modifiers"
+---
+# Scroll Modifiers
+
+Scroll Modifiers are a new feature in BetterTouchTool >= 5.780. They allow you to dynamically change the scrolling behavior of any mouse or trackpad.
+
+## Setup a Scroll Modifier:
+
+To set up a scroll modifier, go to the "Normal Mouse" section in BetterTouchTool and select the desired scroll modifier from the trigger list. Each modifier can be configured with:
+
+- **Device Type Conditions**: Apply the modifier only to specific devices (Regular Mouse, Touch Devices, Magic Mouse, or Trackpad)
+- **Modifier Key Conditions**: Apply the modifier only when specific modifier keys are pressed (Shift, Control, Option, Command, Function)
+
+You can configure multiple scroll modifiers, they will automatically be chained. The order in which you define them in the UI is relevant for some combinations.
+
+![alt text](/media/scroll_modifiers_settings.png)
+
+## App Specific Scroll Modifiers
+
+You might want to have some scroll modifiers only active for specific applications. You can achieve that by not defining your scroll modifiers at the "All Apps" level, but instead assign them to specific apps.
+
+If you want to have the scroll modifiers enabled for most apps but exclude some, please use a [Conditional Activation Group ](/docs/configuration/global-vs-app-specific)
+
+## Detailed Scroll Modifier Description:
+
+### Smooth Scrolling (like Trackpad)
+
+Adds trackpad-like smooth scrolling to mouse wheels using 60 FPS interpolation. Makes discrete mouse wheel scrolling feel smooth like a trackpad.
+
+**Configurable Values:**
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| Duration | 0.1 - 0.5 | 0.35 | How quickly scrolling catches up. Lower = snappier, higher = smoother |
+| Speed Multiplier | 0.1 - 10 | 1.0 | Overall speed multiplier |
+| Stop Threshold | 0.01 - 1 | 0.05 | Minimum velocity (in pixels) before animation stops |
+| Input Timeout | 0.05 - 1 | 0.15 | Time (in seconds) before momentum phase starts |
+| EMA Alpha | 0 - 1 | 0.3 | Smoothing factor. Lower = more smoothing |
+| Simulate Trackpad Phases | On/Off | On | Emits phase events for apps that need them (Messages, Calendar) |
+| Velocity Boost | On/Off | On | Enhances responsiveness for consistent scrolling |
+
+---
+
+### Vertical & Horizontal Scroll Speed Modifier
+
+Multiplies scroll deltas by the specified values to speed up or slow down scrolling.
+
+**Configurable Values:**
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| Vertical Multiplier | any number | 1.0 | Multiplier for vertical scrolling |
+| Horizontal Multiplier | any number | 1.0 | Multiplier for horizontal scrolling |
+
+**Value Guide:**
+- **1.0**: No change (default)
+- **> 1.0**: Faster scrolling (e.g., 2.0 = twice as fast)
+- **< 1.0**: Slower scrolling (e.g., 0.5 = half speed)
+- **< 0**: Reverses direction
+
+Typical range: 0.1 to 5.0
+
+---
+
+### Block Horizontal Scrolling
+
+Completely suppresses left/right scrolling.
+
+**Use Cases:**
+- Preventing accidental horizontal scrolling in vertical-only content
+- Applications where horizontal scroll causes unwanted behavior
+- Mice with sensitive horizontal scroll wheels
+
+No configurable values - simply blocks all horizontal scroll events.
+
+---
+
+### Block Vertical Scrolling
+
+Completely suppresses up/down scrolling.
+
+**Use Cases:**
+- Preventing accidental vertical scrolling in horizontal-only content
+- Spreadsheet applications when editing horizontally
+- Timeline or carousel interfaces
+
+No configurable values - simply blocks all vertical scroll events.
+
+---
+
+### Scroll Acceleration Curve
+
+Applies an acceleration curve that makes faster scrolling even faster while maintaining precision for slow scrolls.
+
+**Formula:** `output = input × (1 + strength × √(|input|/4))`
+
+**Configurable Values:**
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| Horizontal Strength | 0 - 2 | 1.0 | Acceleration strength for horizontal scrolling |
+| Vertical Strength | 0 - 2 | 1.0 | Acceleration strength for vertical scrolling |
+
+**Value Guide:**
+- **0.0**: No acceleration (linear)
+- **1.0**: Default macOS-like acceleration
+- **2.0**: Strong acceleration
+
+Useful for large documents where you want quick navigation with fast scrolls but precise control with slow scrolls.
+
+---
+
+### Reverse Scroll Direction
+
+Inverts the scroll direction for the selected axes (natural vs traditional scrolling).
+
+**Configurable Values:**
+
+| Parameter | Options | Default | Description |
+|-----------|---------|---------|-------------|
+| Reverse Horizontal | On/Off | Off | Invert horizontal scroll direction |
+| Reverse Vertical | On/Off | Off | Invert vertical scroll direction |
+
+**Use Cases:**
+- Switch between 'natural' and 'traditional' scrolling per device
+- Invert only horizontal or only vertical independently
+- Apply different scroll directions to mouse vs trackpad
+
+---
+
+### Swap Scroll Axes (H ↔ V)
+
+Exchanges horizontal and vertical scroll axes. Scrolling up/down becomes left/right and vice versa.
+
+**Use Cases:**
+- Horizontal scrolling with vertical-only scroll wheels
+- Navigating timelines with vertical scroll gesture
+- Working with horizontally-oriented content
+
+No configurable values - simply swaps the axes.
+
+---
+
+### Lock Scroll to Dominant Axis
+
+Prevents diagonal scrolling by locking to the dominant axis. When one axis is significantly stronger than the other, the weaker axis is zeroed out.
+
+**Configurable Values:**
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| Lock Threshold | 1 - 10 | 2.0 | Ratio threshold for locking |
+
+**Value Guide:**
+- **1.0**: Very strict - slight movement locks direction
+- **2.0**: Default - locks when one axis is 2× stronger than the other
+- **5.0+**: Loose - allows more diagonal movement
+
+Useful for precise vertical/horizontal scrolling in grids, lists, or code editors.
+
+---
+
+### Scroll Dead Zone Filter
+
+Ignores small scroll movements below a specified threshold. Scroll events with delta below the threshold are blocked entirely.
+
+**Configurable Values:**
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| Horizontal Dead Zone | 0 - 100 | 0 | Minimum horizontal delta (in pixels) |
+| Vertical Dead Zone | 0 - 100 | 0 | Minimum vertical delta (in pixels) |
+
+**Value Guide:**
+- **0**: No dead zone (all scrolling passes through)
+- **1-5**: Small dead zone for slight jitter
+- **5-20**: Medium dead zone for accidental touches
+- **20+**: Large dead zone for very deliberate scrolling only
+
+Useful for sensitive mice or trackpads.
+
+---
+
+### Scroll Event Debounce
+
+Rate-limits scroll events by blocking events that occur too close together.
+
+**Configurable Values:**
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| Debounce Time | 0 - 1 | 0.05 | Minimum time (in seconds) between events |
+
+**Value Guide:**
+- **0.01-0.03**: Minimal debounce for high-speed scrolling
+- **0.05**: Default - good balance
+- **0.1-0.2**: Slower, more deliberate scrolling
+- **0.5+**: Very slow, single-step scrolling
+
+Useful for mice with jittery scroll wheels or when you want more controlled scrolling.
+
+---
+
+### Clamp Maximum Scroll Speed
+
+Limits the maximum scroll speed by capping delta values. Scroll deltas above the max are reduced to the max value.
+
+**Configurable Values:**
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| Max Horizontal Delta | 0 - 1000 | 0 | Maximum horizontal delta (in pixels). 0 = unlimited |
+| Max Vertical Delta | 0 - 1000 | 0 | Maximum vertical delta (in pixels). 0 = unlimited |
+
+**Value Guide:**
+- **0**: No clamping (unlimited speed)
+- **10-50**: Light clamping for smoother scrolling
+- **50-100**: Moderate speed limit
+- **100-500**: Strong limit for precise control
+
+Useful for preventing overly fast scrolling in applications.
+
+---
+
+### Scroll Distance Per Tick
+
+Sets a fixed pixel distance per scroll tick for discrete scroll wheels.
+
+**Configurable Values:**
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| Horizontal Pixels Per Tick | 1 - 500 | 10 | Pixels scrolled per horizontal tick |
+| Vertical Pixels Per Tick | 1 - 500 | 10 | Pixels scrolled per vertical tick |
+
+**Value Guide:**
+- **5-10**: Fine scrolling, good for code editors
+- **10-20**: Default comfortable range
+- **20-50**: Faster page navigation
+- **50-100**: Large jumps per tick
+
+**Note:** Only affects discrete (non-continuous) scrolling from mouse wheels. Trackpad continuous scrolling is not affected.
+
+---
+
+### Smooth Zoom (Scroll to Magnify)
+
+Converts scroll wheel input into smooth pinch-to-zoom (magnification) gestures. Uses 60 FPS CVDisplayLink interpolation to transform discrete scroll events into fluid zoom gestures that work in apps like Safari, Maps, Photoshop, and Preview.
+
+**Configurable Values:**
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| Sensitivity | 0.001 - 0.1 | 0.01 | Magnification amount per scroll pixel. Higher = faster zoom |
+| Acceleration Factor | 0 - 3 | 1.5 | Velocity-based acceleration. 0 = constant speed, higher = faster scrolling increases zoom speed |
+| Base Multiplier | 0.1 - 5 | 1.0 | Overall magnification multiplier |
+| Duration | 0.05 - 0.5 | 0.15 | Interpolation speed (LERP coefficient). Lower = snappier, higher = smoother |
+| Max Magnification | 0.1 - 1 | 0.5 | Maximum magnification per frame (prevents jumpy zooming) |
+| Dead Zone | 0.0001 - 0.01 | 0.0001 | Minimum magnification before output stops |
+| Input Timeout | 0.05 - 0.5 | 0.15 | Time (in seconds) before gesture ends after scrolling stops |
+| EMA Alpha | 0 - 1 | 0.3 | Smoothing factor for input. Lower = more smoothing |
+| Invert Direction | On/Off | Off | Invert zoom direction (scroll up = zoom out) |
+| Use Horizontal Axis | On/Off | Off | Use horizontal scroll axis instead of vertical |
+
+**Use Cases:**
+- Zooming in maps with a regular mouse wheel
+- Zooming images in Preview, Photoshop, or other image editors
+- Zooming web pages in Safari or Chrome
+- Any application that supports pinch-to-zoom gestures
+
+**How It Works:**
+The modifier captures scroll events and converts them into synthetic magnification gesture events using CVDisplayLink for smooth 60 FPS interpolation. Velocity tracking provides natural acceleration - faster scrolling creates larger zoom changes, similar to trackpad behavior.
+
+---
+
+### Smooth Rotate (Scroll to Rotation)
+
+Converts scroll wheel input into smooth two-finger rotation gestures. Uses 60 FPS CVDisplayLink interpolation to transform discrete scroll events into fluid rotation gestures that work in apps like Preview, Photos, and image editors.
+
+**Configurable Values:**
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| Sensitivity | 0.1 - 2 | 0.5 | Rotation degrees per scroll pixel. Higher = faster rotation |
+| Acceleration Factor | 0 - 3 | 1.5 | Velocity-based acceleration. 0 = constant speed, higher = faster scrolling increases rotation speed |
+| Base Multiplier | 0.1 - 5 | 1.0 | Overall rotation multiplier |
+| Duration | 0.05 - 0.5 | 0.15 | Interpolation speed (LERP coefficient). Lower = snappier, higher = smoother |
+| Max Rotation | 1 - 30 | 15.0 | Maximum rotation degrees per frame (prevents jumpy rotation) |
+| Dead Zone | 0.0001 - 0.1 | 0.001 | Minimum rotation before output stops |
+| Input Timeout | 0.05 - 0.5 | 0.15 | Time (in seconds) before gesture ends after scrolling stops |
+| EMA Alpha | 0 - 1 | 0.3 | Smoothing factor for input. Lower = more smoothing |
+| Invert Direction | On/Off | Off | Invert rotation direction |
+| Use Horizontal Axis | On/Off | Off | Use horizontal scroll axis instead of vertical |
+
+**Use Cases:**
+- Rotating images in Preview or image editors
+- Rotating objects in 3D applications
+- Any application that supports two-finger rotation gestures
+
+**How It Works:**
+The modifier captures scroll events and converts them into synthetic rotation gesture events using CVDisplayLink for smooth 60 FPS interpolation. Velocity tracking provides natural acceleration - faster scrolling creates larger rotation changes, similar to trackpad behavior.
+
+---
+
+### Smooth Space Switch (Scroll to Switch Spaces)
+
+Converts scroll wheel input into smooth Mission Control space switching swipes. Uses 60 FPS CVDisplayLink interpolation to transform discrete scroll events into fluid space switching gestures, similar to a three-finger swipe on a trackpad.
+
+**Configurable Values:**
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| Sensitivity | 0.0005 - 0.01 | 0.001 | How much scroll affects the swipe. Higher = faster space switching |
+| Duration | 0.05 - 0.5 | 0.2 | Interpolation speed (LERP coefficient). Lower = snappier, higher = smoother |
+| Dead Zone | 0.0001 - 0.01 | 0.001 | Minimum movement threshold before output stops |
+| Input Timeout | 0.05 - 1 | 0.2 | Time (in seconds) before gesture ends after scrolling stops |
+| Completion Threshold | 0.2 - 0.8 | 0.7 | How far to swipe before completing the space switch. Lower = easier to trigger |
+| Invert Swipe Direction | On/Off | Off | Invert swipe direction (scroll up = swipe right) |
+| Use Horizontal Scroll Axis | On/Off | Off | Use horizontal scroll axis instead of vertical |
+
+**Use Cases:**
+- Switching between Mission Control Spaces/Desktops with a mouse scroll wheel
+- Navigating virtual desktops without a trackpad
+- Quick workspace navigation while keeping hands on the mouse
+
+**How It Works:**
+The modifier captures scroll events and converts them into synthetic dock swipe gesture events that macOS uses for space switching. It uses CVDisplayLink for smooth 60 FPS interpolation, providing a fluid preview animation as you scroll.
+
+**Key Behaviors:**
+- **One space per gesture**: Each scroll gesture can only switch one space at a time, preventing accidental multi-space jumps
+- **Automatic snap-back**: If you don't scroll far enough to reach the completion threshold, the view snaps back to the original space
+- **Cooldown protection**: After switching a space, there's a brief cooldown (0.8s) to prevent accidental double-switches. This cooldown resets if you pause scrolling for 0.3s
+- **Direction clamping**: The swipe offset is clamped to prevent overshooting, ensuring predictable single-space switching
+
+**Tips:**
+- Lower the **Completion Threshold** if you want easier space switching with less scrolling
+- Increase **Sensitivity** for faster response to scroll input
+- Use **Invert Swipe Direction** if the default direction feels backwards to you
+- Works best with **Only Regular Mouse** enabled to avoid conflicts with trackpad gestures
