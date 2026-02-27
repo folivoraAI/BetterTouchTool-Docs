@@ -1,0 +1,406 @@
+---
+title: "Custom Swift Plugin Widgets"
+sidebar_position: 9
+slug: "/docs/floating-menus/swift-plugins"
+---
+
+# Custom Swift Plugin Widgets for Floating Menus
+
+BetterTouchTool (starting with v6.220 ) allows you to create custom native Swift widgets that can be embedded into floating menus. This lets you build fully interactive UI elements — from simple labels to complex SwiftUI views with buttons, sliders, and live-updating content.
+
+Plugin widgets appear as a dedicated item type when configuring a floating menu. They are rendered natively, so they have full access to macOS APIs and deliver smooth, high-performance UI.
+
+## Two Ways to Create Plugins
+
+### 1. Swift Source Plugins (Recommended)
+
+The simplest approach — write a single `.swift` file and drop it onto the BetterTouchTool window or into the Plugins folder . No Xcode project required.
+
+**Requirements:**
+- Xcode Command Line Tools must be installed (`xcode-select --install`)
+
+**How it works:**
+1. Create a `.swift` file containing your widget class
+2. Drop or paste it onto the BTT window or into `~/Library/Application Support/BetterTouchTool/Plugins/`
+3. BTT detects the file and asks to compile & load it
+4. The widget becomes available as a floating menu item type
+
+If you edit the `.swift` file, BTT will detect the change and offer to recompile. You can also drag `.swift` files onto the BTT preferences window to install them.
+
+### 2. Xcode Bundle Plugins
+
+For more complex plugins with multiple source files, resources, or third-party dependencies, you can create a full Xcode project. Bundle plugins use the `.bttwidget` extension and must conform to `BTTFloatingMenuWidgetInterface`.
+
+See the [BetterTouchToolPlugins GitHub repository](https://github.com/folivoraAI/BetterTouchToolPlugins) for Xcode project examples and setup instructions.
+
+---
+
+## Creating a Simple Widget (AppKit)
+
+Add metadata comments at the top of your `.swift` file to configure the plugin:
+
+```swift
+// BTT-Plugin-Name: Hello Widget
+// BTT-Plugin-Type: FloatingMenuWidget
+// BTT-Plugin-Icon: hand.wave.fill
+
+import Cocoa
+
+class HelloWidget: NSObject, BTTFloatingMenuWidgetInterface {
+    weak var delegate: (any BTTFloatingMenuWidgetDelegate)?
+
+    static func widgetName() -> String { "Hello Widget" }
+    static func widgetDescription() -> String { "A simple greeting widget" }
+    static func widgetIcon() -> String { "hand.wave.fill" }
+
+    // Override the menu item's configured size (optional)
+    static func widgetMinWidth() -> CGFloat { 200 }
+    static func widgetMinHeight() -> CGFloat { 80 }
+
+    func makeWidgetView() -> NSView {
+        let label = NSTextField(labelWithString: "Hello from BTT!")
+        label.font = .systemFont(ofSize: 24, weight: .medium)
+        label.textColor = .white
+        return label
+    }
+
+    func widgetDidAppear() {
+        // Called when the widget becomes visible
+    }
+
+    func widgetWillDisappear() {
+        // Called when the widget is hidden
+    }
+}
+```
+
+### Metadata Comments
+
+| Comment | Description | Default if omitted |
+|---|---|---|
+| `BTT-Plugin-Name` | Display name in BTT | Filename without extension |
+| `BTT-Plugin-Identifier` | Unique identifier | `com.btt.swift.<filename>` |
+| `BTT-Plugin-Type` | Must be `FloatingMenuWidget` | Inferred from protocol conformance |
+| `BTT-Plugin-Icon` | SF Symbol name for the icon | None |
+
+---
+
+## Creating an Interactive Widget (SwiftUI)
+
+For richer UI, you can use SwiftUI by wrapping your view in an `NSHostingView`. If your widget contains interactive controls (buttons, sliders, text fields, etc.), return `true` from `widgetWantsInteractiveView()` so BTT doesn't intercept clicks on your widget.
+
+```swift
+// BTT-Plugin-Name: Timer Widget
+// BTT-Plugin-Type: FloatingMenuWidget
+// BTT-Plugin-Icon: timer
+
+import Cocoa
+import SwiftUI
+
+class TimerWidget: NSObject, BTTFloatingMenuWidgetInterface {
+    weak var delegate: (any BTTFloatingMenuWidgetDelegate)?
+
+    static func widgetName() -> String { "Timer Widget" }
+    static func widgetDescription() -> String { "A simple countdown timer" }
+    static func widgetIcon() -> String { "timer" }
+
+    // Allow buttons inside the widget to receive clicks
+    static func widgetWantsInteractiveView() -> Bool { true }
+
+    // Override the menu item's configured size (optional)
+    static func widgetMinWidth() -> CGFloat { 250 }
+    static func widgetMinHeight() -> CGFloat { 150 }
+    static func widgetMaxWidth() -> CGFloat { 300 }
+    static func widgetMaxHeight() -> CGFloat { 200 }
+
+    func makeWidgetView() -> NSView {
+        return NSHostingView(rootView: TimerView())
+    }
+}
+
+struct TimerView: View {
+    @State private var secondsLeft = 60
+    @State private var running = false
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("\(secondsLeft)s")
+                .font(.system(size: 48, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundColor(secondsLeft <= 10 ? .red : .white)
+
+            HStack(spacing: 16) {
+                Button(running ? "Stop" : "Start") {
+                    running.toggle()
+                }
+                Button("Reset") {
+                    running = false
+                    secondsLeft = 60
+                }
+            }
+        }
+        .padding()
+        .onReceive(
+            Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+        ) { _ in
+            guard running, secondsLeft > 0 else { return }
+            secondsLeft -= 1
+            if secondsLeft == 0 { running = false }
+        }
+    }
+}
+```
+
+---
+
+## Widget Protocol Reference
+
+Your class must conform to `BTTFloatingMenuWidgetInterface`. The protocol and bridging header are shipped inside the BTT app bundle and provided automatically during compilation.
+
+### Required
+
+| Method | Description |
+|---|---|
+| `makeWidgetView() -> NSView` | Return the view to display in the floating menu |
+
+### Optional Class Methods
+
+| Method | Description | Default |
+|---|---|---|
+| `widgetName() -> String` | Display name in BTT | Plugin name |
+| `widgetDescription() -> String` | Short description | None |
+| `widgetIcon() -> String` | SF Symbol name | None |
+| `widgetWantsInteractiveView() -> Bool` | Set to `true` if the widget has its own clickable controls (buttons, sliders, etc.). When `false`, BTT handles click events for action assignment. | `false` |
+| `widgetMinWidth() -> CGFloat` | Minimum width override | Item's configured size |
+| `widgetMinHeight() -> CGFloat` | Minimum height override | Item's configured size |
+| `widgetMaxWidth() -> CGFloat` | Maximum width override | Item's configured size |
+| `widgetMaxHeight() -> CGFloat` | Maximum height override | Item's configured size |
+
+### Optional Instance Methods
+
+| Method | Description |
+|---|---|
+| `widgetDidAppear()` | Called when the widget becomes visible |
+| `widgetWillDisappear()` | Called when the widget is about to be hidden |
+
+---
+
+## Configuration Form Items
+
+You can add a custom configuration UI to your widget that appears in the BTT sidebar when the user selects it. This lets users customize your widget without editing code.
+
+Implement the `configurationFormItems()` class method to return a form group containing your fields:
+
+```swift
+// BTT-Plugin-Name: Greeting Widget
+// BTT-Plugin-Type: FloatingMenuWidget
+// BTT-Plugin-Icon: text.bubble.fill
+
+import Cocoa
+import SwiftUI
+
+class GreetingWidget: NSObject, BTTFloatingMenuWidgetInterface {
+    weak var delegate: (any BTTFloatingMenuWidgetDelegate)?
+
+    private var greetingText = "Hello!"
+    private var fontSize: Double = 24
+
+    static func widgetName() -> String { "Greeting Widget" }
+    static func widgetDescription() -> String { "A configurable greeting" }
+    static func widgetIcon() -> String { "text.bubble.fill" }
+
+    static func configurationFormItems() -> BTTPluginFormItem? {
+        let group = BTTPluginFormItem()
+        group.formFieldType = BTTFormTypeFormGroup
+
+        let textField = BTTPluginFormItem()
+        textField.formFieldType = BTTFormTypeTextField
+        textField.formLabel1 = "Greeting Text"
+        textField.formFieldID = "greetingText"
+        textField.defaultValue = "Hello!"
+
+        let sizeSlider = BTTPluginFormItem()
+        sizeSlider.formFieldType = BTTFormTypeSlider
+        sizeSlider.formLabel1 = "Font Size"
+        sizeSlider.formFieldID = "fontSize"
+        sizeSlider.minValue = NSNumber(value: 10)
+        sizeSlider.maxValue = NSNumber(value: 72)
+        sizeSlider.defaultValue = NSNumber(value: 24)
+        sizeSlider.dataType = BTTFormDataNumber
+
+        let colorPicker = BTTPluginFormItem()
+        colorPicker.formFieldType = BTTFormTypeColorPicker
+        colorPicker.formLabel1 = "Text Color"
+        colorPicker.formFieldID = "textColor"
+
+        group.formOptions = [textField, sizeSlider, colorPicker]
+        return group
+    }
+
+    func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]?) {
+        // Form values arrive with a "plugin_var_" prefix on the formFieldID
+        if let text = configurationValues?["plugin_var_greetingText"] as? String {
+            greetingText = text
+        }
+        if let size = configurationValues?["plugin_var_fontSize"] as? Double {
+            fontSize = size
+        }
+        // Request BTT to refresh the widget with new values
+        delegate?.requestWidgetUpdate(self)
+    }
+
+    func makeWidgetView() -> NSView {
+        let label = NSTextField(labelWithString: greetingText)
+        label.font = .systemFont(ofSize: CGFloat(fontSize), weight: .medium)
+        label.textColor = .white
+        return label
+    }
+}
+```
+
+### Available Form Field Types
+
+| Type Constant | Description |
+|---|---|
+| `BTTFormTypeTextField` | Single-line text input |
+| `BTTFormTypeTwoTextFields` | Two text fields side by side (use `formFieldID` and `formFieldID2`) |
+| `BTTFormTypeTextArea` | Multi-line text input |
+| `BTTFormTypeCheckbox` | Boolean toggle |
+| `BTTFormTypeSlider` | Numeric slider (set `minValue`, `maxValue`, `dataType` to `BTTFormDataNumber`) |
+| `BTTFormTypePopupButton` | Dropdown selector (set `formOptions` to an array of option strings) |
+| `BTTFormTypeColorPicker` | Color picker |
+| `BTTFormTypeImagePicker` | Image picker (value arrives as Base64 string) |
+| `BTTFormTypeSeparator` | Visual separator line |
+| `BTTFormTypeDescription` | Static description text (use `formLabel1` for content) |
+
+### BTTPluginFormItem Properties
+
+| Property | Description |
+|---|---|
+| `formFieldID` | Unique identifier for this field. Values are passed to `didReceiveNewConfigurationValues` with a `plugin_var_` prefix. |
+| `formFieldType` | One of the form field type constants above |
+| `formLabel1` | Primary label displayed next to the field |
+| `formLabel2` | Secondary label (used by some field types) |
+| `defaultValue` | Default value for the field |
+| `dataType` | Data type hint (`BTTFormDataString`, `BTTFormDataNumber`, `BTTFormDataJSON`, `BTTFormDataIcon`, `BTTFormDataData`) |
+| `minValue` / `maxValue` | Range limits for sliders |
+| `formOptions` | Array of child items (for `BTTFormTypeFormGroup`) or option strings (for `BTTFormTypePopupButton`) |
+
+---
+
+## Custom Action Categories
+
+By default, a widget plugin item in BTT has the standard action category (the actions assigned to the item are executed when clicked). You can define additional action categories so that your widget can trigger different sets of user-configured actions for different events.
+
+For example, a clock widget might want to fire actions "On Minute Change", or a media widget might want separate action categories for "On Play" and "On Pause".
+
+Implement `additionalActionCategories()` to define your custom categories:
+
+```swift
+// BTT-Plugin-Name: Clock Widget
+// BTT-Plugin-Type: FloatingMenuWidget
+// BTT-Plugin-Icon: clock.fill
+
+import Cocoa
+import SwiftUI
+
+class ClockWidget: NSObject, BTTFloatingMenuWidgetInterface {
+    weak var delegate: (any BTTFloatingMenuWidgetDelegate)?
+
+    static func widgetName() -> String { "Clock Widget" }
+    static func widgetDescription() -> String { "Shows current time" }
+    static func widgetIcon() -> String { "clock.fill" }
+
+    static func additionalActionCategories() -> [[String: Any]]? {
+        return [
+            [
+                "CategoryActionName": "On Minute Change",
+                "CategoryTag": NSNumber(value: 1000),
+                "CategoryIconName": "clock.badge",
+                "CategoryColor": NSColor.systemTeal
+            ],
+            [
+                "CategoryActionName": "On Hour Change",
+                "CategoryTag": NSNumber(value: 1001),
+                "CategoryIconName": "clock.arrow.2.circlepath",
+                "CategoryColor": NSColor.systemOrange
+            ]
+        ]
+    }
+
+    private var lastMinute = -1
+
+    func makeWidgetView() -> NSView {
+        return NSHostingView(rootView: ClockView(onTimeChange: { [weak self] minute, hour in
+            guard let self else { return }
+            if minute != self.lastMinute {
+                self.lastMinute = minute
+                // Execute actions the user assigned to "On Minute Change"
+                self.delegate?.executeActionCategory(1000, forSender: self)
+            }
+        }))
+    }
+
+    func widgetDidAppear() {}
+    func widgetWillDisappear() {}
+}
+```
+
+The custom action categories appear in the BTT sidebar when the user configures this widget item, allowing them to assign different actions to each category.
+
+### Action Category Dictionary Keys
+
+| Key | Type | Description |
+|---|---|---|
+| `CategoryActionName` | `String` | Name displayed in the BTT sidebar (e.g. "On Minute Change") |
+| `CategoryTag` | `NSNumber` | Unique numeric tag (use values 1000+). Pass this to `delegate?.executeActionCategory(_:forSender:)` to trigger the category. |
+| `CategoryIconName` | `String` | SF Symbol name for the category icon (optional) |
+| `CategoryColor` | `NSColor` | Tint color for the category in the sidebar (optional) |
+
+---
+
+## Interacting with BetterTouchTool
+
+Every plugin has a `delegate` property that provides access to BTT features:
+
+```swift
+// Set a BTT variable (accessible via {variable_name} in BTT)
+delegate?.setVariable("my_var", value: "hello")
+
+// Read a BTT variable
+let value = delegate?.getVariable("my_var")
+
+// Execute assigned BTT actions
+delegate?.executeAssignedBTTActions(self)
+
+// Execute a named trigger
+delegate?.executeNamedTrigger("MyTriggerName")
+
+// Request BTT to refresh the widget
+delegate?.requestWidgetUpdate(self)
+```
+
+This allows your widget to read and write BTT variables, trigger automations, and stay in sync with the rest of your BetterTouchTool setup.
+
+---
+
+## Installing Plugins
+
+- **Drag and drop** a `.swift` file or `.bttwidget` bundle onto the BTT preferences window
+- **Copy manually** to `~/Library/Application Support/BetterTouchTool/Plugins/`
+- **Double-click** a `.bttwidget` bundle to install it
+
+Once installed, the widget will appear as a selectable item type when adding items to a floating menu.
+
+## Distributing Plugins
+
+If you want to share your plugin with others, macOS requires it to be notarized (this only applies to Xcode bundle plugins, not Swift source files).
+
+See the [notarization instructions on GitHub](https://github.com/folivoraAI/BetterTouchToolPlugins#distributing-xcode-bundle-plugins) for the full process.
+
+## Source Code & Examples
+
+The full plugin source code, Xcode project templates, and additional examples are available on GitHub:
+https://github.com/folivoraAI/BetterTouchToolPlugins
+
+If you have questions about creating plugins, reach out via andreas@folivora.ai or post on the [community forum](https://community.folivora.ai).
