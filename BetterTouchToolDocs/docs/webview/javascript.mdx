@@ -537,14 +537,20 @@ Parameters:
 * **format**: Optional: the format you want to retrieve. This defaults to NSPasteboardTypeString (standard string). If you set it to **all** it will retrieve all stored formats for every item. For other supported formats scroll up to the previous *set_clipboard_content* function.
 * **snippetGroup**: Optional: the name of the snippet group you want to retrieve from
 * **asBase64**: Return the content as base64 encoded string
+* **selected**: Optional: if set to true, this will return the currently selected items from the open clipboard manager window, in the order they were selected. When using this parameter, **start**, **numberOfItems** and **snippetGroup** are ignored. Returns an empty items array if no clipboard manager window is open or no items are selected.
 
 
 ```javascript
 
 async function retrieveItems() {
-    //additional supported parameters: format, snippetGroup and asBase64
+    //additional supported parameters: format, snippetGroup, asBase64 and selected
     // if format is set to "all", it will return all stored information about the requested items, apart from "all" it supports any pasteboard UTI
 	return get_items_from_clipboard_manager({start: 0, numberOfItems: 5});
+}
+
+async function retrieveSelectedItems() {
+    // retrieve the currently selected items from the open clipboard manager, in selection order
+    return get_items_from_clipboard_manager({selected: true});
 }
 ```
 

@@ -79,13 +79,15 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `$PositionRelativeTo`: 0=focusedWindow, 1=screenWithMouse, 3=focusedScreen, 7=mousePosition, 8=builtin, 11=notch, 12=focusedMenubar, 19=screenWithDock, 20=greenWindowButton, 21=hoveredFloatingMenuItem, 22=specificFloatingMenu, 23=dock
 - `$AnchorMenu`: 0=topLeft, 1=topRight, 2=bottomLeft, 3=bottomRight, 4=center, 5=topEdgeCenter, 6=rightEdgeCenter, 7=bottomEdgeCenter, 8=leftEdgeCenter
 - `$AnchorRelation`: Same values as $AnchorMenu
-- `$OffsetX`/`$OffsetY`: Position offset
+- `$OffsetX`/`$OffsetY`: Position offset (positive X = right, negative X = left; positive Y = up, negative Y = down)
 - `$OffsetXUnit`/`$OffsetYUnit`: 0=absolute, 1=menu%, 2=referenceFrame%
 - `$PositionDynamicVariable`: Variable for dynamic positioning
 - `$ScreenUUID`: Specific screen UUID
 
 ### Layout Direction
 - `$LayoutDirection`: 0=fillRow, 1=fillColumn, 2=fillRowFixed, 3=fillColumnFixed, 4=absoluteScrollable, 5=absoluteFixed, 6=verticalOneColumn, 7=horizontalOneRow, 8=circular
+- `$HorizontalAlignment`: 0=leading, 1=center, 2=trailing
+- `$VerticalAlignment`: 0=top, 1=center, 2=bottom
 - `$VerticalSpacing`: Vertical spacing (pixels)
 - `$HorizontalSpacing`: Horizontal spacing (pixels)
 
@@ -116,6 +118,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `$ClickThroughEmptyParts`: 1 to click through empty areas
 - `$ClickThroughEverywhere`: 1 to click through everywhere
 - `$ShowDockIconWhileVisible`: 1 to show dock icon
+- `$ShowOnLockScreen`: 1 to show on lock screen
 - `$StealKeyboardFocusOnShow`: 1 to steal focus
 
 ### Visibility
@@ -135,6 +138,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `$ShowIfAppNameContainsNot`: String to exclude
 - `$ShowIfWindowLevelEqualsEnabled`: 1 to enable check
 - `$ShowIfWindowLevelEquals`: Window level value
+- `$ShowForWindowWithID`: Only show for specific window ID
 - `$DoNotShowInFullscreen`: 1 to hide in fullscreen
 - `$OnlyShowOnSpaces`: Comma-separated space numbers
 
@@ -144,6 +148,19 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `$CloseOnKeyboardInput`: 1 to close on keyboard
 - `$CloseAfterAction`: 1 to close after action
 - `$DisableDrag`: 1 to disable dragging
+- `$ContinuouslyFollowMouse`: 1 to make menu follow the mouse continuously
+- `$KeepLastHoveredItemSelectedOnMouseOut`: 1 to keep last hovered item selected when mouse leaves
+- `$AllowScrolling`: 1 to allow scrolling (default 1)
+- `§CloseOnClick`: 1 to close menu on item click (default 1)
+- `§ShowHoverEffect`: 1 to show hover effect (default 1)
+- `§ShowIcon`: 1 to show the item icon (default 1)
+
+### Alternate Mode
+- `$AlternateModeActive`: 1 to activate alternate mode
+- `$AlternateModeActiveVariable`: BTT variable name that controls alternate mode
+
+### Merging
+- `$MergeGlobalMenuItems`: 1 to merge items from global menu with same name
 
 ### Modifiers
 - `§sUseModifierModes`: true if items use modifiers
@@ -198,15 +215,17 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `$TextMinimumScaleFactor`: Min scale 0-1
 - `$TextOffsetX`/`$TextOffsetY`: Text offset
 - `§FontColor`/`§FontColorHover`: Font colors
+- `§FontColorDark`/`§FontColorHoverDark`: Dark mode font colors
 
 #### Background
 - `§BackgroundType`: 0=none, 1=data, 2=sfsymbol, 3=file, 4=color, 5=linearGradient, 6=radialGradient, 7=presetFile, 8=internal
-- `§BackgroundColor`/`2`/`3`/`4`: Gradient colors "R,G,B,A"
+- `§BackgroundColor`/`§BackgroundColor2`/`§BackgroundColor3`/`§BackgroundColor4`: Gradient colors "R,G,B,A"
 - `§BackgroundColorHover`: Hover background
 - `§BackgroundImageData`: Base64 image data
 - `§BackgroundImagePresetPath`: Preset path
 - `§BlurredBackground`: 1 for blur effect
-- `§BackgroundTypeDark`/`ColorDark`/etc.: Dark mode variants
+- `§GlassEffect`: 1 for macOS Tahoe glass effect
+- Dark mode variants with `Dark` suffix (`§BackgroundTypeDark`, `§BackgroundColorDark`/`§BackgroundColor2Dark`/`§BackgroundColor3Dark`/`§BackgroundColor4Dark`, `§BackgroundColorHoverDark`, `§BackgroundImageDataDark`, `§BackgroundImagePresetPathDark`, `§BlurredBackgroundDark`, `§GlassEffectDark`)
 
 #### Borders
 - `§BorderWidth`: Border width
@@ -215,13 +234,14 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `§BorderDashed`: 1 for dashed
 - `§CornerRadius`: Corner radius
 - `§CornerRadiusCorners`: 0=all, 1=left, 2=right, 3=top, 4=bottom, 5=topLeft, 6=topRight, 7=bottomRight, 8=bottomLeft
-- Dark mode variants with `Dark` suffix
+- Dark mode variants with `Dark` suffix (`§BorderWidthDark`, `§BorderColorDark`, `§BorderColorHoverDark`, `§BorderDashedDark`, `§CornerRadiusDark`, `§CornerRadiusCornersDark`)
 
 #### Shadow
 - `§ShadowEnabled`: 1 to enable
-- `§ShadowColor`/`ColorHover`: Shadow colors
+- `§ShadowColor`: Shadow color
+- `§ShadowColorHover`: Shadow color on hover
 - `§ShadowRadius`: Shadow radius
-- Dark mode variants with `Dark` suffix
+- Dark mode variants with `Dark` suffix (`§ShadowEnabledDark`, `§ShadowColorDark`, `§ShadowColorHoverDark`, `§ShadowRadiusDark`)
 
 #### Icons/Images
 - `§IconType`: Same as §BackgroundType
@@ -229,18 +249,20 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `§Image`: Base64 image data
 - `§IconPresetPath`: Preset icon path
 - `§ResizeImage`: 0=fit, 1=none, 2=fixed, 3=fitNew
-- `§ImageChangeColor`: 1 to tint with color
-- `§ImageWidth`/`Height`: Image dimensions
+- `§ImageChangeColor`: 1 to tint with icon color
+- `§ImageWidth`: Image width
+- `§ImageHeight`: Image height
 - `§ImageOffsetX`/`Y`: Image offset
 - `§ImagePadding`: Image padding
+- Dark mode variants with `Dark` suffix (`§IconTypeDark`, `§IconPositionDark`, `§ImageDark`, `§IconPresetPathDark`, `§ResizeImageDark`, `§ImageChangeColorDark`, `§ImageWidthDark`, `§ImageHeightDark`, `§ImageOffsetXDark`/`YDark`, `§ImagePaddingDark`)
 
 #### SF Symbols
 - `§SFSymbolName`: Symbol name
 - `§SFSymbolWeight`: Symbol weight
 - `§SFSymbolStyle`: 0=monochrome, 1=hierarchical, 2=palette, 3=multiColor
-- `§IconColor1`/`2`/`3`: Symbol colors
-- `§IconColor1Hover`/`2Hover`/`3Hover`: Hover colors
-- Dark mode variants with `Dark` suffix
+- `§IconColor1`/`§IconColor2`/`§IconColor3`: Symbol colors (palette uses 2-3 colors, hierarchical uses 1)
+- `§IconColor1Hover`/`§IconColor2Hover`/`§IconColor3Hover`: Hover colors
+- Dark mode variants with `Dark` suffix (`§SFSymbolNameDark`, `§SFSymbolWeightDark`, `§SFSymbolStyleDark`, `§IconColor1Dark`/`§IconColor2Dark`/`§IconColor3Dark`, `§IconColor1HoverDark`/`§IconColor2HoverDark`/`§IconColor3HoverDark`)
 
 #### WebView Properties
 - `§WebViewPlain`: 1 for plain HTML
@@ -261,7 +283,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `§PizzaSliceBackgroundColor`: Wedge background
 - `§PizzaSliceBorderColor`: Wedge border
 - `§PizzaSliceBorderWidth`: Border width
-- Dark mode variants with `Dark` suffix
+- Dark mode variants with `Dark` suffix (`§PizzaSliceBackgroundColorDark`, `§PizzaSliceBorderColorDark`, `§PizzaSliceBorderWidthDark`)
 
 #### Interaction
 - `§Focused`: 1 for initial focus
@@ -269,10 +291,43 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `§ScrollDelta`: Touch scroll delta
 - `§ScrollDeltaNormalMouse`: Mouse scroll delta
 
-#### Widget Properties
+#### Folder Widget Properties
+- `§Path`: Folder path to display (e.g. "/Applications/BetterTouchTool.app")
+
+#### Widget Properties (General)
 - `$WidgetStringStringDictionary`: String dictionary
 - `$WidgetStringIntDictionary`: Integer dictionary
+- `$WidgetCustomPluginID`: Plugin bundle identifier for custom widgets
+
+#### Now Playing Widget
 - `$WidgetNowPlayingPauseBehavior`: 0=icon, 1=albumcover
+- `$WidgetNowPlayingHideCover`: 0=album cover, 1=app icon, 2=hidden
+- `$WidgetNowPlayingShowAlbum`: 0=hide, 1=show
+- `$WidgetNowPlayingHideWhenPaused`: 0=show, 1=show paused, 2=hide
+- `$WidgetNowPlayingHideWhenNoPlayer`: 0=show, 1=hide
+- `$WidgetNowPlayingLayout`: 0=horizontal, 1=vertical
+- `$WidgetNowPlayingShowProgress`: 0=hidden, 1=show progress bar
+- `$WidgetNowPlayingAllowedApps`: Comma-separated bundle IDs (empty=all)
+
+#### Weather Widget
+- `$WidgetWeatherUnit`: 0=Celsius, 1=Fahrenheit, 2=System
+- `$WidgetWeatherAutoLocation`: 0=manual, 1=auto (default)
+- `$WidgetWeatherLatLon`: "lat,lon" for manual location
+- `$WidgetWeatherLayout`: 0=variables mode, 1=rich SwiftUI
+- `$WidgetWeatherForecastDay`: -1=current, 0-7=forecast day
+- `$WidgetWeatherHideWhenNoData`: 0=show, 1=hide
+
+#### Trackpad Widget
+- `$WidgetTrackpadFingerMoveColor`: Finger move color
+- `$WidgetTrackpadFingerDragColor`: Finger drag color
+- `$WidgetTrackpadFingerScrollColor`: Finger scroll color
+- `$WidgetTrackpadEdgeScroll`: 1 to enable edge scroll
+- `$WidgetTrackpadEdgeRightClick`: 1 to enable edge right-click
+- `$WidgetTrackpadTwoFingerScroll`: 1 to enable two-finger scroll
+- `$WidgetTrackpadTwoFingerRightClick`: 1 to enable two-finger right-click
+- `$WidgetTrackpadThreeFingerMiddleClick`: 1 to enable three-finger middle-click
+- `$WidgetTrackpadInertialCursor`: 1 to enable inertial cursor
+- `$WidgetTrackpadBigCursor`: 1 to enable big cursor
 
 
 #### Miscellaneous
@@ -293,6 +348,53 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
   "©Order": 0
 }]
 ```
+
+## Default Values
+
+Properties listed below can be **omitted** from `$Config` when their value matches the default — the runtime will behave identically whether the key is present-with-default or absent. This keeps exported JSON minimal.
+
+### Defaults = 0
+`§MarginLeft`, `§MarginRight`, `§MarginTop`, `§MarginBottom`,
+`§MinWidth`, `§MinHeight`,
+`§ShadowEnabled`, `§ShadowEnabledDark`, `§ShadowEnabledAlt`,
+`§BorderWidth`, `§BorderWidthDark`, `§BorderWidthAlt`,
+`§PositioningMode`, `§X`, `§Y`, `§OffsetX`, `§OffsetY`,
+`§ImageOffsetX`, `§ImageOffsetY`, `§ImageOffsetXDark`, `§ImageOffsetXAlt`,
+`§ImageOffsetYDark`, `§ImageOffsetYAlt`,
+`§ImagePadding`, `§ImagePaddingDark`, `§ImagePaddingAlt`,
+`$TextOffsetX`, `$TextOffsetY`,
+`§BlurredBackground`, `§GlassEffect`, `§GlassEffectDark`,
+`§DisplayOrder`, `§ScrollDelta`, `§InternalProperty2`,
+`$DisableDrag`, `$CloseAfterAction`, `$CloseOnMoveMouseAway`, `$CloseOnKeyboardInput`,
+`$OffsetX`, `$OffsetY`,
+`$ResizeOnHover`, `$HighlightPizzaSlice`, `$HoverOnWholePizzaSlice`, `$PlaceFirstItemAtCenter`,
+`$WindowResizable`, `$HorizontalAlignment`, `$VerticalAlignment`,
+`$ShowIfWindowLevelEqualsEnabled`, `$AnimateShow`, `$AnimateShowDuration`,
+`$FrameWidthHovered`, `$FrameHeightHovered`,
+`$ScriptAlwaysRunOnFirstLoad`, `$ScriptAlwaysRunOnAppear`, `$ModifierKeys`,
+`$WidgetNowPlayingHideCover`, `$WidgetNowPlayingHideWhenNoPlayer`, `$WidgetNowPlayingHideWhenPaused`,
+`$WidgetWeatherLayout`, `$WidgetWeatherUnit`, `$WidgetWeatherHideWhenNoData`
+
+### Defaults = 1
+`$TextMinimumScaleFactor`, `$OpacityActive`, `$OpacityInactive`,
+`§VisibleWhileActive`, `§VisibleWhileInactive`,
+`§ShowHoverEffect`, `§ShowIcon`, `§CloseOnClick`,
+`$AllowScrolling`, `$CloseOnOutsideClick`, `$WidgetWeatherAutoLocation`
+
+### Defaults = 2
+`§ScrollDeltaNormalMouse`
+
+### Defaults = 5
+`§PaddingLeft`, `§PaddingRight`, `§PaddingTop`, `§PaddingBottom`
+
+### Defaults = 10000
+`§MaxWidth`, `§MaxHeight`
+
+### Defaults = -1
+`$WidgetWeatherForecastDay`
+
+### Always excluded from export
+`$AppearanceStyle`, `©LastChangeUUID`, `§IsVisible` (internal only)
 
 ## Example: Complete Menu
 ```json
