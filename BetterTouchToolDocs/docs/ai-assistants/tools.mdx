@@ -99,9 +99,18 @@ Use these when you need holistic, step-by-step desktop control.
 - **screenshot** → Capture the whole space, a screen, or a specific window. Use `target` to pick scope; `window_id` when targeting a single window.
 - **get_windows_sorted_front_to_back** → List visible windows in z-order (front to back). Each includes app, pid, bounds, id, title.
 - **activate_window** → Bring a window to the front by `id`.
-- **set_window_frame** → Move/resize a window: provide `id` and `frame`
+- **set_window_frame** → Move/resize a window: provide `id` and `frame`.
 - **screenshot_window** → Screenshot a single window by `id`.
 - **ocr_window** → OCR text from a window (no need to screenshot first). Returns text with global bounds.
+
+### Window management
+- **activate_app** → Activate an app by its `bundleId` (e.g., `com.apple.Safari`).
+- **save_window_layout** → Save the current window layout under a `layoutName`.
+- **restore_window_layout** → Restore a previously saved window layout by `layoutName`.
+- **minimize_window_under_cursor** → Minimize the window currently under the cursor.
+- **close_window_under_cursor** → Close the window currently under the cursor.
+- **zoom_window_under_cursor** → Maximize/zoom the window currently under the cursor.
+- **activate_hovered_app_in_dock** → Activate the app currently hovered in the Dock.
 
 ---
 
@@ -251,13 +260,15 @@ Returns structured JSON with titles, dates, times, location, notes, calendar nam
 
 ---
 
-## Menubar & Triggers
+## Menubar, Context Menus & Triggers
 
 - **retrieve_app_menubar_items** → Query an app's menubar (enabled/checked state). Provide a path (or empty for root) to get that level's items.
 - **find_menubar_item** → Search a menubar item by name (supports regex). Returns the full path string.
 - **trigger_menubar_item** → Trigger a menubar item using the full path and `pid` (or focused app).
+- **show_menubar_in_context_menu** → Show an app's menubar as a context menu.
+- **trigger_context_menu_item** → Trigger a context menu item by `itemName`.
 - **trigger_named_trigger** → Fire a BetterTouchTool Named Trigger by name.
-- **import_trigger_json** → Import a trigger from its JSON (into a specific app or globally).
+- **create_new_btt_trigger_from_json** → Import a trigger from its JSON string (into a specific app via `app_bundle_identifier` or globally). Triggers with the same UUID will be updated/replaced.
 - **add_action_to_trigger** → Import an action JSON and attach it to an existing trigger by UUID.
 - **get_trigger_json** → Retrieve the JSON representation for a trigger by UUID.
 
@@ -265,8 +276,25 @@ Returns structured JSON with titles, dates, times, location, notes, calendar nam
 
 ## Scripting
 
+- **run_javascript** → Execute JavaScript code via BetterTouchTool's JavaScriptCore runtime (not the browser). The code should be an async named function that returns a result. Supports `offset` and `length` for paginating large results.
 - **run_shell_script** → Run any shell command or script. Use `directory`, `environmentVariables`, and `background` as needed. For long-running servers, use `autoReturnTimeout` to return after inactivity.
 - **run_apple_script** → Run AppleScript code (with optional function/arguments). Perfect for deep macOS automation.
+- **call_bettertouchtool_scripting_interface** → Call BetterTouchTool's scripting interface directly with a `function` name and optional `parameters` (JSON format).
+
+---
+
+## Reasoning & Analysis
+
+- **sequential_thinking** → A multi-step reasoning tool for structured problem-solving. Supports branching, revisions, and tool-aware step recommendations. Use for complex problems that benefit from chain-of-thought reasoning.
+- **think** → Create an isolated multi-turn reasoning session for a complex `problem`. Uses sequential_thinking internally and returns only the final conclusion. Supports `max_turns` (default: 5, max: 15).
+- **self_instruct** → Allows the AI to give itself new instructions based on the output of a previous step. Useful for chaining multi-step workflows.
+
+---
+
+## Sub-Agents & Batch Execution
+
+- **agent** → Launch a specialized sub-agent to handle complex, multi-step tasks autonomously. Specify a `task` description, `agent_type` (from the allowed agents for your chat), optional `context`, and `max_iterations` (default: 10, max: 50). Available agent types depend on the skills configured for the chat.
+- **batch** → Execute multiple tool calls in parallel for efficiency. Max 10 calls per batch. Each item specifies a `tool` name and `parameters` object. Useful for independent operations like reading multiple files or running several searches at once.
 
 ---
 
@@ -275,6 +303,22 @@ Returns structured JSON with titles, dates, times, location, notes, calendar nam
 - **search_bettertouchtool_documentation** → Ask anything about BTT; returns the most relevant docs from a vector search.
 - **search_bettertouchtool_trigger_and_action_definitions** → Find trigger/action definitions when creating automations.
 - **retrieve_floating_menu_definition** → Retrieve JSON definitions for Floating Menus (optionally filter results).
+- **retrieve_swift_plugin_reference** → Returns the full reference documentation for creating custom native Swift plugin widgets for BetterTouchTool floating menus.
+
+---
+
+## Function Library
+
+- **search_function_library** → Search the library of previously generated JavaScript functions. Use before writing new code to check if a similar function already exists. Returns matching functions with scripts, descriptions, and usage counts. Params: `query` (required), `limit` (default: 5).
+- **get_execution_log** → Get a log of recently executed JavaScript functions across all AI chats. Params: `days` (default: 3), `limit` (default: 50), `name_filter` (optional substring match).
+
+---
+
+## System Tools
+
+- **close_all_notifications** → Close all macOS notifications.
+- **bluetooth_device_connection** → Manage Bluetooth state and connected devices. Actions: `connectDevice`, `disconnectDevice`, `enable`, `disable`, `toggle`. Provide `deviceAddressOrName` for connect/disconnect.
+- **get_tools** → Retrieve full descriptions for tools marked as `onDemand`. Provide an array of `names` to get their complete parameter documentation.
 
 ---
 

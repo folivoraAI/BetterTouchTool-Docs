@@ -44,6 +44,8 @@ This document provides a first, incomplete, reference for all BetterTouchTool ac
 20. [Device Control](#device-control)
 21. [UI Automation](#ui-automation-actions)
 22. [Custom Actions](#custom-actions)
+23. [AI Actions (h@llo.ai)](#ai-actions-halloai)
+24. [Action Categories](#action-categories)
 
 ---
 
@@ -434,6 +436,91 @@ Example:
 }
 ```
 
+### Shift + Click
+
+> Presses the shift modifier key and then performs a left click.
+
+Parameters:
+* **BTTPredefinedActionType**: 89
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 89
+}
+```
+
+### Start Drag By Double-Click
+
+> Starts a mouse drag operation initiated by a double-click.
+
+Parameters:
+* **BTTPredefinedActionType**: 296
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 296
+}
+```
+
+### Toggle Magic Mouse Touchpad Mode
+
+> Toggles Magic Mouse touchpad mode on or off.
+
+Parameters:
+* **BTTPredefinedActionType**: 68
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 68
+}
+```
+
+### Change Mouse Speed And Acceleration
+
+> Changes mouse tracking speed and acceleration settings.
+
+Parameters:
+* **BTTPredefinedActionType**: 559
+* **BTTAdditionalActionData**: JSON object with speed configuration
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 559
+}
+```
+
+### Pick Color On Screen And Write To Clipboard
+
+> Opens a color picker to select a color from anywhere on screen and writes the result to the clipboard.
+
+Parameters:
+* **BTTPredefinedActionType**: 546
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 546
+}
+```
+
+### All Modifier Keys UP
+
+> Releases all modifier keys (Fn, Shift, Ctrl, Option, Command). Useful in action sequences to ensure a clean modifier state.
+
+Parameters:
+* **BTTPredefinedActionType**: 547
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 547
+}
+```
+
 ---
 
 ## Keyboard Actions
@@ -732,6 +819,62 @@ Example:
   "BTTActionKeyRemapKeyboard": "all",
   "BTTActionKeyRemapFromKey": 50,
   "BTTActionKeyRemapToKey": 51
+}
+```
+
+### Reset All Key Remappings
+
+> Resets all low-level keyboard key remappings to their defaults.
+
+Parameters:
+* **BTTPredefinedActionType**: 482
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 482
+}
+```
+
+### Act as Hyper Key
+
+> Makes the trigger key act as a Hyper Key (simultaneous Ctrl+Shift+Opt+Cmd).
+
+Parameters:
+* **BTTPredefinedActionType**: 293
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 293
+}
+```
+
+### Reset Current Key Sequence
+
+> Resets / stops the currently active key sequence recognition.
+
+Parameters:
+* **BTTPredefinedActionType**: 422
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 422
+}
+```
+
+### Press Context Menu Key
+
+> Simulates pressing the context menu key to show the context menu for the current selection.
+
+Parameters:
+* **BTTPredefinedActionType**: 532
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 532
 }
 ```
 
@@ -1069,8 +1212,10 @@ Parameters:
 * **BTTPredefinedActionType**:
   - Save Current Layout: 269
   - Restore Saved Layout: 268
+  - Restore Last Saved Layout: 270
   - Save Layout with Name: 269 (with BTTWindowLayoutName)
   - Restore Layout with Name: 513 (with BTTWindowLayoutName)
+  - Restore Layout with Name & Launch Apps: 580 (with BTTWindowLayoutName)
 * **BTTWindowLayoutName**: Layout name (for named layouts)
 * **BTTWindowLayout**: Layout data (for restore)
 
@@ -1079,6 +1224,36 @@ Example:
 {
   "BTTPredefinedActionType": 269,
   "BTTWindowLayoutName": "Work Layout"
+}
+```
+
+### Save/Restore Focused Window Size And Position
+
+> Saves or restores the size and position of the currently focused window.
+
+Parameters:
+* **BTTPredefinedActionType**:
+  - Save: 539
+  - Restore: 540
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 539
+}
+```
+
+### Close Window, If Last Window Quit App
+
+> Closes the current window. If it is the last window of the application, quits the app entirely.
+
+Parameters:
+* **BTTPredefinedActionType**: 560
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 560
 }
 ```
 
@@ -1500,6 +1675,34 @@ Example:
 }
 ```
 
+### Search Selected Text With Google
+
+> Searches for the currently selected text using Google.
+
+Parameters:
+* **BTTPredefinedActionType**: 58
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 58
+}
+```
+
+### Switch to Login Screen
+
+> Switches to the macOS login screen without logging out.
+
+Parameters:
+* **BTTPredefinedActionType**: 9
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 9
+}
+```
+
 ---
 
 ## Application Control
@@ -1656,6 +1859,62 @@ Example:
 {
   "BTTPredefinedActionType": 364,
   "BTTGenericActionConfig": "Document.txt"
+}
+```
+
+### Expose And Sort
+
+> Shows Expose and sorts windows automatically.
+
+Parameters:
+* **BTTPredefinedActionType**: 103
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 103
+}
+```
+
+### Show Menu Bar in Context Menu
+
+> Shows the application's menu bar as a context menu at the current mouse position.
+
+Parameters:
+* **BTTPredefinedActionType**: 125
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 125
+}
+```
+
+### Show Shortcuts in Context Menu
+
+> Shows macOS Shortcuts app shortcuts in a context menu.
+
+Parameters:
+* **BTTPredefinedActionType**: 298
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 298
+}
+```
+
+### Activate Hovered App in Dock
+
+> Activates the application whose Dock icon is currently hovered.
+
+Parameters:
+* **BTTPredefinedActionType**: 150
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 150
 }
 ```
 
@@ -1848,6 +2107,54 @@ Example:
 {
   "BTTPredefinedActionType": 373,
   "BTTGenericActionConfig": "50"
+}
+```
+
+### Set Audio Output Device
+
+> Changes the system audio output device.
+
+Parameters:
+* **BTTPredefinedActionType**: 583
+* **BTTGenericActionConfig**: Audio device name or identifier
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 583,
+  "BTTGenericActionConfig": "MacBook Pro Speakers"
+}
+```
+
+### Set Audio Input Device
+
+> Changes the system audio input device.
+
+Parameters:
+* **BTTPredefinedActionType**: 584
+* **BTTGenericActionConfig**: Audio device name or identifier
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 584,
+  "BTTGenericActionConfig": "MacBook Pro Microphone"
+}
+```
+
+### Play Sound File
+
+> Plays a sound file.
+
+Parameters:
+* **BTTPredefinedActionType**: 582
+* **BTTGenericActionConfig**: Path to sound file
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 582,
+  "BTTGenericActionConfig": "/System/Library/Sounds/Glass.aiff"
 }
 ```
 
@@ -2339,6 +2646,26 @@ Example:
 ```json
 {
   "BTTPredefinedActionType": 8
+}
+```
+
+### Navigate To Space Or Fullscreen App By ID or Index
+
+> Navigates to a specific space or fullscreen app using either its index or its unique ID.
+
+Parameters:
+* **BTTPredefinedActionType**: 550
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionGoToSpaceByIndex`: number or string - The space index (supports BTT variables)
+  - `BTTActionGoToSpaceByID`: number or string - The space ID (supports BTT variables)
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 550,
+  "BTTAdditionalActionData": {
+    "BTTActionGoToSpaceByIndex": 3
+  }
 }
 ```
 
@@ -3553,6 +3880,115 @@ Example:
 }
 ```
 
+### Disable Configured Trigger
+
+> Disables a specific trigger identified by its UUID.
+
+Parameters:
+* **BTTPredefinedActionType**: 552
+* **BTTGenericActionConfig**: UUID of the trigger to disable
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 552,
+  "BTTGenericActionConfig": "12345678-1234-1234-1234-123456789012"
+}
+```
+
+### Enable Configured Trigger
+
+> Enables a previously disabled trigger identified by its UUID.
+
+Parameters:
+* **BTTPredefinedActionType**: 553
+* **BTTGenericActionConfig**: UUID of the trigger to enable
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 553,
+  "BTTGenericActionConfig": "12345678-1234-1234-1234-123456789012"
+}
+```
+
+### Save Menu Bar Status Item Layout / Ordering
+
+> Saves the current arrangement and ordering of menu bar status items so it can be restored later.
+
+Parameters:
+* **BTTPredefinedActionType**: 543
+* **BTTGenericActionConfig**: Optional identifier for the saved layout
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 543,
+  "BTTGenericActionConfig": "my_menubar_layout"
+}
+```
+
+### Restore Saved Menu Bar Status Item Layout / Ordering
+
+> Restores a previously saved menu bar status item arrangement.
+
+Parameters:
+* **BTTPredefinedActionType**: 544
+* **BTTGenericActionConfig**: Identifier of the saved layout to restore
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 544,
+  "BTTGenericActionConfig": "my_menubar_layout"
+}
+```
+
+### Change Menu Bar Status Item Spacing
+
+> Changes the spacing and padding between menu bar status items.
+
+Parameters:
+* **BTTPredefinedActionType**: 545
+* **BTTAdditionalActionData**: JSON object with spacing configuration
+  - `BTTActionChangeMenubarStatusItemSpacingSpacing`: number - Spacing between items in pixels
+  - `BTTActionChangeMenubarStatusItemSpacingPadding`: number - Padding around items in pixels
+  - `BTTActionChangeMenubarStatusItemSpacingAutorestart`: boolean - Whether to auto-restart affected apps
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 545,
+  "BTTAdditionalActionData": {
+    "BTTActionChangeMenubarStatusItemSpacingSpacing": 8,
+    "BTTActionChangeMenubarStatusItemSpacingPadding": 4,
+    "BTTActionChangeMenubarStatusItemSpacingAutorestart": false
+  }
+}
+```
+
+### Show Simple JSON Format Menu
+
+> Shows a customizable menu built from a simple JSON format. Can use JavaScript to generate menu content dynamically.
+
+Parameters:
+* **BTTPredefinedActionType**: 551
+* **BTTAdditionalActionData**: JSON object with menu configuration
+  - `BTTActionShowWithSimpleJSONFormatScriptSettings`: object - Script settings
+  - `BTTScriptFunctionToCall`: string - JavaScript function to call
+  - `BTTJavaScriptUseIsolatedContext`: boolean - Use isolated JavaScript context
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 551,
+  "BTTAdditionalActionData": {
+    "BTTActionShowWithSimpleJSONFormatScriptSettings": {},
+    "BTTScriptFunctionToCall": "generateMenu"
+  }
+}
+```
+
 ---
 
 ## Touch Bar Actions
@@ -4178,6 +4614,22 @@ Example:
 }
 ```
 
+### Toggle Attach / Pin Floating Menu To Active Window
+
+> Attaches or detaches a floating menu to/from the currently active window, so the menu moves with the window.
+
+Parameters:
+* **BTTPredefinedActionType**: 548
+* **BTTAdditionalActionData**: JSON object with floating menu configuration
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 548,
+  "BTTAdditionalActionData": {}
+}
+```
+
 ---
 
 ## Control Flow Actions
@@ -4749,6 +5201,43 @@ Example:
 }
 ```
 
+### Wait For Other BetterTouchTool Trigger To Fire
+
+> Pauses the action sequence and waits until a specific trigger (identified by UUID) fires. If the trigger doesn't fire within the timeout, the wait is cancelled.
+
+Parameters:
+* **BTTPredefinedActionType**: 567
+* **BTTGenericActionConfig**: UUID of the trigger to wait for
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionWaitForTriggerTimeout`: number - Timeout in seconds (default: very large value)
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 567,
+  "BTTGenericActionConfig": "12345678-1234-1234-1234-123456789012",
+  "BTTAdditionalActionData": {
+    "BTTActionWaitForTriggerTimeout": 30
+  }
+}
+```
+
+### Debounce
+
+> Only continues the action sequence if the last execution has been more than X seconds ago. Useful to prevent rapid repeated execution of expensive actions.
+
+Parameters:
+* **BTTPredefinedActionType**: 579
+* **BTTGenericActionConfig**: Debounce time in seconds (as string)
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 579,
+  "BTTGenericActionConfig": "2.0"
+}
+```
+
 ---
 
 ## Variable Actions
@@ -5175,6 +5664,228 @@ Example:
 }
 ```
 
+### Logitech: Change Mouse DPI
+
+> Changes the DPI (sensitivity) setting of a Logitech mouse (e.g. MX Master).
+
+Parameters:
+* **BTTPredefinedActionType**: 554
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionLogitechDPI`: number - DPI value
+  - `BTTActionLogitechMouseName`: string - Name of the Logitech device
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 554,
+  "BTTAdditionalActionData": {
+    "BTTActionLogitechDPI": 1600,
+    "BTTActionLogitechMouseName": "MX Master 3S"
+  }
+}
+```
+
+### Logitech: Change Smart Shift / Ratchet Mode / Scroll Settings
+
+> Changes smart shift, ratchet mode, and scroll settings of a Logitech mouse.
+
+Parameters:
+* **BTTPredefinedActionType**: 555
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionLogitechTorque`: number - Torque value
+  - `BTTActionLogitechSmartshiftMode`: number - Smart shift mode
+  - `BTTActionLogitechAutoDisengange`: number - Auto disengage setting
+  - `BTTActionLogitechScrollWheelHighResolutionMode`: number - High resolution scroll mode
+  - `BTTActionLogitechScrollWheelInvertMain`: number - Invert main scroll wheel
+  - `BTTActionLogitechScrollWheelInvertThumb`: number - Invert thumb scroll wheel
+  - `BTTActionLogitechMouseName`: string - Name of the Logitech device
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 555,
+  "BTTAdditionalActionData": {
+    "BTTActionLogitechSmartshiftMode": 1,
+    "BTTActionLogitechTorque": 20,
+    "BTTActionLogitechMouseName": "MX Master 3S"
+  }
+}
+```
+
+### Logitech: Change LED Color
+
+> Changes the LED color of a Logitech device.
+
+Parameters:
+* **BTTPredefinedActionType**: 556
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionLogitechLEDColor`: string - RGBA color string
+  - `BTTActionLogitechLEDMode`: number - LED mode
+  - `BTTActionLogitechLEDIntensity`: number - LED intensity
+  - `BTTActionLogitechLEDPeriod`: number - LED period
+  - `BTTActionLogitechLEDWaveform`: number - LED waveform
+  - `BTTActionLogitechMouseName`: string - Name of the Logitech device
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 556,
+  "BTTAdditionalActionData": {
+    "BTTActionLogitechLEDColor": "1.0,0.0,0.0,1.0",
+    "BTTActionLogitechLEDMode": 1,
+    "BTTActionLogitechLEDIntensity": 100,
+    "BTTActionLogitechMouseName": "MX Master 3S"
+  }
+}
+```
+
+### Logitech: Change Report Rate
+
+> Changes the report rate (polling rate in Hz) of a Logitech mouse.
+
+Parameters:
+* **BTTPredefinedActionType**: 557
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionLogitechReportRate`: number - Report rate in Hz
+  - `BTTActionLogitechMouseName`: string - Name of the Logitech device
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 557,
+  "BTTAdditionalActionData": {
+    "BTTActionLogitechReportRate": 1000,
+    "BTTActionLogitechMouseName": "MX Master 3S"
+  }
+}
+```
+
+### Logitech: Change Profile
+
+> Switches the onboard profile of a Logitech device.
+
+Parameters:
+* **BTTPredefinedActionType**: 558
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionLogitechProfile`: number - Profile index
+  - `BTTActionLogitechMouseName`: string - Name of the Logitech device
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 558,
+  "BTTAdditionalActionData": {
+    "BTTActionLogitechProfile": 0,
+    "BTTActionLogitechMouseName": "MX Master 3S"
+  }
+}
+```
+
+### Logitech: Increase / Decrease Keyboard Brightness
+
+> Increases or decreases the keyboard backlight brightness of a Logitech keyboard.
+
+Parameters:
+* **BTTPredefinedActionType**:
+  - Increase: 561
+  - Decrease: 562
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionLogitechDeviceName`: string - Name of the Logitech keyboard
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 561,
+  "BTTAdditionalActionData": {
+    "BTTActionLogitechDeviceName": "MX Keys"
+  }
+}
+```
+
+### Logitech: Increase / Decrease Mouse DPI
+
+> Incrementally increases or decreases the mouse DPI by a scale factor.
+
+Parameters:
+* **BTTPredefinedActionType**:
+  - Increase: 563
+  - Decrease: 564
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionLogitechDPIScaleFactor`: number - Scale factor (default: 1.2)
+  - `BTTActionLogitechMouseName`: string - Name of the Logitech device
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 563,
+  "BTTAdditionalActionData": {
+    "BTTActionLogitechDPIScaleFactor": 1.5,
+    "BTTActionLogitechMouseName": "MX Master 3S"
+  }
+}
+```
+
+### Logitech: Toggle Ratchet Mode
+
+> Toggles the scroll wheel ratchet mode (free-spin vs. ratchet) of a Logitech mouse.
+
+Parameters:
+* **BTTPredefinedActionType**: 565
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionLogitechMouseName`: string - Name of the Logitech device
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 565,
+  "BTTAdditionalActionData": {
+    "BTTActionLogitechMouseName": "MX Master 3S"
+  }
+}
+```
+
+### Logitech: Haptic Feedback
+
+> Triggers haptic feedback on a supported Logitech mouse (MX Master 4 only).
+
+Parameters:
+* **BTTPredefinedActionType**: 566
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionLogitechHapticPattern`: number - Haptic pattern ID
+  - `BTTActionLogitechMouseName`: string - Name of the Logitech device
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 566,
+  "BTTAdditionalActionData": {
+    "BTTActionLogitechHapticPattern": 1,
+    "BTTActionLogitechMouseName": "MX Master 4"
+  }
+}
+```
+
+### Logitech: Change Host / Channel
+
+> Switches the active host/channel (1-3) on a multi-device Logitech device.
+
+Parameters:
+* **BTTPredefinedActionType**: 568
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionLogitechChannel`: number - Channel number (1-3)
+  - `BTTActionLogitechMouseName`: string - Name of the Logitech device
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 568,
+  "BTTAdditionalActionData": {
+    "BTTActionLogitechChannel": 2,
+    "BTTActionLogitechMouseName": "MX Master 3S"
+  }
+}
+```
+
 ---
 
 ## UI Automation Actions
@@ -5565,6 +6276,128 @@ Example:
 ```json
 {
   "BTTPredefinedActionType": 533
+}
+```
+
+### Start / Stop Smooth Scroll
+
+> Starts or stops continuous smooth scrolling. Can be used to simulate touchpad-like smooth scrolling.
+
+Parameters:
+* **BTTPredefinedActionType**:
+  - Start: 569
+  - Stop: 570
+* **BTTAdditionalActionData** (for Start): JSON object with configuration
+  - `BTTScrollModifierSpeedHorizontal`: number - Horizontal scroll speed
+  - `BTTScrollModifierSpeedVertical`: number - Vertical scroll speed
+* **BTTAdditionalActionData** (for Stop): JSON object with configuration
+  - `BTTScrollStopImmediate`: boolean - Stop immediately without deceleration
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 569,
+  "BTTAdditionalActionData": {
+    "BTTScrollModifierSpeedHorizontal": 0,
+    "BTTScrollModifierSpeedVertical": 5.0
+  }
+}
+```
+
+### Start / Stop Smooth Zoom
+
+> Starts or stops continuous smooth zooming (pinch zoom gesture simulation).
+
+Parameters:
+* **BTTPredefinedActionType**:
+  - Start: 571
+  - Stop: 572
+* **BTTAdditionalActionData** (for Start): JSON object with configuration
+  - `BTTZoomSpeed`: number - Magnification per second
+* **BTTAdditionalActionData** (for Stop): JSON object with configuration
+  - `BTTZoomStopImmediate`: boolean - Stop immediately without deceleration
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 571,
+  "BTTAdditionalActionData": {
+    "BTTZoomSpeed": 2.0
+  }
+}
+```
+
+### Start / Stop Smooth Rotate
+
+> Starts or stops continuous smooth rotation (rotation gesture simulation).
+
+Parameters:
+* **BTTPredefinedActionType**:
+  - Start: 573
+  - Stop: 574
+* **BTTAdditionalActionData** (for Start): JSON object with configuration
+  - `BTTRotateSpeed`: number - Degrees per second
+* **BTTAdditionalActionData** (for Stop): JSON object with configuration
+  - `BTTRotateStopImmediate`: boolean - Stop immediately without deceleration
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 573,
+  "BTTAdditionalActionData": {
+    "BTTRotateSpeed": 45.0
+  }
+}
+```
+
+### Start / Stop Smooth Space Switch
+
+> Starts or stops smooth space switching animation (smooth horizontal desktop transition).
+
+Parameters:
+* **BTTPredefinedActionType**:
+  - Start: 575
+  - Stop: 578
+* **BTTAdditionalActionData** (for Start): JSON object with configuration
+  - `BTTSpaceSwitchSpeed`: number - Offset progress per second
+* **BTTAdditionalActionData** (for Stop): JSON object with configuration
+  - `BTTSpaceSwitchStopImmediate`: boolean - Stop immediately without deceleration
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 575,
+  "BTTAdditionalActionData": {
+    "BTTSpaceSwitchSpeed": 1.5
+  }
+}
+```
+
+### Start Dictation / Speech Recognition
+
+> Starts recognizing and transcribing speech using macOS speech recognition.
+
+Parameters:
+* **BTTPredefinedActionType**: 576
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 576
+}
+```
+
+### Stop Dictation & Paste or Copy
+
+> Stops speech recognition and pastes or copies the transcribed text.
+
+Parameters:
+* **BTTPredefinedActionType**: 577
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 577
 }
 ```
 
@@ -6082,6 +6915,99 @@ Example:
 }
 ```
 
+### h@llo.ai - Show Customizable AI Assistant
+
+> Shows the customizable h@llo.ai (hello.ai) AI assistant window.
+
+Parameters:
+* **BTTPredefinedActionType**: 525
+* **BTTAdditionalActionData**: JSON object with AI assistant configuration
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 525,
+  "BTTAdditionalActionData": {}
+}
+```
+
+### h@llo.ai - Update AI Chat Properties
+
+> Updates properties of an active h@llo.ai chat session.
+
+Parameters:
+* **BTTPredefinedActionType**: 538
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTAIChatIdentifier`: string - Identifier of the chat to update
+  - `BTTAIShowProgressIndicator`: boolean - Show/hide progress indicator
+  - `BTTAIBackgroundReuseConversation`: boolean - Reuse existing conversation
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 538,
+  "BTTAdditionalActionData": {
+    "BTTAIChatIdentifier": "my_chat",
+    "BTTAIShowProgressIndicator": true,
+    "BTTAIBackgroundReuseConversation": true
+  }
+}
+```
+
+### h@llo.ai - Cancel All Ongoing Requests
+
+> Cancels all ongoing h@llo.ai AI requests.
+
+Parameters:
+* **BTTPredefinedActionType**: 541
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 541
+}
+```
+
+### h@llo.ai - Close All Assistant Windows
+
+> Closes all open h@llo.ai assistant windows.
+
+Parameters:
+* **BTTPredefinedActionType**: 542
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 542
+}
+```
+
+### h@llo.ai - Run AI Task In Background
+
+> Runs an AI task in the background without showing a window.
+
+Parameters:
+* **BTTPredefinedActionType**: 581
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTAIChatIdentifier`: string - Chat identifier
+  - `BTTAIUserMessage`: string - The user message/prompt to send
+  - `BTTAIShowProgressIndicator`: boolean - Show progress indicator
+  - `BTTAIBackgroundReuseConversation`: boolean - Reuse existing conversation
+  - `BTTAIUserMessageFileType`: number - File type for the message
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 581,
+  "BTTAdditionalActionData": {
+    "BTTAIChatIdentifier": "background_task",
+    "BTTAIUserMessage": "Summarize the clipboard contents",
+    "BTTAIShowProgressIndicator": false,
+    "BTTAIBackgroundReuseConversation": false
+  }
+}
+```
+
 ### Stage Manager Actions
 
 > Controls macOS Stage Manager.
@@ -6474,5 +7400,239 @@ When using keyboard shortcuts:
 6. Use conditions to make actions context-aware
 7. Leverage variables for dynamic behavior
 8. Group related actions using control flow structures
+
+---
+
+## Action Categories
+
+Many trigger types in BetterTouchTool support multiple **action categories**. Action categories allow a single trigger to execute different actions depending on *how* the trigger is activated (e.g., on key down vs. key release, on hover vs. click, etc.).
+
+Each action assigned to a trigger has a `BTTActionCategory` integer value that determines when it fires. The available categories depend on the trigger type.
+
+### BTTActionCategory Values
+
+| Value | Constant | Description |
+|-------|----------|-------------|
+| 0 | `BTTActionCategoryStandard` | Default/primary action |
+| 1 | `BTTActionCategoryHover` | Hover start |
+| 2 | `BTTActionCategoryLongPress` | Long press / long hold down |
+| 3 | `BTTActionCategoryTouchRelease` | Touch release / button up |
+| 4 | `BTTActionCategoryHoverEnd` | Hover end |
+| 5 | `BTTActionCategoryHyperKeyRelease` | Hyper key release (unused) |
+| 6 | `BTTActionCategoryRightClick` | Right click |
+| 7 | `BTTActionCategoryChangeToFalse` | Condition changed to false |
+| 8 | `BTTActionCategoryAppear` | Item appeared |
+| 9 | `BTTActionCategoryDisappear` | Item disappeared |
+| 10 | `BTTActionCategoryOnDrop` | Item received a drop |
+| 11 | `BTTActionCategoryScrollLeft` | Scroll left |
+| 12 | `BTTActionCategoryScrollRight` | Scroll right |
+| 13 | `BTTActionCategoryScrollUp` | Scroll up |
+| 14 | `BTTActionCategoryScrollDown` | Scroll down |
+| 15 | `BTTActionCategoryBTTMobileThreeFingerSwipeLeft` | BTT Remote three-finger swipe left |
+| 16 | `BTTActionCategoryBTTMobileThreeFingerSwipeRight` | BTT Remote three-finger swipe right |
+| 17 | `BTTActionCategoryPressDown` | Button press down |
+| 18 | `BTTActionCategoryCustomContextMenu` | Custom context menu |
+| 19 | `BTTActionCategoryAppIsRunning` | App is running |
+| 20 | `BTTActionCategoryAppIsNotRunning` | App is not running |
+| 21 | `BTTActionCategoryDragDown` | Drag down (discrete) |
+| 22 | `BTTActionCategoryDragUp` | Drag up (discrete) |
+| 23 | `BTTActionCategoryDragLeft` | Drag left (discrete) |
+| 24 | `BTTActionCategoryDragRight` | Drag right (discrete) |
+| 25 | `BTTActionCategoryDragDownContinuous` | Drag down (continuous) |
+| 26 | `BTTActionCategoryDragUpContinuous` | Drag up (continuous) |
+| 27 | `BTTActionCategoryDragLeftContinuous` | Drag left (continuous) |
+| 28 | `BTTActionCategoryDragRightContinuous` | Drag right (continuous) |
+| 29 | `BTTActionCategoryConnect` | Device connected |
+| 30 | `BTTActionCategoryDisconnect` | Device disconnected |
+| 31 | `BTTActionCategoryButtonRelease` | Button/click release |
+| 32 | `BTTActionCategoryButtonQuickRelease` | Quick button/click release |
+| 33 | `BTTActionCategoryButtonReleaseAfterLongPress` | Button/click release after long hold |
+| 34 | `BTTActionCategorySeparator` | Separator (UI only, not assignable) |
+| 35 | `BTTActionCategoryKeyRelease` | Key release |
+| 36 | `BTTActionCategoryKeyQuickRelease` | Quick key release |
+| 37 | `BTTActionCategoryKeyReleaseAfterLongPress` | Key release after long hold |
+| 38 | `BTTActionCategoryKeyLongPress` | Long key hold down |
+| 39 | `BTTActionCategoryFirstScroll` | First scroll only |
+| 40 | `BTTActionCategoryCrownRotateLeftSmooth` | Logitech Craft Crown rotate left (smooth) |
+| 41 | `BTTActionCategoryCrownRotateRightSmooth` | Logitech Craft Crown rotate right (smooth) |
+| 42 | `BTTActionCategoryCrownRotateLeftRatchet` | Logitech Craft Crown rotate left (ratchet) |
+| 43 | `BTTActionCategoryCrownRotateRightRatchet` | Logitech Craft Crown rotate right (ratchet) |
+| 44 | `BTTActionCategoryCrownTap` | Logitech Craft Crown tap |
+| 45 | `BTTActionCategoryCrownPressDown` | Logitech Craft Crown press down |
+| 46 | `BTTActionCategoryCrownPressUp` | Logitech Craft Crown press up |
+| 47 | `BTTActionCategoryKeyReleaseAfterAllModifiersReleased` | Key release after all modifier keys released |
+
+### Categories by Trigger Type
+
+#### Keyboard Shortcuts
+
+Regular keyboard shortcuts support the following action categories:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on key down |
+| `BTTActionCategoryKeyLongPress` | 38 | Actions executed on long key hold down |
+| `BTTActionCategoryKeyRelease` | 35 | Actions executed on key release |
+| `BTTActionCategoryKeyQuickRelease` | 36 | Actions executed on quick key release |
+| `BTTActionCategoryKeyReleaseAfterLongPress` | 37 | Actions executed on key release after long hold |
+| `BTTActionCategoryKeyReleaseAfterAllModifiersReleased` | 47 | Actions executed after all modifier keys released |
+
+**Hyper Key** shortcuts only support:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on trigger |
+| `BTTActionCategoryHyperKeyRelease` | 5 | Actions executed on (unused) hyper key release |
+
+#### Mouse Triggers
+
+**Mouse button triggers** support:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on press |
+| `BTTActionCategoryLongPress` | 2 | Actions executed on long hold down |
+| `BTTActionCategoryButtonRelease` | 31 | Actions executed on click release |
+| `BTTActionCategoryButtonQuickRelease` | 32 | Actions executed on quick click release |
+| `BTTActionCategoryButtonReleaseAfterLongPress` | 33 | Actions executed on click release after long hold |
+| `BTTActionCategoryDragUp` | 22 | Actions executed on drag up (discrete) |
+| `BTTActionCategoryDragDown` | 21 | Actions executed on drag down (discrete) |
+| `BTTActionCategoryDragLeft` | 23 | Actions executed on drag left (discrete) |
+| `BTTActionCategoryDragRight` | 24 | Actions executed on drag right (discrete) |
+| `BTTActionCategoryDragUpContinuous` | 26 | Actions executed on drag up (continuous) |
+| `BTTActionCategoryDragDownContinuous` | 25 | Actions executed on drag down (continuous) |
+| `BTTActionCategoryDragLeftContinuous` | 27 | Actions executed on drag left (continuous) |
+| `BTTActionCategoryDragRightContinuous` | 28 | Actions executed on drag right (continuous) |
+
+**Mouse scroll triggers** support:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on scroll (repeating) |
+| `BTTActionCategoryFirstScroll` | 39 | Actions executed on first scroll only |
+
+**Mouse scroll+button combo triggers** additionally support:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryButtonRelease` | 31 | Actions executed on button release |
+| `BTTActionCategoryButtonQuickRelease` | 32 | Actions executed on quick button release |
+| `BTTActionCategoryButtonReleaseAfterLongPress` | 33 | Actions executed on button release after long hold |
+
+#### Trackpad / Magic Mouse / Siri Remote Triggers
+
+Most trackpad, Magic Mouse, and Siri Remote gesture triggers support:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on trigger |
+| `BTTActionCategoryTouchRelease` | 3 | Actions executed on touch release |
+
+#### Stream Deck Triggers
+
+**Stream Deck button triggers** support:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on button down |
+| `BTTActionCategoryTouchRelease` | 3 | Actions executed on button up |
+| `BTTActionCategoryLongPress` | 2 | Actions executed on long press |
+
+**Stream Deck dial triggers** support:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on dial turn |
+| `BTTActionCategoryTouchRelease` | 3 | Actions executed on dial press |
+| `BTTActionCategoryLongPress` | 2 | Actions executed on dial long press |
+
+#### Floating Menu Triggers
+
+**Standard floating menu items and submenus** support:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryHover` | 1 | Actions executed on hover start |
+| `BTTActionCategoryHoverEnd` | 4 | Actions executed on hover end |
+| `BTTActionCategoryOnDrop` | 10 | Actions executed on drop |
+| `BTTActionCategoryAppear` | 8 | Actions executed on appear |
+| `BTTActionCategoryDisappear` | 9 | Actions executed on disappear |
+
+**Other floating menu items (buttons, widgets, etc.)** support:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on trigger (button release) |
+| `BTTActionCategoryPressDown` | 17 | Actions executed on button press down |
+| `BTTActionCategoryHover` | 1 | Actions executed on hover start |
+| `BTTActionCategoryHoverEnd` | 4 | Actions executed on hover end |
+| `BTTActionCategoryOnDrop` | 10 | Actions executed on drop |
+| `BTTActionCategoryRightClick` | 6 | Actions executed on right click |
+| `BTTActionCategoryScrollLeft` | 11 | Actions executed on scroll left |
+| `BTTActionCategoryScrollRight` | 12 | Actions executed on scroll right |
+| `BTTActionCategoryScrollUp` | 13 | Actions executed on scroll up |
+| `BTTActionCategoryScrollDown` | 14 | Actions executed on scroll down |
+
+**BTT Remote trackpad items** in floating menus support:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on trigger |
+| `BTTActionCategoryBTTMobileThreeFingerSwipeLeft` | 15 | Actions executed on three-finger swipe left |
+| `BTTActionCategoryBTTMobileThreeFingerSwipeRight` | 16 | Actions executed on three-finger swipe right |
+
+#### Menu Bar / Status Icon Triggers
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on left click |
+| `BTTActionCategoryRightClick` | 6 | Actions executed on right click |
+
+#### Dock Icon Triggers
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on click |
+| `BTTActionCategoryCustomContextMenu` | 18 | Custom dock context menu |
+
+#### Conditional Triggers (Advanced Trigger Conditions / Script Output Changed)
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on change to TRUE |
+| `BTTActionCategoryChangeToFalse` | 7 | Actions executed on change to FALSE |
+
+#### Logitech Craft Crown Triggers
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryCrownRotateLeftSmooth` | 40 | Actions executed on rotate left (smooth) |
+| `BTTActionCategoryCrownRotateRightSmooth` | 41 | Actions executed on rotate right (smooth) |
+| `BTTActionCategoryCrownRotateLeftRatchet` | 42 | Actions executed on rotate left (ratchet) |
+| `BTTActionCategoryCrownRotateRightRatchet` | 43 | Actions executed on rotate right (ratchet) |
+| `BTTActionCategoryStandard` | 0 | Actions executed on crown tap |
+| `BTTActionCategoryCrownPressDown` | 45 | Actions executed on crown press down |
+| `BTTActionCategoryCrownPressUp` | 46 | Actions executed on crown press up |
+
+#### Default (All Other Trigger Types)
+
+Trigger types not listed above (Touch Bar, Notch Bar, generic devices, key sequences, drawings, etc.) use only:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryStandard` | 0 | Actions executed on trigger |
+
+### Using Action Categories in JSON
+
+When defining actions in JSON, set the `BTTActionCategory` field on the action to assign it to a specific category:
+
+```json
+{
+  "BTTPredefinedActionType": 3,
+  "BTTActionCategory": 35
+}
+```
+
+This example assigns a left-click action to the **key release** category (value 35) of a keyboard shortcut trigger, meaning the left click will be performed when the key is released rather than when it is pressed down.
 
 This documentation covers all available BetterTouchTool actions as of the current version. Actions may be added or modified in future releases.

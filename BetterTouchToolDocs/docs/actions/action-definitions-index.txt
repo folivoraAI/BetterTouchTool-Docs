@@ -1,0 +1,391 @@
+# BetterTouchTool Action Definitions Index
+# Source: action-definitions.mdx
+# Format: action_id(s) | action_name | line_number
+# Read ~40 lines from the line number to get full parameters and examples.
+#
+# Reference sections (not action-specific):
+#   Important Notes: L12
+#   Additional Notes: L7318
+#   Action Categories: L7406
+
+3 | Left Click | L54
+421 | Left Click - Without Modifier Keys | L68
+4 | Right Click | L82
+1 | Middle Click | L96
+54 | Double Left Click | L110
+87 | Ctrl + Left Click | L124
+88 | Opt + Left Click | L138
+2 | CMD + Left Click | L152
+149 | CMD + Double Left Click | L166
+111 | CMD + Shift + Left Click | L180
+119 | Custom Click (Custom Mouse Buttons & Modifiers) | L194
+153 | Move Mouse To Position | L272
+154 | Save Current Mouse Position | L323
+155 | Restore Saved Mouse Position | L337
+65 | Start Drag | L351
+66 | Stop Drag | L365
+126 | Toggle Mouse Speed | L379
+123 | Toggle Cursor Size | L393
+411 | Set Cursor Size | L407
+272 | Scroll | L423
+89 | Shift + Click | L439
+296 | Start Drag By Double-Click | L453
+68 | Toggle Magic Mouse Touchpad Mode | L467
+559 | Change Mouse Speed And Acceleration | L481
+546 | Pick Color On Screen And Write To Clipboard | L496
+547 | All Modifier Keys UP | L510
+193 | Type String | L528
+118 | Paste String | L546
+264 | Send Keyboard Shortcut | L564
+128 | Send Shortcut to Specific App | L651
+33,34,35,36,37,38,39,40,41,42,43,44,130,131,132,133,134,135,303,304,305,306,307,308 | Function Keys (F1-F24) | L672
+178,179,180,181,182,183,184,185,186,187,437,438,439,440,441,442,443,444 | Modifier Key Actions | L710
+189 | ESC Key | L742
+194 | Toggle Caps Lock | L756
+60,61,62,63,64 | Page Navigation Keys | L770
+51,52 | Arrow Keys | L789
+483 | Remap Key | L805
+482 | Reset All Key Remappings | L825
+293 | Act as Hyper Key | L839
+422 | Reset Current Key Sequence | L853
+532 | Press Context Menu Key | L867
+21 | Maximize Window | L885
+19 | Maximize Window Left | L899
+20 | Maximize Window Right | L913
+90,92,91,93 | Resize Window to Quarters | L927
+108,109,110,174,175 | Resize Window to Thirds | L945
+96,95 | Resize Window to Halves | L964
+97 | Center Window | L980
+98 | Center Window on Next Monitor | L994
+47 | Move Window to Next Monitor | L1008
+48 | Maximize Window on Next Monitor | L1022
+84 | Restore Old Window Size | L1036
+102 | Close Window Under Cursor | L1050
+106 | Minimize Window Under Cursor | L1064
+107 | Zoom Window Under Cursor | L1078
+204 | Bring Window Under Cursor to Front | L1092
+17,18 | Move Window Left/Right | L1106
+69,70,74 | Start/Stop Moving Windows | L1122
+71,72,73 | Start/Stop Resizing Windows | L1139
+251 | Custom Move/Resize | L1156
+446 | Move Window to Specific Size and Position | L1191
+269,268,270 | Window Layout Management | L1207
+539,540 | Save/Restore Focused Window Size And Position | L1230
+560 | Close Window, If Last Window Quit App | L1246
+337,402,401,338 | Pin/Unpin Window to Float on Top | L1260
+99,100,378,476 | Window Switcher | L1278
+317,318,319,320,322,321 | Arrange Windows Side by Side | L1330
+13 | Sleep Display | L1354
+14 | Sleep Computer | L1368
+15 | Logout | L1382
+158 | Lock Screen | L1396
+159 | Unlock Screen | L1410
+202 | Start Screen Saver | L1426
+156 | Empty Trash | L1440
+200 | Toggle Do Not Disturb | L1454
+197 | Toggle Dark Mode | L1468
+201 | Toggle Night Shift | L1482
+257 | Toggle True Tone | L1496
+45 | Show Desktop | L1510
+50 | Hide All Windows | L1524
+53 | Hide All But Active Window | L1538
+488 | Show All Windows | L1552
+16 | Show/Hide Hidden Files | L1566
+122 | Notification Center | L1580
+290 | Control Center | L1594
+289 | Close All Notifications | L1608
+167 | Show Character Viewer | L1622
+173 | Start Siri | L1636
+30 | Eject | L1650
+302 | Refresh Status Bar Items | L1664
+58 | Search Selected Text With Google | L1678
+9 | Switch to Login Screen | L1692
+49 | Launch Application | L1710
+177 | Show/Hide Specific Application | L1726
+247 | Quit App Under Cursor | L1749
+294 | Hide App Under Cursor | L1763
+46,142 | Application Switcher | L1777
+367 | Activate Previous App | L1792
+383,491 | Activate Previous Window | L1806
+368 | Save Active Window | L1821
+369 | Go Back to Saved Active Window | L1835
+364 | Activate Specific Window | L1849
+103 | Expose And Sort | L1865
+125 | Show Menu Bar in Context Menu | L1879
+298 | Show Shortcuts in Context Menu | L1893
+150 | Activate Hovered App in Dock | L1907
+10 | Open Finder | L1921
+85 | Create New File in Finder | L1935
+157 | Open Finder Selection with Specific App | L1949
+176 | Open Selected Folder with App | L1965
+23 | Play/Pause | L1985
+27 | Next Track | L1999
+26 | Previous Track | L2013
+24 | Volume Up | L2027
+25 | Volume Down | L2041
+198 | Volume Up (Small Step) | L2055
+199 | Volume Down (Small Step) | L2069
+22 | Mute | L2083
+373 | Set Volume | L2097
+583 | Set Audio Output Device | L2113
+584 | Set Audio Input Device | L2129
+582 | Play Sound File | L2145
+28 | Brightness Up | L2165
+29 | Brightness Down | L2179
+259 | Brightness Up (Small Step) | L2193
+260 | Brightness Down (Small Step) | L2207
+120 | External Monitor Brightness Up | L2221
+121 | External Monitor Brightness Down | L2235
+261 | External Brightness Up (Small Step) | L2249
+262 | External Brightness Down (Small Step) | L2263
+370 | Set Brightness | L2277
+31 | Keyboard Illumination Up | L2293
+32 | Keyboard Illumination Down | L2307
+477 | Set Keyboard Brightness | L2321
+266 | Toggle Mirroring | L2337
+127 | AirPlay Mirroring | L2351
+326 | Toggle Super Brightness | L2365
+324 | Enable Super Brightness | L2390
+325 | Disable Super Brightness | L2415
+267 | Move All Windows to Mouse Display | L2440
+314 | Rotate Display Clockwise | L2454
+315 | Rotate Display Counter-Clockwise | L2468
+7 | Mission Control | L2486
+165 | Mission Control & Show Desktop Preview | L2500
+6 | Application Exposé | L2514
+207,208,209,210,211,212,213,214,215,226,227,228,229,230,231,232,233,234,235 | Switch to Desktop (1-19) | L2528
+216,217,218,219,220,222,223,224,225,236,237,238,239,240,241,242,243,244,245 | Move Window to Desktop (1-19) | L2552
+113,114,527,528 | Switch Space Left/Right | L2576
+151,152 | Move Window to Left/Right Space | L2594
+196 | Add New Space | L2610
+115 | Launchpad | L2624
+8 | Dashboard | L2638
+550 | Navigate To Space Or Fullscreen App By ID or Index | L2652
+169 | Take Screenshot | L2676
+170 | Screenshot Window | L2693
+171 | Screenshot and Edit | L2707
+316 | Screenshot to Clipboard | L2721
+500 | Screenshot to Clipboard (New) | L2735
+263 | Take Screenshot or Video | L2751
+495 | Take Screenshot (Configurable) | L2765
+501 | Measure Area on Screen | L2793
+203 | Toggle Clipboard Manager | L2811
+480 | Show Clipboard Manager | L2832
+481 | Hide Clipboard Manager | L2853
+508 | Save Clipboard Contents | L2867
+509 | Restore Clipboard Contents | L2881
+529 | Set Clipboard Contents | L2895
+297 | Upload Clipboard to Imgur | L2917
+287 | Copy Selected Text with JavaScript | L2931
+448 | Transform Clipboard with JavaScript | L2947
+449,0 | Transform Clipboard with ChatGPT | L2963
+489 | Paste Specific Clipboard Item | L3009
+487 | Delete Items from Clipboard Manager | L3025
+512 | Delete Specific Item from Clipboard | L3039
+484 | Paste and Remove Item | L3055
+250 | Custom Paste | L3074
+328 | Check Clipboard Change | L3093
+499 | Wait for Clipboard Change | L3107
+434,433 | Enable/Disable Clipboard Manager Watcher | L3127
+485 | Copy to Snippet Group | L3143
+496,497 | Copy/Paste Text Style | L3159
+494 | Change Formatting of Selected Text | L3175
+256 | Save Selected Text to Variable | L3282
+284 | Transform Selected Text with JavaScript | L3298
+384 | Transform Selected Text with ChatGPT | L3314
+471 | ChatGPT Selection to Clipboard & Variable | L3378
+385 | Reset ChatGPT Conversation | L3424
+470 | Cancel ChatGPT Request | L3438
+498 | OCR Area on Screen | L3452
+426 | Find Text on Screen | L3468
+427 | Wait for Text on Screen | L3506
+493 | Force Check Selection Change | L3524
+172 | Run AppleScript (Blocking) | L3542
+195 | Run AppleScript (Background) | L3559
+252,253,281 | Run JavaScript | L3576
+246 | Terminal Command (Blocking) | L3597
+137 | Terminal Command (Background) | L3613
+206 | Shell Script Task | L3629
+138 | Automator Workflow | L3647
+295 | Run Apple Shortcut | L3663
+519 | Trigger Apple Shortcut from System Settings | L3679
+105 | Open BTT Preferences | L3699
+374 | Open Specific BTT Settings | L3713
+55 | Restart BetterTouchTool | L3729
+56 | Quit BetterTouchTool | L3743
+101 | Toggle BetterTouchTool | L3757
+144 | Disable Gesture Recognition | L3771
+502 | Disable Triggers for X Seconds | L3786
+139 | Switch to Preset | L3803
+258 | Toggle Preset | L3820
+248 | Trigger Named Trigger | L3837
+400 | Trigger Actions for Item with UUID | L3853
+425 | Show BTT Menu Bar Status Item Menu | L3869
+552 | Disable Configured Trigger | L3883
+553 | Enable Configured Trigger | L3899
+543 | Save Menu Bar Status Item Layout / Ordering | L3915
+544 | Restore Saved Menu Bar Status Item Layout / Ordering | L3931
+545 | Change Menu Bar Status Item Spacing | L3947
+551 | Show Simple JSON Format Menu | L3970
+188 | Toggle Touch Bar | L3996
+282 | Show Touch Bar | L4010
+283 | Hide Touch Bar | L4024
+190 | Toggle Global Touch Bar | L4038
+205 | Open Touch Bar Group | L4052
+191 | Close Current Touch Bar Group | L4068
+301 | Toggle Notch Bar Hidden | L4086
+312 | Show Notch Bar | L4100
+311 | Hide Notch Bar | L4114
+299 | Disable Notch Bar | L4128
+300 | Toggle Notch Bar Mode | L4158
+310 | Open Notch Bar Group | L4172
+309 | Close Current Notch Bar Group | L4188
+341 | Open Stream Deck Group | L4206
+340 | Close Current Stream Deck Group | L4222
+343,344 | Stream Deck Brightness Control | L4236
+347,348,349 | Stream Deck Power Control | L4254
+365 | Show/Hide Stream Deck Emulator | L4271
+376 | Activate Stream Deck Touch Screen Group | L4285
+377 | Temporarily Change Stream Deck Item | L4301
+386 | Show Floating Menu | L4323
+387 | Hide Floating Menu | L4348
+388 | Toggle Floating Menu | L4364
+472 | Open Floating Menu Submenu | L4388
+445 | Close Floating Menu Submenu | L4404
+398 | Floating Menu Execute JavaScript | L4418
+397 | Floating Menu Load HTML | L4436
+389 | Floating Menu Evaluate Scripts | L4454
+390 | Floating Menu Re-evaluate Position | L4470
+399 | Floating Menu Bring to Mouse Screen | L4486
+393 | Trigger Floating Menu Highlighted Item | L4502
+404 | Trigger Highlighted Item and Hide Menu | L4518
+394,395,396 | Floating Menu Hover/Unhover | L4534
+447 | Update Floating Menu Item Properties | L4553
+450 | Update Floating Menu Properties | L4569
+451 | Reset Floating Menu Item Properties | L4585
+469 | Run Floating Menu Content Scripts | L4601
+548 | Toggle Attach / Pin Floating Menu To Active Window | L4617
+345 | Delay (Async / Non-Blocking) | L4637
+129 | Delay (Blocking) | L4653
+329 | Start Repeat | L4671
+332 | End / Stop Repeat | L4693
+424 | Cancel Repeat | L4721
+330 | IF Condition | L4737
+431 | IF JavaScript True | L4755
+432 | IF AppleScript True | L4771
+405 | IF Image Visible | L4787
+428 | IF Text Visible | L4804
+333 | ELSE | L4820
+331 | END IF | L4834
+351 | Execute Action Sequence After Timeout (Cancellable) | L4848
+352 | Cancel Timed / Delayed Action Sequences | L4884
+403 | Ask For Input & Save To Variable | L4900
+486 | Wait for Keyboard Input | L4924
+417 | Wait for Conditions To Become True | L4944
+418 | Cancel Wait for Conditions To Become True | L4966
+423,334 | Wait for Change Of Focused Window | L4982
+366 | Continue With Next Action | L5022
+531 | Stop All Action Sequences | L5036
+413,414,415,416 | Wait For App Launch/Terminate | L5090
+419 | Wait For Image to Become Visible | L5110
+567 | Wait For Other BetterTouchTool Trigger To Fire | L5204
+579 | Debounce | L5225
+292 | Set Variable | L5245
+412 | Increase Variable | L5267
+335 | Toggle Variable | L5285
+346 | Toggle On/Off | L5326
+350 | Refresh Condition Values | L5372
+523 | Show Variables View | L5386
+274 | Connect Bluetooth Device | L5404
+275 | Disconnect Bluetooth Device | L5421
+276 | Toggle Bluetooth Device | L5438
+277 | Enable Bluetooth | L5455
+278 | Disable Bluetooth | L5469
+279 | Toggle Bluetooth | L5483
+271 | Connect MIDI Device | L5497
+462 | Send MIDI Command | L5513
+379 | Send Raw Data to Generic Device | L5529
+380 | Execute Generic Device Command | L5545
+506 | Connect Sidecar | L5563
+507 | Disconnect Sidecar | L5578
+452,454,455,456,457,510,511,514,515 | BTT Mobile Actions | L5592
+453 | Mobile Trackpad Widget | L5616
+516,517,166 | Siri Remote Mouse Mode | L5650
+554 | Logitech: Change Mouse DPI | L5667
+555 | Logitech: Change Smart Shift / Ratchet Mode / Scroll Settings | L5688
+556 | Logitech: Change LED Color | L5715
+557 | Logitech: Change Report Rate | L5742
+558 | Logitech: Change Profile | L5763
+561,562 | Logitech: Increase / Decrease Keyboard Brightness | L5784
+563,564 | Logitech: Increase / Decrease Mouse DPI | L5805
+565 | Logitech: Toggle Ratchet Mode | L5828
+566 | Logitech: Haptic Feedback | L5847
+568 | Logitech: Change Host / Channel | L5868
+291 | Find Position of Image on Screen | L5893
+381,382 | Start/Stop Scroll Blocking | L5949
+478 | Zoom (Pinch) | L5965
+479 | Rotate | L5981
+117 | Smart Zoom | L5997
+116 | Look Up | L6011
+288 | Show Context Menu | L6025
+353 | Show Context Menu for Selection | L6040
+124 | Trigger Menu Bar Item | L6054
+162 | Trigger Context Menu Item | L6070
+375 | Click Status Bar Item | L6086
+458,460,461,265,463,467,466,468 | Show/Hide Status Bar Items | L6103
+459 | Move Status Bar Item | L6127
+464 | Search Menu Bar Status Items | L6145
+520 | Click Button in Active Window | L6159
+521 | Change Slider Value | L6175
+522 | Interact with UI Element | L6193
+503,504,505 | Show UI Element Viewers | L6213
+524,526 | Get Hovered Link/URL | L6230
+429,430 | Start/End Keyboard Input Blocking | L6248
+533,534,535,536 | Lock Mouse Axis Movement | L6264
+569,570 | Start / Stop Smooth Scroll | L6282
+571,572 | Start / Stop Smooth Zoom | L6307
+573,574 | Start / Stop Smooth Rotate | L6330
+575,578 | Start / Stop Smooth Space Switch | L6353
+576 | Start Dictation / Speech Recognition | L6376
+577 | Stop Dictation & Paste or Copy | L6390
+327 | Show Custom Context Menu | L6408
+339 | Show Custom HTML Menu | L6425
+465 | Show Searchable List | L6441
+249 | Show Floating Web View | L6471
+372 | Close Floating Web View | L6490
+254 | Show HUD | L6506
+371 | Show Notification | L6549
+255 | Haptic Feedback | L6567
+94 | Show Color Picker | L6583
+354 | Show Cheat Sheet | L6597
+355,356 | Hide/Toggle Cheat Sheet | L6633
+59 | Open URL | L6649
+136 | Post Distributed Notification | L6668
+420 | Change Input Source | L6685
+492 | Change Default Browser | L6707
+436 | Set Function Key Mode | L6723
+435 | Call macOS Service | L6739
+473 | Set Icon for File | L6755
+391 | Create Snap Area | L6773
+392 | Edit Snap Areas | L6789
+168 | Trigger Snap Area | L6803
+280 | Plugin Action | L6820
+490 | Comment | L6838
+323 | Separator | L6854
+530,537 | AI Actions | L6868
+999 | AI Chat Window | L6886
+525 | h@llo.ai - Show Customizable AI Assistant | L6918
+538 | h@llo.ai - Update AI Chat Properties | L6934
+541 | h@llo.ai - Cancel All Ongoing Requests | L6957
+542 | h@llo.ai - Close All Assistant Windows | L6971
+581 | h@llo.ai - Run AI Task In Background | L6985
+360,357,358,363,359,361,362 | Stage Manager Actions | L7011
+145,146,147,148 | Dock Actions | L7036
+140,123,126,313 | Toggle Actions | L7054
+9,86 | Login/Security Actions | L7072
+75,76,83,77,78,79,80,81,82 | Gesture Control | L7108
+11,12 | Zoom In/Out | L7131
+163,164 | Window Snapping | L7147
+112 | Fullscreen | L7163
+-1 | No Action | L7177
+285 | Send Data to Connected BTT Mobile/iOS Device | L7279
