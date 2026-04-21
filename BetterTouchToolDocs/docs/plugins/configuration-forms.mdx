@@ -1,0 +1,229 @@
+---
+title: "Configuration Forms Reference"
+sidebar_position: 10
+slug: "/docs/plugins/configuration-forms"
+---
+
+# Configuration Forms Reference
+
+All plugin types support custom configuration forms that appear in the BTT sidebar when the user selects the plugin. Forms let users customize plugin behavior without editing code.
+
+## Creating a Configuration Form
+
+Implement the `configurationFormItems()` class method and return a form group containing your fields:
+
+```swift
+static func configurationFormItems() -> BTTPluginFormItem? {
+    let group = BTTPluginFormItem()
+    group.formFieldType = BTTFormTypeFormGroup
+
+    let textField = BTTPluginFormItem()
+    textField.formFieldType = BTTFormTypeTextField
+    textField.formLabel1 = "Label Text"
+    textField.formFieldID = "labelText"
+    textField.defaultValue = "Hello!"
+
+    group.formOptions = [textField]
+    return group
+}
+```
+
+## Receiving Configuration Values
+
+When the user changes a form field value, BTT calls `didReceiveNewConfigurationValues(_:)` on your plugin. Values arrive with a `plugin_var_` prefix on the `formFieldID`:
+
+```swift
+func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]?) {
+    if let text = configurationValues?["plugin_var_labelText"] as? String {
+        labelText = text
+    }
+    if let size = configurationValues?["plugin_var_fontSize"] as? Double {
+        fontSize = size
+    }
+    // Request a UI refresh (for widget plugins)
+    delegate?.requestWidgetUpdate(self)
+}
+```
+
+For [JSON Action Plugins](/docs/plugins/json-action-plugins), form values are referenced with `@@@fieldID@@@` placeholders instead of the `plugin_var_` prefix.
+
+## Form Field Types
+
+| Type Constant | Description |
+|---|---|
+| `BTTFormTypeTextField` | Single-line text input |
+| `BTTFormTypeTwoTextFields` | Two text fields side by side (use `formFieldID` and `formFieldID2`) |
+| `BTTFormTypeTextArea` | Multi-line text input |
+| `BTTFormTypeCheckbox` | Boolean toggle |
+| `BTTFormTypeSlider` | Numeric slider (set `minValue`, `maxValue`, `dataType` to `BTTFormDataNumber`) |
+| `BTTFormTypePopupButton` | Dropdown selector (set `formOptions` to an array of option items) |
+| `BTTFormTypeColorPicker` | Color picker |
+| `BTTFormTypeImagePicker` | Image picker (value arrives as Base64 string) |
+| `BTTFormTypeSeparator` | Visual separator line (no value) |
+| `BTTFormTypeDescription` | Static description text (use `formLabel1` for content) |
+| `BTTFormTypeTitleField` | Bold title/header text |
+| `BTTFormTypeDetailTitleField` | Detailed title field |
+| `BTTFormTypeFormGroup` | Container for nested fields (use `formOptions` for child items) |
+| `BTTFormTypeButton` | Action button |
+| `BTTFormTypeAppleScript` | AppleScript editor |
+| `BTTFormTypeShellScript` | Shell script editor |
+| `BTTFormTypeTabs` | Tab container |
+| `BTTFormTypeModifiers` | Keyboard modifier picker |
+| `BTTFormTypeCustomTextInsertDropDown` | Custom text dropdown |
+| `BTTFormTypeMouseClickRecognizer` | Mouse gesture recorder |
+| `BTTFormTypeScalingBezierPath` | Path drawing |
+| `BTTFormTypeSelectorPopover` | Complex selector popover |
+
+## BTTPluginFormItem Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `formFieldID` | `String` | Unique identifier for this field. Values are passed with a `plugin_var_` prefix. |
+| `formFieldID2` | `String` | Secondary field identifier (used by `BTTFormTypeTwoTextFields`) |
+| `formFieldType` | `String` | One of the form field type constants above |
+| `formLabel1` | `String` | Primary label displayed next to the field |
+| `formLabel2` | `String` | Secondary label |
+| `formOption` | `Any` | Option value (used for popup button options) |
+| `defaultValue` | `Any` | Default value for the field |
+| `dataType` | `BTTFormData*` | Data type hint |
+| `minValue` | `NSNumber` | Minimum value (for sliders) |
+| `maxValue` | `NSNumber` | Maximum value (for sliders) |
+| `formOptions` | `[BTTPluginFormItem]` | Array of child items (for groups, popup buttons, tabs) |
+| `formData` | `Data` | Raw data value |
+| `formIcon` | `NSImage` | Icon image |
+| `doubleClickFocus` | `Bool` | Whether to focus on double-click |
+| `doubleClickActivate` | `Bool` | Whether to activate on double-click |
+| `floats` | `Bool` | Float behavior flag |
+| `autoSave` | `Bool` | Auto-save behavior |
+| `shouldTriggerReload` | `Bool` | Whether changes trigger a reload |
+| `saveLastStateToUserDefaults` | `Bool` | Persist last state to user defaults |
+
+## Data Types
+
+| Constant | Value | Description |
+|---|---|---|
+| `BTTFormDataString` | 1 | String data |
+| `BTTFormDataNumber` | 2 | Numeric data |
+| `BTTFormDataJSON` | 3 | JSON data |
+| `BTTFormDataIcon` | 4 | Icon data |
+| `BTTFormDataData` | 5 | Raw data |
+
+## Common Patterns
+
+### Text Field
+
+```swift
+let field = BTTPluginFormItem()
+field.formFieldType = BTTFormTypeTextField
+field.formLabel1 = "Title"
+field.formFieldID = "title"
+field.defaultValue = "Default Text"
+```
+
+### Slider
+
+```swift
+let slider = BTTPluginFormItem()
+slider.formFieldType = BTTFormTypeSlider
+slider.formLabel1 = "Font Size"
+slider.formFieldID = "fontSize"
+slider.minValue = NSNumber(value: 10)
+slider.maxValue = NSNumber(value: 72)
+slider.defaultValue = NSNumber(value: 24)
+slider.dataType = BTTFormDataNumber
+```
+
+### Checkbox
+
+```swift
+let checkbox = BTTPluginFormItem()
+checkbox.formFieldType = BTTFormTypeCheckbox
+checkbox.formLabel1 = "Enable Feature"
+checkbox.formFieldID = "enabled"
+checkbox.defaultValue = NSNumber(value: true)
+```
+
+### Color Picker
+
+```swift
+let colorPicker = BTTPluginFormItem()
+colorPicker.formFieldType = BTTFormTypeColorPicker
+colorPicker.formLabel1 = "Background Color"
+colorPicker.formFieldID = "bgColor"
+```
+
+### Dropdown / Popup Button
+
+```swift
+let popup = BTTPluginFormItem()
+popup.formFieldType = BTTFormTypePopupButton
+popup.formLabel1 = "Style"
+popup.formFieldID = "style"
+
+let opt1 = BTTPluginFormItem()
+opt1.formLabel1 = "Compact"
+opt1.formOption = "compact"
+
+let opt2 = BTTPluginFormItem()
+opt2.formLabel1 = "Detailed"
+opt2.formOption = "detailed"
+
+popup.formOptions = [opt1, opt2]
+```
+
+### Image Picker
+
+```swift
+let imagePicker = BTTPluginFormItem()
+imagePicker.formFieldType = BTTFormTypeImagePicker
+imagePicker.formLabel1 = "Icon"
+imagePicker.formFieldID = "icon"
+// Value arrives as a Base64-encoded string
+```
+
+### Description / Static Text
+
+```swift
+let desc = BTTPluginFormItem()
+desc.formFieldType = BTTFormTypeDescription
+desc.formLabel1 = "This widget shows the current time and fires actions on minute/hour changes."
+```
+
+### Title / Section Header
+
+```swift
+let title = BTTPluginFormItem()
+title.formFieldType = BTTFormTypeTitleField
+title.formLabel1 = "Appearance Settings"
+```
+
+### Separator
+
+```swift
+let separator = BTTPluginFormItem()
+separator.formFieldType = BTTFormTypeSeparator
+```
+
+### Grouping Fields
+
+Wrap related fields in a form group:
+
+```swift
+let group = BTTPluginFormItem()
+group.formFieldType = BTTFormTypeFormGroup
+
+let title = BTTPluginFormItem()
+title.formFieldType = BTTFormTypeTitleField
+title.formLabel1 = "Display Settings"
+
+let fontSize = BTTPluginFormItem()
+fontSize.formFieldType = BTTFormTypeSlider
+fontSize.formLabel1 = "Font Size"
+fontSize.formFieldID = "fontSize"
+fontSize.minValue = NSNumber(value: 8)
+fontSize.maxValue = NSNumber(value: 48)
+fontSize.defaultValue = NSNumber(value: 16)
+fontSize.dataType = BTTFormDataNumber
+
+group.formOptions = [title, fontSize]
+```

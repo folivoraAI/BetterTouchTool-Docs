@@ -848,6 +848,69 @@ end tell
   
 ---
 
+### **display_notification**
+This method displays a notification in the macOS Notification Center.
+
+Parameters:
+
+**Notification body** (text): The main body text of the notification (direct parameter).
+
+**with title** (text, optional): The title of the notification.
+
+**subtitle** (text, optional): The subtitle of the notification.
+
+**sound name** (text, optional): The name of the sound to play when the notification is shown. Pass an empty string (`""`) to show the notification silently. Supported macOS system sound names:
+- Basso
+- Blow
+- Bottle
+- Frog
+- Funk
+- Glass
+- Hero
+- Morse
+- Ping
+- Pop
+- Purr
+- Sosumi
+- Submarine
+- Tink
+
+**image path** (text, optional): A file path to an image that should be displayed in the notification.
+
+**shared_secret** (text, optional): You can specify a shared secret which must be contained in all AppleScript calls in the advanced BTT preferences.
+
+#### Standard AppleScript Example:
+```applescript
+tell application "BetterTouchTool"
+
+display_notification "This is the notification body" with title "My Title" subtitle "My Subtitle" sound name "default" image path "~/Desktop/icon.png"
+
+end tell
+```
+
+#### Silent Notification Example:
+```applescript
+tell application "BetterTouchTool"
+
+display_notification "Silent notification" with title "No Sound" sound name ""
+
+end tell
+```
+
+#### JavaScript for Automation Example:
+```javascript
+var BetterTouchTool = Application('BetterTouchTool');
+
+BetterTouchTool.displayNotification("This is the notification body", {
+  withTitle: "My Title",
+  subtitle: "My Subtitle",
+  soundName: "default",
+  imagePath: "~/Desktop/icon.png"
+});
+```
+
+---
+
 ## Floating Menus
 See [Scripting Floating Menus](/docs/floating-menus/scripting) for details.
 

@@ -1,0 +1,103 @@
+---
+title: "Multiple Launchers & Positioning"
+sidebar_position: 13
+slug: "/docs/launcher/multiple-launchers"
+---
+
+# Multiple Launchers & Positioning
+
+You can run several independent Launcher instances in parallel — for example a general-purpose launcher, a "work" launcher with only work-related triggers pinned, and a "media" launcher that auto-opens the Apple TV remote.
+
+Each instance is identified by a stable **launcher ID**. Every launcher ID has its own:
+
+- Window position and size.
+- Pinned items.
+- Per-item aliases, priorities, and hidden-state overrides.
+- Query memory / smart ranking.
+
+## Setting a Launcher ID
+
+Configure the launcher-related predefined actions (**Show Launcher**, **Hide Launcher**, **Toggle Launcher**) with a `BTTActionLauncherID`. Two triggers that target the same launcher ID control the same Launcher instance.
+
+If you leave the launcher ID empty, the action operates on the default Launcher.
+
+## Action Parameters
+
+In the right-hand configuration panel for **Show Launcher** / **Toggle Launcher** you can set:
+
+- **Launcher ID** — `BTTActionLauncherID` (string). Leave empty for the default Launcher.
+- **Actions Popover Shortcut** — `BTTActionLauncherShortcut` (recorded shortcut). Defaults to `⌘P`. This is the shortcut used to open the per-item actions popover inside that Launcher.
+- **Positioning** — see below.
+
+For **Hide Launcher** you can additionally set a launcher ID to hide a specific instance, or leave it empty to hide the currently active one.
+
+## Positioning Modes
+
+`BTTMenuPositioningType` controls how the window appears:
+
+| Value | Mode |
+| --- | --- |
+| `0` | **Move & Resize Freely** (default) — remembers last position per launcher ID. |
+| `1` | **Fixed Position** — always appears at a point relative to a reference frame. |
+| `3` | **Center on Focused Screen**. |
+| `4` | **Fixed Initial Position then Free** — first appearance is fixed, subsequent moves are remembered. |
+
+For modes `1` and `4` you can configure:
+
+- `BTTMenuPositionRelativeTo` — `0` focused window, `1` focused screen, `2` notch, `3` focused menubar, etc.
+- `BTTMenuAnchorMenu` — which corner/center of the Launcher to anchor (`0` top-left, `1` top-right, `2` bottom-left, `3` bottom-right, `4` center).
+- `BTTMenuAnchorRelation` — which point of the reference to anchor to (same values).
+- `BTTMenuOffsetX` / `BTTMenuOffsetY` — offset in either pixels or percent.
+- `BTTMenuOffsetXUnit` / `BTTMenuOffsetYUnit` — `0` pixels, `1` % of menu size, `2` % of reference size.
+
+These are the same positioning options used by other BTT menu-style predefined actions.
+
+## Examples
+
+Run a **"work" launcher** that is independent from the default one:
+
+```json
+{
+  "BTTPredefinedActionType": 594,
+  "BTTAdditionalActionData": {
+    "BTTActionLauncherID": "work"
+  }
+}
+```
+
+Center a Launcher on the focused screen every time it opens:
+
+```json
+{
+  "BTTPredefinedActionType": 594,
+  "BTTAdditionalActionData": {
+    "BTTMenuPositioningType": 3
+  }
+}
+```
+
+Anchor a Launcher 20 px below the notch:
+
+```json
+{
+  "BTTPredefinedActionType": 594,
+  "BTTAdditionalActionData": {
+    "BTTMenuPositioningType": 1,
+    "BTTMenuPositionRelativeTo": 2,
+    "BTTMenuAnchorMenu": 0,
+    "BTTMenuAnchorRelation": 2,
+    "BTTMenuOffsetX": 0,
+    "BTTMenuOffsetY": 20
+  }
+}
+```
+
+## Predefined Action Type Numbers
+
+| Action | `BTTPredefinedActionType` |
+| --- | --- |
+| Show Launcher | 594 |
+| Hide Launcher | 595 |
+| Toggle Launcher | 596 |
+
+See also [action-definitions](../actions/action-definitions) for full parameter details.

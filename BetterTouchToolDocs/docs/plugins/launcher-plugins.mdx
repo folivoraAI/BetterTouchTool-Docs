@@ -1,0 +1,230 @@
+---
+title: "Launcher Plugins"
+sidebar_position: 7
+slug: "/docs/plugins/launcher"
+---
+
+# Launcher Plugins
+
+Launcher plugins add custom rows, commands, and native surfaces to the BetterTouchTool Launcher. They conform to the `BTTLauncherPluginInterface` protocol and use the `.bttlauncherplugin` bundle extension for Xcode projects.
+
+Launcher plugins appear in the Launcher's **Launcher Plugins** section. For the user-facing install and usage documentation, see [Launcher Plugins](/docs/launcher/plugins).
+
+## What Launcher Plugins Can Do
+
+- Return **top-level rows** for the current launcher query
+- Return **child items** for drill-down style navigation
+- Attach **per-item commands** with optional keyboard shortcuts
+- Open **native launcher surfaces** with custom `NSView` content
+- React to the current **search query**, frontmost app, and Finder selection
+- Read and write **BTT variables**
+- Execute **named triggers**
+- Request launcher-hosted **result** and **surface refreshes**
+
+## Protocol: `BTTLauncherPluginInterface`
+
+### Metadata Class Methods
+
+| Method | Description |
+|---|---|
+| `launcherPluginName() -> String` | Display name shown in BTT and the Launcher |
+| `launcherPluginDescription() -> String` | Short description shown in UI |
+| `launcherPluginIcon() -> String` | SF Symbol name for the plugin icon |
+
+### Optional Configuration Methods
+
+| Method | Description |
+|---|---|
+| `configurationFormItems() -> BTTPluginFormItem?` | Return configuration form items for the BTT sidebar |
+| `didReceiveNewConfigurationValues(_:)` | Called when BetterTouchTool updates the plugin configuration |
+
+### Main Launcher Methods
+
+| Method | Description |
+|---|---|
+| `launcherResults(for:)` | Return launcher results for the current query and context |
+| `performAction(forItemIdentifier:actionIdentifier:context:)` | Run the action for a result or command |
+| `launcherSurface(forItemIdentifier:surfaceIdentifier:context:)` | Return a launcher-hosted native surface |
+
+A useful launcher plugin usually implements `launcherResults(for:)` plus either `performAction(...)`, `launcherSurface(...)`, or both.
+
+## Context: `BTTLauncherPluginContext`
+
+The launcher passes contextual information through `BTTLauncherPluginContext`:
+
+| Property | Description |
+|---|---|
+| `launcherID` | Identifier of the active launcher instance |
+| `query` | Current search string |
+| `frontmostBundleIdentifier` | Bundle identifier of the frontmost app |
+| `finderURLs` | Current Finder selection URLs when available |
+| `finderSelection` | Whether Finder currently has a selection |
+| `timestamp` | Timestamp for the current context snapshot |
+
+Use `query` for result filtering, `frontmostBundleIdentifier` for app-aware rows, and the Finder fields when building file-sensitive actions.
+
+## Result Model: `BTTLauncherPluginResult`
+
+`BTTLauncherPluginResult` is the main building block for launcher rows.
+
+| Property | Description |
+|---|---|
+| `itemIdentifier` | Stable ID for the result |
+| `title` | Main result title |
+| `subtitle` | Secondary line |
+| `systemImageName` | SF Symbol name |
+| `iconImage` | Optional custom `NSImage` |
+| `keywords` | Extra searchable terms |
+| `trailingHint` | Compact hint such as `Open` or `↩` |
+| `primaryActionIdentifier` | Action ID to run when the row is activated |
+| `surfaceIdentifier` | Surface ID to open native launcher UI |
+| `sortOrder` | Ordering hint |
+| `searchMatchPriority` | Search ranking hint |
+| `opensChildrenByDefault` | Whether activation should drill into children first |
+| `children` | Nested `BTTLauncherPluginResult` values |
+| `commands` | Per-item commands shown in the launcher command list |
+
+Typical patterns:
+
+- For a simple actionable row, set `itemIdentifier` and `primaryActionIdentifier`.
+- For a browse-style plugin, attach `children`.
+- For a row that opens native UI, set `surfaceIdentifier` and implement `launcherSurface(...)`.
+- For row-specific shortcuts and actions, attach `commands`.
+
+## Commands And Shortcuts
+
+Use `BTTLauncherPluginCommand` to provide item-specific commands. Commands appear in the launcher's command list and can have keyboard shortcuts.
+
+`BTTLauncherPluginCommand` properties:
+
+- `commandIdentifier`
+- `title`
+- `subtitle`
+- `systemImageName`
+- `shortcut`
+- `closesLauncherOnSuccess`
+- `destructive`
+
+`BTTLauncherPluginShortcut` properties:
+
+- `character`
+- `keyCode`
+- `modifierFlags`
+- `displayKeys`
+
+Use `displayKeys` when you want explicit launcher rendering such as `["⌘", "R"]`.
+
+## Action Results
+
+Return `BTTLauncherPluginActionResult` from `performAction(...)`:
+
+| Property | Description |
+|---|---|
+| `success` | Whether the action succeeded |
+| `message` | Optional status text shown by the launcher |
+| `closeLauncher` | Whether the launcher should close afterwards |
+
+For most launcher-native workflows, it is better to keep `closeLauncher = false` so the user can continue navigating.
+
+## Launcher Surfaces
+
+Use a surface when the plugin should show richer native UI inside the launcher.
+
+### Surface Methods
+
+| Method | Description |
+|---|---|
+| `makeLauncherSurfaceView() -> NSView` | Return the native content view for the surface |
+| `launcherSurfaceDidAppear()` | Called when the surface becomes visible |
+| `launcherSurfaceWillDisappear()` | Called before the surface disappears |
+| `launcherSurfaceQueryDidChange(_:)` | Called when the launcher query changes while the surface is visible |
+| `handleLauncherInputCommand(_:)` | Optionally handle launcher navigation or activation commands |
+| `launcherSurfaceShouldBypassGlobalKeyboardHandlingForEvent(_:)` | Return `true` only when the surface must consume raw key events itself |
+| `launcherSurfacePlaceholderText()` | Placeholder text for the search field while the surface is active |
+| `launcherSurfaceFooterHint()` | Footer help text |
+| `launcherSurfaceStatusText()` | Status line text |
+| `launcherSurfacePreferredContentSize()` | Preferred launcher content size |
+| `launcherSurfaceMinimumContentSize()` | Minimum launcher content size |
+| `launcherSurfaceKeepsLauncherPinned()` | Request outside-click pinning while the surface is visible |
+
+When the pinned state changes while the surface is visible, call `delegate?.requestLauncherSurfaceUpdate()`.
+
+If you implement `handleLauncherInputCommand(_:)`, return `nil` when the launcher should keep handling the command normally.
+
+## Delegate Methods
+
+The `delegate` property (type `BTTLauncherPluginDelegate`) provides:
+
+| Method | Description |
+|---|---|
+| `setVariable(_:value:)` | Set a BTT variable |
+| `getVariable(_:)` | Read a BTT variable |
+| `executeNamedTrigger(_:)` | Execute a named BTT trigger |
+| `requestLauncherResultsRefresh()` | Ask the launcher to rebuild the plugin's results |
+
+Inside a launcher surface, the delegate also conforms to `BTTLauncherPluginSurfaceDelegate`:
+
+| Method | Description |
+|---|---|
+| `requestLauncherSurfaceUpdate()` | Refresh the visible surface |
+| `requestLauncherSurfaceGoBack()` | Ask the launcher to leave the current surface |
+| `requestLauncherSurfaceClose()` | Ask the launcher to close |
+
+## Basic Example
+
+```swift
+// BTT-Plugin-Name: Demo Launcher Plugin
+// BTT-Plugin-Type: Launcher
+// BTT-Plugin-Icon: sparkles.rectangle.stack
+
+import AppKit
+
+class DemoLauncherPlugin: NSObject, BTTLauncherPluginInterface {
+    weak var delegate: (any BTTLauncherPluginDelegate)?
+
+    static func launcherPluginName() -> String { "Demo Launcher Plugin" }
+    static func launcherPluginDescription() -> String { "Shows custom launcher results" }
+    static func launcherPluginIcon() -> String { "sparkles.rectangle.stack" }
+
+    func launcherResults(for context: BTTLauncherPluginContext) -> [BTTLauncherPluginResult]? {
+        let result = BTTLauncherPluginResult()
+        result.itemIdentifier = "demo-root"
+        result.title = "Launcher Plugin Demo"
+        result.subtitle = "Returned by a native launcher plugin"
+        result.systemImageName = "sparkles.rectangle.stack"
+        result.surfaceIdentifier = "demo-surface"
+        return [result]
+    }
+
+    func launcherSurface(
+        forItemIdentifier itemIdentifier: String,
+        surfaceIdentifier: String?,
+        context: BTTLauncherPluginContext
+    ) -> (any BTTLauncherPluginSurfaceInterface)? {
+        DemoLauncherSurface()
+    }
+}
+
+final class DemoLauncherSurface: NSObject, BTTLauncherPluginSurfaceInterface {
+    func makeLauncherSurfaceView() -> NSView {
+        let label = NSTextField(labelWithString: "Hello from a launcher surface")
+        label.font = .systemFont(ofSize: 22, weight: .medium)
+        return label
+    }
+}
+```
+
+See the sample launcher plugin in the BetterTouchTool plugins repository for a fuller example with child items, commands, keyboard shortcuts, variables, refresh requests, and a pinned native launcher panel:
+
+https://github.com/folivoraAI/BetterTouchToolPlugins/blob/master/BTTSampleLauncherPlugin/SampleLauncherPlugin.swift
+
+## Xcode Bundle Setup
+
+For Xcode-based launcher plugins, the bundle extension is `.bttlauncherplugin`. Set these `Info.plist` keys:
+
+| Key | Value |
+|---|---|
+| `BTTPluginType` | `Launcher` |
+| `NSPrincipalClass` | `$(PRODUCT_MODULE_NAME).YourClassName` |
+
+See [Xcode Bundle Plugins & Distribution](/docs/plugins/xcode-bundle-distribution) for the full setup process.

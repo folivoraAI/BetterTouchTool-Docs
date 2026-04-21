@@ -1,0 +1,269 @@
+---
+title: "Floating Menu Widget Plugins"
+sidebar_position: 5
+slug: "/docs/plugins/floating-menu-widget"
+---
+
+# Floating Menu Widget Plugins
+
+Floating Menu Widget plugins embed custom native views into floating menus and desktop widgets. They conform to the `BTTFloatingMenuWidgetInterface` protocol and use the `.bttwidget` bundle extension for Xcode projects.
+
+Plugin widgets appear as a dedicated item type when configuring a floating menu. They are rendered natively, so they have full access to macOS APIs and deliver smooth, high-performance UI.
+
+## Protocol: `BTTFloatingMenuWidgetInterface`
+
+### Required Method
+
+| Method | Description |
+|---|---|
+| `makeWidgetView() -> NSView` | Return the view to display in the floating menu |
+
+### Optional Class Methods
+
+| Method | Description | Default |
+|---|---|---|
+| `widgetName() -> String` | Display name in BTT | Plugin name |
+| `widgetDescription() -> String` | Short description | None |
+| `widgetIcon() -> String` | SF Symbol name | None |
+| `widgetWantsInteractiveView() -> Bool` | Set to `true` if the widget has its own clickable controls (buttons, sliders, etc.). When `false`, BTT handles click events for action assignment. | `false` |
+| `widgetMinWidth() -> CGFloat` | Minimum width override | Item's configured size |
+| `widgetMinHeight() -> CGFloat` | Minimum height override | Item's configured size |
+| `widgetMaxWidth() -> CGFloat` | Maximum width override | Item's configured size |
+| `widgetMaxHeight() -> CGFloat` | Maximum height override | Item's configured size |
+| `configurationFormItems() -> BTTPluginFormItem?` | Configuration form for the BTT sidebar | None |
+| `additionalActionCategories() -> [[String: Any]]?` | Custom action categories | None |
+
+### Optional Instance Methods
+
+| Method | Description |
+|---|---|
+| `widgetDidAppear()` | Called when the widget becomes visible |
+| `widgetWillDisappear()` | Called when the widget is about to be hidden |
+| `didReceiveNewConfigurationValues(_:)` | Called when the user changes configuration values |
+
+## Simple Widget (AppKit)
+
+```swift
+// BTT-Plugin-Name: Hello Widget
+// BTT-Plugin-Type: FloatingMenuWidget
+// BTT-Plugin-Icon: hand.wave.fill
+
+import Cocoa
+
+class HelloWidget: NSObject, BTTFloatingMenuWidgetInterface {
+    weak var delegate: (any BTTFloatingMenuWidgetDelegate)?
+
+    static func widgetName() -> String { "Hello Widget" }
+    static func widgetDescription() -> String { "A simple greeting widget" }
+    static func widgetIcon() -> String { "hand.wave.fill" }
+
+    static func widgetMinWidth() -> CGFloat { 200 }
+    static func widgetMinHeight() -> CGFloat { 80 }
+
+    func makeWidgetView() -> NSView {
+        let label = NSTextField(labelWithString: "Hello from BTT!")
+        label.font = .systemFont(ofSize: 24, weight: .medium)
+        label.textColor = .white
+        return label
+    }
+
+    func widgetDidAppear() {}
+    func widgetWillDisappear() {}
+}
+```
+
+## Interactive Widget (SwiftUI)
+
+For richer UI, use SwiftUI by wrapping your view in an `NSHostingView`. If your widget contains interactive controls, return `true` from `widgetWantsInteractiveView()` so BTT doesn't intercept clicks.
+
+```swift
+// BTT-Plugin-Name: Timer Widget
+// BTT-Plugin-Type: FloatingMenuWidget
+// BTT-Plugin-Icon: timer
+
+import Cocoa
+import SwiftUI
+
+class TimerWidget: NSObject, BTTFloatingMenuWidgetInterface {
+    weak var delegate: (any BTTFloatingMenuWidgetDelegate)?
+
+    static func widgetName() -> String { "Timer Widget" }
+    static func widgetDescription() -> String { "A simple countdown timer" }
+    static func widgetIcon() -> String { "timer" }
+
+    static func widgetWantsInteractiveView() -> Bool { true }
+
+    static func widgetMinWidth() -> CGFloat { 250 }
+    static func widgetMinHeight() -> CGFloat { 150 }
+    static func widgetMaxWidth() -> CGFloat { 300 }
+    static func widgetMaxHeight() -> CGFloat { 200 }
+
+    func makeWidgetView() -> NSView {
+        return NSHostingView(rootView: TimerView())
+    }
+}
+
+struct TimerView: View {
+    @State private var secondsLeft = 60
+    @State private var running = false
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("\(secondsLeft)s")
+                .font(.system(size: 48, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundColor(secondsLeft <= 10 ? .red : .white)
+
+            HStack(spacing: 16) {
+                Button(running ? "Stop" : "Start") {
+                    running.toggle()
+                }
+                Button("Reset") {
+                    running = false
+                    secondsLeft = 60
+                }
+            }
+        }
+        .padding()
+        .onReceive(
+            Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+        ) { _ in
+            guard running, secondsLeft > 0 else { return }
+            secondsLeft -= 1
+            if secondsLeft == 0 { running = false }
+        }
+    }
+}
+```
+
+## Configuration Forms
+
+Add a custom configuration UI that appears in the BTT sidebar when the user selects the widget:
+
+```swift
+// BTT-Plugin-Name: Greeting Widget
+// BTT-Plugin-Type: FloatingMenuWidget
+// BTT-Plugin-Icon: text.bubble.fill
+
+import Cocoa
+
+class GreetingWidget: NSObject, BTTFloatingMenuWidgetInterface {
+    weak var delegate: (any BTTFloatingMenuWidgetDelegate)?
+
+    private var greetingText = "Hello!"
+    private var fontSize: Double = 24
+
+    static func widgetName() -> String { "Greeting Widget" }
+    static func widgetDescription() -> String { "A configurable greeting" }
+    static func widgetIcon() -> String { "text.bubble.fill" }
+
+    static func configurationFormItems() -> BTTPluginFormItem? {
+        let group = BTTPluginFormItem()
+        group.formFieldType = BTTFormTypeFormGroup
+
+        let textField = BTTPluginFormItem()
+        textField.formFieldType = BTTFormTypeTextField
+        textField.formLabel1 = "Greeting Text"
+        textField.formFieldID = "greetingText"
+        textField.defaultValue = "Hello!"
+
+        let sizeSlider = BTTPluginFormItem()
+        sizeSlider.formFieldType = BTTFormTypeSlider
+        sizeSlider.formLabel1 = "Font Size"
+        sizeSlider.formFieldID = "fontSize"
+        sizeSlider.minValue = NSNumber(value: 10)
+        sizeSlider.maxValue = NSNumber(value: 72)
+        sizeSlider.defaultValue = NSNumber(value: 24)
+        sizeSlider.dataType = BTTFormDataNumber
+
+        let colorPicker = BTTPluginFormItem()
+        colorPicker.formFieldType = BTTFormTypeColorPicker
+        colorPicker.formLabel1 = "Text Color"
+        colorPicker.formFieldID = "textColor"
+
+        group.formOptions = [textField, sizeSlider, colorPicker]
+        return group
+    }
+
+    func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]?) {
+        if let text = configurationValues?["plugin_var_greetingText"] as? String {
+            greetingText = text
+        }
+        if let size = configurationValues?["plugin_var_fontSize"] as? Double {
+            fontSize = size
+        }
+        delegate?.requestWidgetUpdate(self)
+    }
+
+    func makeWidgetView() -> NSView {
+        let label = NSTextField(labelWithString: greetingText)
+        label.font = .systemFont(ofSize: CGFloat(fontSize), weight: .medium)
+        label.textColor = .white
+        return label
+    }
+}
+```
+
+See the [Configuration Forms Reference](/docs/plugins/configuration-forms) for all available field types.
+
+## Custom Action Categories
+
+By default, actions assigned to a widget item are executed when clicked. You can define additional action categories so your widget can trigger different sets of user-configured actions for different events — for example, "On Minute Change" or "On Play".
+
+```swift
+static func additionalActionCategories() -> [[String: Any]]? {
+    return [
+        [
+            "CategoryActionName": "On Minute Change",
+            "CategoryTag": NSNumber(value: 1000),
+            "CategoryIconName": "clock.badge",
+            "CategoryColor": NSColor.systemTeal
+        ],
+        [
+            "CategoryActionName": "On Hour Change",
+            "CategoryTag": NSNumber(value: 1001),
+            "CategoryIconName": "clock.arrow.2.circlepath",
+            "CategoryColor": NSColor.systemOrange
+        ]
+    ]
+}
+```
+
+The custom categories appear in the BTT sidebar when the user configures this widget item. To fire a category from your code:
+
+```swift
+delegate?.executeActionCategory(1000, forSender: self)
+```
+
+### Action Category Dictionary Keys
+
+| Key | Type | Description |
+|---|---|---|
+| `CategoryActionName` | `String` | Name displayed in the BTT sidebar |
+| `CategoryTag` | `NSNumber` | Unique numeric tag (use values 1000+). Pass this to `executeActionCategory(_:forSender:)` to trigger the category. |
+| `CategoryIconName` | `String` | SF Symbol name for the category icon (optional) |
+| `CategoryColor` | `NSColor` | Tint color for the category in the sidebar (optional) |
+
+## Delegate Methods
+
+The `delegate` property (type `BTTFloatingMenuWidgetDelegate`) provides:
+
+| Method | Description |
+|---|---|
+| `executeAssignedBTTActions(_:)` | Execute the BTT actions assigned to this widget |
+| `requestWidgetUpdate(_:)` | Request BTT to refresh the widget view |
+| `setVariable(_:value:)` | Set a BTT variable |
+| `getVariable(_:)` | Read a BTT variable |
+| `executeNamedTrigger(_:)` | Execute a named trigger configured in BTT |
+| `executeActionCategory(_:forSender:)` | Execute a plugin-defined action category |
+
+## Xcode Bundle Setup
+
+For Xcode-based floating menu widget plugins, the bundle extension is `.bttwidget`. Set these `Info.plist` keys:
+
+| Key | Value |
+|---|---|
+| `BTTPluginType` | `FloatingMenuWidget` |
+| `NSPrincipalClass` | `$(PRODUCT_MODULE_NAME).YourClassName` |
+
+See [Xcode Bundle Plugins & Distribution](/docs/plugins/xcode-bundle-distribution) for the full setup process.

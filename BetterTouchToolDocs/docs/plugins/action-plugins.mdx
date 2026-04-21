@@ -1,0 +1,171 @@
+---
+title: "Action Plugins"
+sidebar_position: 6
+slug: "/docs/plugins/action"
+---
+
+# Action Plugins
+
+Action plugins define reusable custom actions that can be assigned to any trigger in BetterTouchTool. They conform to the `BTTActionPluginInterface` protocol and use the `.bttactionplugin` bundle extension for Xcode projects.
+
+Action plugins appear in the BTT action selector under **Custom Plugin Actions**.
+
+:::tip No-code alternative
+If your action can be expressed as a sequence of existing BTT actions with configurable parameters, consider using a [JSON Action Plugin](/docs/plugins/json-action-plugins) instead — no compilation required.
+:::
+
+## Protocol: `BTTActionPluginInterface`
+
+### Required Methods
+
+| Method | Description |
+|---|---|
+| `configurationFormItems() -> BTTPluginFormItem?` | Return configuration form items for the BTT sidebar (return `nil` for no configuration) |
+| `executeAction(withConfiguration:completionBlock:)` | Execute the action. Call the completion block when done. |
+
+### Optional Methods
+
+| Method | Description |
+|---|---|
+| `actionName(withConfiguration:) -> String?` | Return a dynamic action name based on the current configuration (shown in the trigger list) |
+
+## Basic Example
+
+```swift
+// BTT-Plugin-Name: Show Greeting
+// BTT-Plugin-Type: Action
+// BTT-Plugin-Icon: bubble.left.fill
+
+import Cocoa
+
+class ShowGreeting: NSObject, BTTActionPluginInterface {
+    weak var delegate: (any BTTActionPluginDelegate)?
+
+    static func configurationFormItems() -> BTTPluginFormItem? { nil }
+
+    func executeAction(
+        withConfiguration config: [String: Any]?,
+        completionBlock: @escaping (Any?) -> Void
+    ) {
+        let alert = NSAlert()
+        alert.messageText = "Hello from a BTT Action Plugin!"
+        alert.runModal()
+        completionBlock("done")
+    }
+}
+```
+
+## Example with Configuration
+
+An action plugin that shows a macOS notification with configurable title, subtitle, and sound:
+
+```swift
+// BTT-Plugin-Name: Show Notification
+// BTT-Plugin-Type: Action
+// BTT-Plugin-Icon: bell.fill
+
+import Cocoa
+
+class ShowNotification: NSObject, BTTActionPluginInterface {
+    weak var delegate: (any BTTActionPluginDelegate)?
+
+    static func configurationFormItems() -> BTTPluginFormItem? {
+        let group = BTTPluginFormItem()
+        group.formFieldType = BTTFormTypeFormGroup
+
+        let title = BTTPluginFormItem()
+        title.formFieldType = BTTFormTypeTextField
+        title.formLabel1 = "Notification Title"
+        title.formFieldID = "notifTitle"
+        title.defaultValue = "BetterTouchTool"
+
+        let subtitle = BTTPluginFormItem()
+        subtitle.formFieldType = BTTFormTypeTextField
+        subtitle.formLabel1 = "Notification Subtitle"
+        subtitle.formFieldID = "notifSubtitle"
+        subtitle.defaultValue = ""
+
+        let sound = BTTPluginFormItem()
+        sound.formFieldType = BTTFormTypeTextField
+        sound.formLabel1 = "Sound Name"
+        sound.formFieldID = "soundName"
+        sound.defaultValue = "default"
+
+        let icon = BTTPluginFormItem()
+        icon.formFieldType = BTTFormTypeImagePicker
+        icon.formLabel1 = "Notification Icon"
+        icon.formFieldID = "notifIcon"
+
+        group.formOptions = [title, subtitle, sound, icon]
+        return group
+    }
+
+    // Dynamic action name shown in the trigger list
+    static func actionName(withConfiguration config: [String: Any]?) -> String? {
+        if let title = config?["plugin_var_notifTitle"] as? String, !title.isEmpty {
+            return "Show Notification: \(title)"
+        }
+        return nil
+    }
+
+    func executeAction(
+        withConfiguration config: [String: Any]?,
+        completionBlock: @escaping (Any?) -> Void
+    ) {
+        let title = config?["plugin_var_notifTitle"] as? String ?? "BetterTouchTool"
+        let subtitle = config?["plugin_var_notifSubtitle"] as? String ?? ""
+        let soundName = config?["plugin_var_soundName"] as? String ?? "default"
+
+        let notification = NSUserNotification()
+        notification.title = title
+        notification.subtitle = subtitle
+        notification.soundName = soundName
+
+        // Handle base64-encoded icon from image picker
+        if let iconBase64 = config?["plugin_var_notifIcon"] as? String,
+           let imageData = Data(base64Encoded: iconBase64) {
+            notification.contentImage = NSImage(data: imageData)
+        }
+
+        NSUserNotificationCenter.default.deliver(notification)
+        completionBlock("delivered")
+    }
+}
+```
+
+## Configuration Values
+
+Form field values are passed to `executeAction(withConfiguration:)` with a `plugin_var_` prefix on the `formFieldID`. For example, a field with `formFieldID = "notifTitle"` arrives as `config["plugin_var_notifTitle"]`.
+
+See the [Configuration Forms Reference](/docs/plugins/configuration-forms) for all available field types.
+
+## Completion Block
+
+Always call the `completionBlock` when your action finishes. You can pass a result value or `nil`:
+
+```swift
+completionBlock("result string")  // Pass a result
+completionBlock(nil)               // No result
+```
+
+BTT waits for the completion block before proceeding to the next action in a sequence.
+
+## Delegate Methods
+
+The `delegate` property (type `BTTActionPluginDelegate`) provides:
+
+| Method | Description |
+|---|---|
+| `setVariable(_:value:)` | Set a BTT variable |
+| `getVariable(_:)` | Read a BTT variable |
+
+## Xcode Bundle Setup
+
+For Xcode-based action plugins, the bundle extension is `.bttactionplugin`. Set these `Info.plist` keys:
+
+| Key | Value |
+|---|---|
+| `BTTPluginType` | `Action` |
+| `NSPrincipalClass` | `$(PRODUCT_MODULE_NAME).YourClassName` |
+
+See [Xcode Bundle Plugins & Distribution](/docs/plugins/xcode-bundle-distribution) for the full setup process.

@@ -1,0 +1,94 @@
+---
+title: "Launcher Overview"
+sidebar_position: 1
+slug: "/docs/launcher"
+---
+
+# The BetterTouchTool Launcher
+
+The Launcher is a Spotlight-style command window built into BetterTouchTool. It can start apps, run BetterTouchTool actions and triggers, manage your clipboard, show a calendar, dictate speech, control an Apple TV, browse files, host custom plugins, and much more — all from one search field.
+
+The Launcher requires **macOS 13 or newer**.
+
+## Opening the Launcher
+
+The Launcher is controlled through predefined BetterTouchTool actions. Assign any of these to a trigger (hotkey, trackpad gesture, menu bar item, etc.):
+
+| Action | Description |
+| --- | --- |
+| **Show Launcher** | Shows the Launcher, optionally with prefilled text. |
+| **Hide Launcher** | Hides the currently active Launcher. |
+| **Toggle Launcher** | Shows the Launcher if hidden, otherwise hides it. |
+
+All three actions accept optional positioning parameters and a stable launcher ID so you can run multiple independent Launcher instances side by side. See [Multiple Launchers & Positioning](/docs/launcher/multiple-launchers) for details.
+
+A typical setup is a keyboard shortcut trigger (e.g. `⌥ Space`) that runs **Toggle Launcher**.
+
+## What the Launcher Can Do
+
+Out of the box the Launcher comes with a number of **built-in sections**. Every section can be individually enabled, disabled, renamed, reordered, and grouped in the Launcher settings.
+
+- **Finder Context** — current Finder selection or folder, with "Open With…"
+- **Clipboard Manager** — full clipboard history with preview, edit, transformers
+- **Calendar** — create events and reminders, browse month/week/day views
+- **Apple TV Remote** — on-screen remote for Apple TV devices
+- **Speech Dictation** — voice-to-text with review, edit, paste, copy
+- **Running Apps / Installed Apps** — launch or switch to apps, list their open windows
+- **File Search / File Browser** — spotlight-style file search and a Finder-like browser
+- **BetterTouchTool Actions** — browse and execute any predefined BTT action
+- **Launcher Plugins** — third-party extensions that add their own commands and surfaces
+- **AI Chat Conversations** — jump into recent h@llo.AI conversations
+- **Configured Triggers** — any gesture/shortcut you configured to appear in the Launcher
+- **Math** — quick calculator evaluation straight in the search field
+- **URL suggestions** — type a URL to open it directly in your browser
+
+In addition, you can put **any BetterTouchTool trigger** into the Launcher simply by enabling "Show in Launcher" in its configuration — see [Configured Triggers](/docs/launcher/configured-triggers).
+
+## Result Types
+
+A Launcher row can do one of four things when activated:
+
+1. **Execute an action** (e.g. launch an app, run a BTT action, paste a clipboard item)
+2. **Open child items** — a nested list (e.g. the windows of an app)
+3. **Open a rich surface** — an expanded interface inside the Launcher (clipboard, calendar, dictation, Apple TV remote, file browser, floating menu)
+4. **Open a browser or Finder target** directly
+
+## Main Keyboard Shortcuts
+
+| Key | Action |
+| --- | --- |
+| `↑` / `↓` | Move selection. Pressing `↑` at the top returns focus to the search field. |
+| `↩` | Activate selected item. |
+| `⌘↩` | Alternate activation (varies per item type). |
+| `Tab` or `→` | Enter child items (e.g. an app's windows, subcommands). |
+| `←` | Go back one level in child navigation. |
+| `Esc` | Close the Launcher or exit the current surface/child list. |
+| `Space` | Quick Look preview (on file rows). |
+| `⌘P` | Open the per-item actions popover (customizable). |
+| `⌘L` / `⌘A` | Focus the search field and select all text. |
+
+More keyboard details are in [Keyboard & Shortcuts](/docs/launcher/keyboard-shortcuts).
+
+## Window Behavior
+
+- **Drag to move**: grab any passive chrome (header, empty area) to move the window.
+- **Pin button** in the top right keeps the Launcher open when you click outside.
+- **Outside click** closes the Launcher (unless it is pinned or showing a sticky surface).
+- **Window position and size** are remembered per Launcher ID.
+- Rich surfaces like clipboard or calendar automatically resize the window and restore it when you leave them.
+
+## Where to Go Next
+
+- [Built-In Items & Sections](/docs/launcher/built-in-items) — all built-in providers, default order, groups
+- [Clipboard Manager](/docs/launcher/clipboard) — full clipboard surface
+- [Calendar](/docs/launcher/calendar) — events and reminders surface
+- [File Search & Browser](/docs/launcher/files) — file search keywords, scopes, and the file browser
+- [Speech Dictation](/docs/launcher/speech-dictation)
+- [Apple TV Remote](/docs/launcher/apple-tv-remote)
+- [BetterTouchTool Actions Surface](/docs/launcher/btt-actions)
+- [Configured Triggers](/docs/launcher/configured-triggers) — adding your own triggers to the Launcher
+- [Customization](/docs/launcher/customization) — aliases, priority, hiding, pinning
+- [Keyboard & Shortcuts](/docs/launcher/keyboard-shortcuts)
+- [Launcher Plugins](/docs/launcher/plugins)
+- [Multiple Launchers & Positioning](/docs/launcher/multiple-launchers)
+- [Theme & Settings](/docs/launcher/settings)

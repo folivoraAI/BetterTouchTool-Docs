@@ -91,25 +91,8 @@ async function retrieveJSON() {
   let items = [
     {
         "title": "hello world",
-        "icon": "sfsymbol::globe"
-    },
-    {
-      title: "some title",
-      subtitle: "some subtitle",
-      subitems: [
-        {
-          title: "some sub-item",
-          action: "named::NameOfNamedTriggerInBTT",
-          icon: "sfsymbol::house::weight@@light::size@@30"
-        },
-        {
-          title: "some sub-item2",
-          icon: "base64::iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mNkYPhfz0AEYBxVSF+FAP5FDvcfRYWgAAAAAElFTkSuQmCC",
-          action: "shortcut::NameOfShortcutInShortcutsApp@@OptionalInput"
-        },
-      ],
-      icon: "sfsymbol::star::color@@B53E93",
-      // this shows various forms of actions. In case you are just triggering
+        "icon": "sfsymbol::globe",
+        // this shows various forms of actions. In case you are just triggering
       // a single action, it does not need to be an array.
       action: [
         `btt::paste_text@@{"text": "hello world"}`,
@@ -129,7 +112,25 @@ async function retrieveJSON() {
           shortcut: "theNameOfTheShortcut",
           input: "some optional input",
         },
+      ]
+    },
+    {
+      title: "some title",
+      subtitle: "some subtitle",
+      subitems: [
+        {
+          title: "some sub-item",
+          action: "named::NameOfNamedTriggerInBTT",
+          icon: "sfsymbol::house::weight@@light::size@@30"
+        },
+        {
+          title: "some sub-item2",
+          icon: "base64::iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mNkYPhfz0AEYBxVSF+FAP5FDvcfRYWgAAAAAElFTkSuQmCC",
+          action: "shortcut::NameOfShortcutInShortcutsApp@@OptionalInput"
+        },
       ],
+      icon: "sfsymbol::star::color@@B53E93"
+      
     },
   ];
 

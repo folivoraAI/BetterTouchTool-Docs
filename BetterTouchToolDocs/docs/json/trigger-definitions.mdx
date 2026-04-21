@@ -63,6 +63,9 @@ Every trigger must have these required fields:
 
 #### Single Finger Gestures
 - `215` - 1 Finger Touch Start
+- `221` - 1 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
+- `226` - 1 Finger Circle Clockwise (configurable circles via `BTTAdditionalConfiguration`, default 0.9)
+- `227` - 1 Finger Circle Counter-Clockwise (configurable circles via `BTTAdditionalConfiguration`, default 0.9)
 - `157` - Corner Click Bottom Left
 - `158` - Corner Click Bottom Right
 - `182` - Corner Click Top Left
@@ -84,9 +87,26 @@ Every trigger must have these required fields:
 - `107` - 1 Finger Tap Upper Right
 - `108` - 1 Finger Tap Bottom Left
 - `109` - 1 Finger Tap Bottom Right
+- `228` - 1 Finger Swipe Up on Left Edge (Continuous)
+- `229` - 1 Finger Swipe Down on Left Edge (Continuous)
+- `230` - 1 Finger Swipe Up on Right Edge (Continuous)
+- `231` - 1 Finger Swipe Down on Right Edge (Continuous)
+- `232` - 1 Finger Swipe Left on Top Edge (Continuous)
+- `233` - 1 Finger Swipe Right on Top Edge (Continuous)
+- `234` - 1 Finger Swipe Left on Bottom Edge (Continuous)
+- `235` - 1 Finger Swipe Right on Bottom Edge (Continuous)
 
 #### Two Finger Gestures
+- `236` - 2 Finger Swipe Up on Left Edge (Continuous)
+- `237` - 2 Finger Swipe Down on Left Edge (Continuous)
+- `238` - 2 Finger Swipe Up on Right Edge (Continuous)
+- `239` - 2 Finger Swipe Down on Right Edge (Continuous)
+- `240` - 2 Finger Swipe Left on Top Edge (Continuous)
+- `241` - 2 Finger Swipe Right on Top Edge (Continuous)
+- `242` - 2 Finger Swipe Left on Bottom Edge (Continuous)
+- `243` - 2 Finger Swipe Right on Bottom Edge (Continuous)
 - `216` - 2 Finger Touch Start
+- `222` - 2 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
 - `173` - 2 Finger Tap
 - `179` - 2 Finger Double-Tap
 - `174` - 2 Finger Click
@@ -116,6 +136,7 @@ Every trigger must have these required fields:
 
 #### Three Finger Gestures
 - `217` - 3 Finger Touch Start
+- `223` - 3 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
 - `110` - 3 Finger Tap
 - `163` - 3 Finger Double-Tap
 - `111` - 3 Finger Click
@@ -150,6 +171,7 @@ Every trigger must have these required fields:
 
 #### Four Finger Gestures
 - `218` - 4 Finger Touch Start
+- `224` - 4 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
 - `116` - 4 Finger Tap
 - `169` - 4 Finger Double Tap
 - `117` - 4 Finger Click
@@ -165,6 +187,7 @@ Every trigger must have these required fields:
 
 #### Five And More Finger Gestures
 - `219` - 5 Finger Touch Start
+- `225` - 5 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
 - `119` - 5 Finger Tap
 - `141` - 5 Finger Click
 - `172` - 5 Finger Force Click
@@ -182,6 +205,16 @@ Every trigger must have these required fields:
 - `164` - Custom Tap Sequence (4 Fingers)
 - `220` - First Touch With X Fingers, Then Release Y Fingers
 
+#### Long Touch & Circle Gesture Configuration
+
+**Long Touch gestures** trigger after fingers have been held stationary for a configurable duration.
+- `BTTAdditionalConfiguration` (String): Duration in seconds before the gesture triggers. Range: 0.1–5.0, default: 0.5. Example: `"BTTAdditionalConfiguration": "0.8"`.
+
+**Circle gestures** trigger when one finger draws a circular motion on the trackpad or Magic Mouse surface.
+- `BTTAdditionalConfiguration` (String): Number of circles required before the gesture triggers. Fractional values are supported (e.g. 0.9 = 90% of a circle). Range: 0.5–20, default: 0.9. Example: `"BTTAdditionalConfiguration": "0.9"`.
+- The gesture re-triggers on every additional full circle after the initial trigger.
+- When the value is 1.0 or less, the circle must be completed within 2.5 seconds of initial touch to avoid false triggers. This time limit does not apply for higher values.
+
 ### 2. Magic Mouse
 
 **BTTTriggerClass**: `"BTTTriggerTypeMagicMouse"`
@@ -195,7 +228,10 @@ Every trigger must have these required fields:
 - `56` - Release Last Finger After Previous Touch With 5 Fingers
 
 #### Single Finger Gestures
-- `50` - 1 Finger Touch Start
+- `52` - 1 Finger Touch Start
+- `57` - 1 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
+- `62` - 1 Finger Circle Clockwise (configurable circles via `BTTAdditionalConfiguration`, default 0.9)
+- `63` - 1 Finger Circle Counter-Clockwise (configurable circles via `BTTAdditionalConfiguration`, default 0.9)
 - `1` - 1 Finger Tap
 - `2` - 1 Finger Tap Left
 - `3` - 1 Finger Tap Right
@@ -210,7 +246,8 @@ Every trigger must have these required fields:
 - `36` - 1 Finger Swipe Right
 
 #### Two Finger Gestures
-- `57` - 2 Finger Touch Start
+- `53` - 2 Finger Touch Start
+- `58` - 2 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
 - `4` - 2 Finger Tap
 - `62` - 2 Finger Double-Tap
 - `20` - 2 Finger Click
@@ -224,7 +261,8 @@ Every trigger must have these required fields:
 - `17` - TipTap Right (1 Finger Fix)
 
 #### Three Finger Gestures
-- `58` - 3 Finger Touch Start
+- `54` - 3 Finger Touch Start
+- `59` - 3 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
 - `9` - 3 Finger Tap
 - `63` - 3 Finger Double-Tap
 - `21` - 3 Finger Click
@@ -239,12 +277,17 @@ Every trigger must have these required fields:
 - `61` - TipSwipe Left Finger Down
 
 #### Four Finger Gestures
-- `59` - 4 Finger Touch Start
+- `55` - 4 Finger Touch Start
+- `60` - 4 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
 - `25` - 4 Finger Click
 - `27` - 4 Finger Swipe Up
 - `26` - 4 Finger Swipe Down
 - `28` - 4 Finger Swipe Left
 - `29` - 4 Finger Swipe Right
+
+#### Five Finger Gestures
+- `56` - 5 Finger Touch Start
+- `61` - 5 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
 
 #### Moving, Resizing and Custom Drawings
 - `40` - 1 Finger Touch Top
@@ -274,6 +317,32 @@ Every trigger must have these required fields:
   "BTTActionsToExecute": [{
     "BTTPredefinedActionType": 49
   }]
+}
+```
+
+#### Launcher Simple JSON Item
+- `849` - Launcher Simple JSON Item
+
+A trigger that provides dynamic items for the BetterTouchTool Launcher. The trigger runs a JavaScript function (default `retrieveJSON`) that must return items in the [Simple JSON Format](http://docs.folivora.ai/docs/1108_simple_format.html). The trigger itself appears as a top-level launcher item, and activating it runs the script and shows the returned items as launcher children.
+
+The script is stored as a JSON object in the trigger's secondary action data. The script must be configured using the BetterTouchTool UI script editor.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTGestureConfig` | String | Display name of this launcher item |
+
+The trigger should have a Launcher Config with `BTTLauncherShowInLauncher` set to `1` (or `3` for always visible) so it appears in the launcher.
+
+```json
+{
+  "BTTTriggerType": 849,
+  "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
+  "BTTGestureConfig": "My Custom Items",
+  "BTTLauncherConfig": {
+    "BTTLauncherShowInLauncher": 1,
+    "BTTLauncherTitle": "My Custom Items"
+  },
+  "BTTActionsToExecute": []
 }
 ```
 
@@ -653,9 +722,133 @@ These are configured via `BTTTriggerConfig` with Touch Bar-style properties for 
 | `BTTRepeatDelay` | Number | Angle threshold value |
 | `BTTRepeatRate` | Number | Polling interval in seconds |
 
+#### Accelerometer (Apple Silicon)
+
+Accelerometer triggers use the built-in Bosch BMI286 IMU on Apple Silicon MacBooks.
+
+##### Axis Threshold Triggers
+- `838` - Accelerometer X-Axis Goes Above
+- `839` - Accelerometer X-Axis Goes Below
+- `840` - Accelerometer Y-Axis Goes Above
+- `841` - Accelerometer Y-Axis Goes Below
+- `842` - Accelerometer Z-Axis Goes Above
+- `843` - Accelerometer Z-Axis Goes Below
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTRepeatDelay` | Number | Threshold value in g (e.g. 0.5 means 0.5g) |
+| `BTTNumber1` | Number | Re-trigger prevention: value must change by this amount before the trigger can fire again |
+| `BTTTriggerOnDown` | Number | If 1, trigger fires on the very first accelerometer reading if threshold is already crossed |
+
+```json
+{
+  "BTTTriggerType": 842,
+  "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
+  "BTTRepeatDelay": -0.9,
+  "BTTNumber1": 0.1,
+  "BTTTriggerOnDown": 0,
+  "BTTActionsToExecute": [{
+    "BTTPredefinedActionType": 172,
+    "BTTNotificationText": "Z-axis crossed -0.9g (laptop tilted!)"
+  }]
+}
+```
+
+##### Shake / Abrupt Movement
+- `844` - Accelerometer Detects Shake / Abrupt Movement
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTRepeatDelay` | Number | Magnitude threshold in g — fires when combined per-sample delta across all axes exceeds this value |
+
+```json
+{
+  "BTTTriggerType": 844,
+  "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
+  "BTTRepeatDelay": 0.3,
+  "BTTActionsToExecute": [{
+    "BTTPredefinedActionType": 172,
+    "BTTNotificationText": "Shake detected!"
+  }]
+}
+```
+
+##### Impact / Tap Detection (STA/LTA)
+- `845` - Accelerometer Detects Light Tap on Chassis
+- `846` - Accelerometer Detects Knock on Chassis
+- `847` - Accelerometer Detects Hard Hit / Slap on Chassis
+
+These use a Short-Term Average / Long-Term Average (STA/LTA) algorithm with a high-pass filter to detect impulsive events independent of device orientation.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTRepeatDelay` | Number | Sensitivity (1–10, default 5). Lower = more sensitive, higher = stronger impact required |
+| `BTTNumber1` | Number | Required number of taps/knocks (default 1). E.g. 3 for triple-knock. Multi-tap window is 0.4s × count |
+
+```json
+{
+  "BTTTriggerType": 846,
+  "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
+  "BTTRepeatDelay": 5,
+  "BTTNumber1": 2,
+  "BTTActionsToExecute": [{
+    "BTTPredefinedActionType": 172,
+    "BTTNotificationText": "Double knock detected!"
+  }]
+}
+```
+
 #### Audio Device Changes (No Configuration Needed)
 - `833` - Audio Output Changed
 - `834` - Audio Input Changed
+
+#### Power Mode Changed
+- `848` - Power Mode Did Change
+
+Fires when the macOS energy mode changes (e.g. switching between Automatic, Low Power, High Power in System Settings > Battery). Sets the BTT variable `power_mode` to the current mode.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTGestureConfig` | String | Which power mode to trigger on: `all`, `automatic`, `low-power`, or `high-power` |
+
+When `BTTGestureConfig` is set to a specific mode (e.g. `low-power`), the trigger only fires when switching to that mode. Use `all` to fire on every power mode change.
+
+```json
+{
+  "BTTTriggerType": 848,
+  "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
+  "BTTGestureConfig": "low-power",
+  "BTTActionsToExecute": [{
+    "BTTPredefinedActionType": 172,
+    "BTTNotificationText": "Switched to Low Power mode"
+  }]
+}
+```
+
+#### Trigger Plugin
+- `837` - Trigger Plugin
+
+Trigger plugins are custom Swift plugins that observe arbitrary system events and fire BTT triggers when conditions are met. They appear under Other Triggers > Trigger Plugins in the trigger selector.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTGestureConfig` | String | Plugin bundle identifier (selects which trigger plugin to use) |
+
+The plugin identifier is stored in `BTTGestureConfig` (aka `gestureConfig`). When a trigger plugin fires, any context values it provides are stored as BTT variables with the `TriggerPlugin_` prefix (e.g. context key `clipboardContent` becomes variable `TriggerPlugin_clipboardContent`).
+
+Plugin-specific configuration values (defined by the plugin's `configurationFormItems`) are stored alongside the trigger with keys prefixed by `plugin_var_`.
+
+```json
+{
+  "BTTTriggerType": 837,
+  "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
+  "BTTGestureConfig": "com.example.myTriggerPlugin",
+  "BTTActionsToExecute": [{
+    "BTTPredefinedActionType": 172,
+    "BTTNotificationText": "Plugin triggered!"
+  }]
+}
+```
 
 #### BTT Mobile / Remote (No Configuration Needed)
 - `808` - BTT Mobile App Did Connect
@@ -726,18 +919,25 @@ The time configuration is stored in `BTTAdditionalConfiguration` as a JSON strin
 |----------|------|-------------|
 | `BTTShortcutKeyCode` | Number | macOS virtual key code |
 | `BTTShortcutModifierKeys` | Number | Modifier key flags (see Modifier Keys section) |
-| `BTTLayoutIndependentChar` | String | Layout-independent character |
+| `BTTTriggerOnDown` | Number | Trigger on key down (1) or key up (0). **Default: 1** — always set to 1 unless key-up triggering is explicitly needed |
+| `BTTLayoutIndependentChar` | String | Layout-independent character (the character the key produces, e.g. `"a"`, `"s"`) |
 | `BTTAutoAdaptToKeyboardLayout` | Number | Auto-adapt to keyboard layout (0/1) |
+| `BTTShortcutAdvancedModifierKeys` | String | Advanced modifier key combination as string (same value as `BTTShortcutModifierKeys` but as string, e.g. `"1179658"`) |
+| `BTTAdditionalConfiguration` | String | Additional modifier configuration as string (typically same value as `BTTShortcutAdvancedModifierKeys`) |
+| `BTTShortcutKeyboardType` | Number | Keyboard type identifier (internal keyboard ID, e.g. `-2052004921`). Optional — omit to match any keyboard |
 | `BTTShortcutScope` | Number | Where shortcut is active |
 | `BTTKeyboardShortcutMinTime` | Number | Minimum hold time in seconds |
 | `BTTKeyboardShortcutMaxTime` | Number | Maximum hold time in seconds |
+| `BTTKeyboardShortcutPerformDefaultOnAdvancedConditionMismatch` | Boolean | If true and this trigger has advanced conditions that evaluate to false, BetterTouchTool will pass the original keyboard event through so the frontmost app can handle it normally. Only applies to the standard action category — triggers with key long-press, release, or other keyboard action categories will still be swallowed. Default: false |
 
 ```json
 {
   "BTTTriggerType": 0,
   "BTTTriggerClass": "BTTTriggerTypeKeyboardShortcut",
+  "BTTTriggerOnDown": 1,
   "BTTShortcutKeyCode": 49,
   "BTTShortcutModifierKeys": 1048576,
+  "BTTLayoutIndependentChar": "space",
   "BTTActionsToExecute": [{
     "BTTPredefinedActionType": 45
   }]
@@ -1388,8 +1588,12 @@ Advanced conditions use `BTTTriggerConditionsData` with base64 encoded predicate
 {
   "BTTTriggerType": 0,
   "BTTTriggerClass": "BTTTriggerTypeKeyboardShortcut",
+  "BTTTriggerOnDown": 1,
   "BTTShortcutKeyCode": 49,
   "BTTShortcutModifierKeys": 1179648,
+  "BTTLayoutIndependentChar": "space",
+  "BTTShortcutAdvancedModifierKeys": "1179658",
+  "BTTAdditionalConfiguration": "1179658",
   "BTTTriggerTypeDescription": "Open Terminal",
   "BTTActionsToExecute": [{
     "BTTPredefinedActionType": 49,
@@ -1610,6 +1814,48 @@ Actions are placed in `BTTActionsToExecute` by default (standard action category
 ```
 
 **Note:** Not all triggers support all action categories. The most commonly used are `BTTActionsToExecute` (all triggers), `BTTActionCategoryLongPress` (buttons, keys), `BTTActionCategoryTouchRelease` / `BTTActionCategoryKeyRelease` (buttons, keys), and `BTTActionCategoryHover` / `BTTActionCategoryHoverEnd` (Touch Bar, Stream Deck, Notch Bar items).
+
+## Launcher Config
+
+Any trigger can optionally include a `BTTLauncherConfig` object to control how it appears in the BetterTouchTool Launcher.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTLauncherShowInLauncher` | Number | 0 = hidden, 1 = show in launcher, 2 = embed in launcher below prompt (floating menus only), 3 = show in launcher even if prompt doesn't match, 4 = only show if the prompt starts with an assigned launcher keyword, 5 = only show if the prompt matches |
+| `BTTLauncherTitle` | String | Custom title in the launcher (overrides trigger name) |
+| `BTTLauncherDetails` | String | Subtitle/details text shown in the launcher |
+| `BTTLauncherKeywords` | Array or String | Search aliases/keywords for this launcher item. Accepts an array of strings or a single comma/newline separated string (e.g. `"dict, translate"`). Used for alias matching and by display mode 4 (keyword-only). |
+| `BTTLauncherOrder` | Number | Sort order for this item in the launcher. Lower values appear first. Use negative values to place items above the built-in sections. |
+| `BTTLauncherIconConfig` | String | JSON string describing the launcher icon configuration |
+
+Mode 3 (`launcherResultAlwaysVisible`) keeps the item visible in the launcher results even when the typed prompt does not match. This is useful for items that want to react to the current prompt text via the `BTTLauncherLastPrompt` variable.
+
+Mode 4 (`launcherResultKeywordOnly`) hides the item until the current prompt starts with one of its assigned launcher keywords (see `BTTLauncherKeywords`).
+
+Mode 5 (`launcherResultPromptMatchesOnly`) hides the item until the current prompt matches it.
+
+The launcher also exposes the current prompt through these variables:
+
+- `BTTLauncherLastPrompt` — the full current prompt text.
+- `BTTLauncherLastPromptKeyword` — the first whitespace-separated word of the prompt (useful when combined with display mode 4).
+- `BTTLauncherLastPromptAfterKeyword` — the remainder of the prompt after the first word.
+
+```json
+{
+  "BTTTriggerType": 643,
+  "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
+  "BTTTriggerName": "quick_note",
+  "BTTLauncherConfig": {
+    "BTTLauncherShowInLauncher": 1,
+    "BTTLauncherTitle": "Quick Note",
+    "BTTLauncherDetails": "Create a new note",
+    "BTTLauncherOrder": -500
+  },
+  "BTTActionsToExecute": [{
+    "BTTPredefinedActionType": 49
+  }]
+}
+```
 
 ## Tips
 

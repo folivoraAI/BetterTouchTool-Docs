@@ -1,0 +1,97 @@
+---
+title: "Keyboard & Shortcuts"
+sidebar_position: 3
+slug: "/docs/launcher/keyboard-shortcuts"
+---
+
+# Keyboard & Shortcuts
+
+The Launcher is designed to be driven from the keyboard. This page lists every shortcut available in the main results view and in the per-item actions popover.
+
+## Main Results
+
+| Key | Behavior |
+| --- | --- |
+| `↑` / `↓` | Move the selection. Pressing `↑` at the top returns focus to the search field. |
+| `↩` | Activate the selected result (launch app, run action, open surface, …). |
+| `⌘↩` | Alternate activation, when the result defines one. |
+| `Tab` or `→` | Open child items (e.g. an app's windows) or enter a secondary destination. |
+| `←` | Go back one level in child navigation. |
+| `Esc` | Exit the current surface, go back one level, or close the Launcher. |
+| `Space` | Quick Look preview (on file rows). |
+| `⌘L` / `⌘A` | Focus the search field and select all text. |
+| `⌘P` (default) | Open the **per-item actions popover** for the selected row. |
+
+`⌘P` can be reassigned per Launcher instance using the `BTTActionLauncherShortcut` parameter on the **Show Launcher** or **Toggle Launcher** action.
+
+## Per-Item Actions Popover
+
+Every row exposes a small popover with contextual commands. Open it with `⌘P` (or the shortcut you configured). Inside the popover:
+
+| Key | Behavior |
+| --- | --- |
+| `↑` / `↓` | Move between commands. |
+| `↩` | Run the highlighted command. |
+| `Esc` | Close the popover. |
+
+Each command in the popover may also have its own keyboard shortcut; that shortcut works **directly on the main results list** too (without opening the popover first).
+
+### Universal Commands
+
+Available on most row types:
+
+- **Pin / Unpin** — add or remove a pin from the pinned-items bar above the results.
+- **Increase Priority** / **Decrease Priority** — boost or lower a row's ranking in filtered searches.
+- **Reset Priority** — restore default ranking.
+- **Set Keywords (Aliases)** — add comma-separated alternative search terms for this row in the current Launcher.
+
+### App Rows
+
+- **Quit** (`⌘Q`) — graceful quit (running apps only).
+- **Force Quit** (`⌘⌥Q`) — force terminate (running apps only).
+- **Show in Finder** (`⌘R`) — reveal the app bundle.
+
+### File Rows
+
+- **Quick Look** (`Space`) — preview.
+- **Reveal in Finder** (`⌘R`).
+- **Open Containing Folder** (`⌘⌥R`).
+- **Copy Path** (`⌘⇧C`).
+
+### Window Rows (Window Switcher Sublist)
+
+- **Left Half** (`⌘←`)
+- **Right Half** (`⌘→`)
+- **Top Half** (`⌘⇧↑`)
+- **Bottom Half** (`⌘⇧↓`)
+- **Maximize** (`⌘↑`)
+
+### Clipboard Root Row
+
+- **Paste Item 1** (`⌘1`)
+- **Paste Item 2** (`⌘2`)
+- **Paste Item 3** (`⌘3`)
+
+These paste the most recent clipboard entries without first opening the clipboard surface.
+
+### Calendar Root Row
+
+- **Create New Event** (`⌘N`)
+- **Create New Reminder** (`⌘⇧N`)
+
+## Group Shortcuts
+
+Each built-in group (Widgets, Commands, AI, Apps, plus any custom groups you create) can have its own keyboard shortcut. Assign one in the Launcher settings to jump straight into that group.
+
+## Surface-Specific Shortcuts
+
+Rich surfaces inherit the main navigation keys and add their own:
+
+- **Clipboard surface**: `⌘S` save text edits, `⌘C` copy selected entry, standard edit menu shortcuts work in-place.
+- **Calendar surface**: `⌘N` new event, `⌘⇧N` new reminder, arrow keys navigate dates.
+- **Speech dictation surface**: `⌘R` restart recording, `⌘C` copy transcript.
+- **File browser**: arrow keys navigate, `Space` Quick Look, `↩` open.
+
+## Quick Look
+
+Pressing `Space` on any file-like row (Finder context, file search, file browser, clipboard file entries) opens a native Quick Look preview. `Esc` closes it.

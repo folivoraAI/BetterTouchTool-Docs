@@ -1,0 +1,237 @@
+---
+title: "JSON Action Plugins"
+sidebar_position: 9
+slug: "/docs/plugins/json-action-plugins"
+---
+
+# JSON Action Plugins (`.bttjsonplugin`)
+
+JSON Action Plugins are a simple way to create reusable, configurable action plugins for BetterTouchTool — **without writing any compiled code**. Instead of building an Xcode project, you write a single `.bttjsonplugin` file containing:
+
+- **Metadata** — plugin name, identifier, description, and icon
+- **Form fields** — user-configurable parameters that appear in the BTT preferences
+- **Actions** — a sequence of BTT actions (same format as exported presets) with placeholders that get replaced by the form field values at execution time
+
+## Quick Start
+
+1. Create a file with the `.bttjsonplugin` extension (e.g. `MyPlugin.bttjsonplugin`). The easiest way to do that is to right-click one or multiple actions you have configured in BTT and choose "Export Selected Actions As JSON Action Plugin".
+2. Drop it into either `~/Library/Application Support/BetterTouchTool/Plugins/` or `/Library/Application Support/BetterTouchTool/Plugins/` (or drag it onto the BTT window)
+3. In BTT, create a trigger and select your plugin from **Custom Plugin Actions**
+
+## File Format
+
+A `.bttjsonplugin` file is a JSON file with three top-level sections:
+
+```json
+{
+  "BTTPluginMetadata": { ... },
+  "BTTPluginFormFields": [ ... ],
+  "BTTPluginActions": [ ... ]
+}
+```
+
+### BTTPluginMetadata
+
+Describes the plugin in the action selector and plugin manager.
+
+| Key | Type | Required | Description |
+|---|---|---|---|
+| `BTTPluginName` | String | Yes | Display name shown in the action selector |
+| `BTTPluginIdentifier` | String | Yes | Unique reverse-domain identifier (e.g. `com.yourname.pluginName`) |
+| `BTTPluginDescription` | String | No | Short description of what the plugin does |
+| `BTTPluginIcon` | String | No | SF Symbol name for the icon (e.g. `star.fill`). Defaults to `puzzlepiece.extension.fill` |
+| `BTTPluginVersion` | String | No | Version string (e.g. `1.0`) |
+
+```json
+"BTTPluginMetadata": {
+  "BTTPluginName": "My Custom Action",
+  "BTTPluginIdentifier": "com.example.myCustomAction",
+  "BTTPluginDescription": "Does something useful",
+  "BTTPluginIcon": "bolt.fill",
+  "BTTPluginVersion": "1.0"
+}
+```
+
+### BTTPluginFormFields
+
+An array of form field definitions. These create the configuration UI that appears when the user selects the plugin action. Each field's value is available as a placeholder in the actions.
+
+| Key | Type | Required | Description |
+|---|---|---|---|
+| `formFieldType` | String | Yes | The form field type (see table below) |
+| `formFieldID` | String | Yes | Unique ID for this field. Used as the placeholder name: `@@@fieldID@@@` |
+| `formLabel1` | String | No | Primary label displayed next to the field |
+| `formLabel2` | String | No | Secondary label |
+| `defaultValue` | Any | No | Default value for the field |
+| `dataType` | Number | No | `1` = String, `2` = Number, `3` = JSON, `4` = Icon, `5` = Data |
+| `minValue` | Number | No | Minimum value (for sliders) |
+| `maxValue` | Number | No | Maximum value (for sliders) |
+| `formOptions` | Array | No | Options for popup buttons (see below) |
+
+#### Available Form Field Types
+
+| Type | Description |
+|---|---|
+| `BTTFormTypeTextField` | Single-line text input |
+| `BTTFormTypeTwoTextFields` | Two text fields side by side |
+| `BTTFormTypeTextArea` | Multi-line text input |
+| `BTTFormTypeCheckbox` | Boolean toggle |
+| `BTTFormTypeSlider` | Numeric slider (set `minValue`, `maxValue`, `dataType` to `2`) |
+| `BTTFormTypePopupButton` | Dropdown selector |
+| `BTTFormTypeColorPicker` | Color picker |
+| `BTTFormTypeImagePicker` | Image picker (value is Base64 encoded) |
+| `BTTFormTypeSeparator` | Visual separator line (no value) |
+| `BTTFormTypeDescription` | Static description text (use `formLabel1` for content) |
+| `BTTFormTypeTitleField` | Title/header text (use `formLabel1` for content) |
+
+#### Popup Button Options
+
+For `BTTFormTypePopupButton`, provide an array of option objects:
+
+```json
+{
+  "formFieldType": "BTTFormTypePopupButton",
+  "formFieldID": "position",
+  "formLabel1": "Position:",
+  "formOptions": [
+    { "formLabel1": "Top", "formOption": "top" },
+    { "formLabel1": "Center", "formOption": "center" },
+    { "formLabel1": "Bottom", "formOption": "bottom" }
+  ]
+}
+```
+
+### BTTPluginActions
+
+An array of BTT action dictionaries — the same JSON format used when exporting triggers/actions from BTT. These actions are executed in sequence when the plugin is triggered.
+
+Use `@@@fieldID@@@` placeholders anywhere in the action JSON. At execution time, each placeholder is replaced with the corresponding form field value (properly JSON-escaped).
+
+```json
+"BTTPluginActions": [
+  {
+    "BTTIsPureAction": true,
+    "BTTPredefinedActionType": 254,
+    "BTTAdditionalActionData": {
+      "BTTActionHUDTitle": "@@@hudTitle@@@"
+    },
+    "BTTHUDDuration": "@@@duration@@@"
+  }
+]
+```
+
+:::tip Getting the action JSON
+The easiest way to get the correct action JSON is to:
+1. Configure the action manually in BTT
+2. Right-click the trigger > **Copy JSON**
+3. Extract the action properties from the exported JSON
+4. Replace the values you want to be configurable with `@@@fieldID@@@` placeholders
+:::
+
+## Complete Example
+
+This plugin shows a configurable macOS notification:
+
+```json
+{
+  "BTTPluginMetadata": {
+    "BTTPluginName": "Show Notification",
+    "BTTPluginIdentifier": "com.example.showNotification",
+    "BTTPluginDescription": "Shows a macOS notification with a custom title and message",
+    "BTTPluginIcon": "bell.fill",
+    "BTTPluginVersion": "1.0"
+  },
+  "BTTPluginFormFields": [
+    {
+      "formFieldType": "BTTFormTypeTextField",
+      "formFieldID": "notifTitle",
+      "formLabel1": "Notification Title:",
+      "defaultValue": "Hello",
+      "dataType": 1
+    },
+    {
+      "formFieldType": "BTTFormTypeTextField",
+      "formFieldID": "notifMessage",
+      "formLabel1": "Notification Message:",
+      "defaultValue": "World",
+      "dataType": 1
+    }
+  ],
+  "BTTPluginActions": [
+    {
+      "BTTIsPureAction": true,
+      "BTTPredefinedActionType": 254,
+      "BTTAdditionalActionData": {
+        "BTTActionHUDTitle": "@@@notifTitle@@@",
+        "BTTActionHUDDetail": "@@@notifMessage@@@"
+      },
+      "BTTHUDDuration": 2
+    }
+  ]
+}
+```
+
+When the user sets "Notification Title" to `Meeting Reminder` and "Notification Message" to `Standup in 5 minutes`, BTT replaces the placeholders and executes:
+
+```json
+{
+  "BTTIsPureAction": true,
+  "BTTPredefinedActionType": 254,
+  "BTTAdditionalActionData": {
+    "BTTActionHUDTitle": "Meeting Reminder",
+    "BTTActionHUDDetail": "Standup in 5 minutes"
+  },
+  "BTTHUDDuration": 2
+}
+```
+
+## Placeholder Replacement
+
+- Placeholders use the format `@@@fieldID@@@` where `fieldID` matches a `formFieldID` from your form fields
+- Placeholders can appear anywhere in the action JSON — in string values, numeric values, or even keys
+- Values are automatically JSON-escaped, so special characters like quotes and backslashes in user input are handled safely
+- Replacement is done on the serialized JSON string, then parsed back — this means placeholders work even inside nested objects
+
+## Multiple Actions
+
+You can include multiple actions in the `BTTPluginActions` array. They are executed in sequence, just like additional actions on a regular BTT trigger:
+
+```json
+"BTTPluginActions": [
+  { "BTTIsPureAction": true, "BTTPredefinedActionType": 254, ... },
+  { "BTTIsPureAction": true, "BTTPredefinedActionType": 195, ... },
+  { "BTTIsPureAction": true, "BTTPredefinedActionType": 47, ... }
+]
+```
+
+## Installation
+
+JSON action plugins can be installed in several ways:
+
+- **File copy**: Place the `.bttjsonplugin` file in either `~/Library/Application Support/BetterTouchTool/Plugins/` or `/Library/Application Support/BetterTouchTool/Plugins/`
+- **Drag and drop**: Drag the file onto the BetterTouchTool preferences window
+- **Double-click**: Double-click the `.bttjsonplugin` file (BTT is registered as the handler)
+
+Plugins are loaded automatically when BTT starts. If you add, modify, or remove a `.bttjsonplugin` file while BTT is running, it will detect the change and reload automatically.
+
+## Plugin Manager
+
+JSON action plugins appear in the BTT Plugin Manager (accessible from the BTT menu bar) alongside compiled plugins. From there you can:
+
+- View all installed plugins
+- Reveal a plugin file in Finder
+- Delete a plugin
+
+## Comparison with Compiled Action Plugins
+
+| Feature | JSON Action Plugin (`.bttjsonplugin`) | Compiled Action Plugin (`.bttactionplugin`) |
+|---|---|---|
+| **Format** | Single JSON file | Xcode bundle |
+| **Code required** | No | Yes (Swift or Objective-C) |
+| **Setup** | Text editor only | Xcode project |
+| **Capabilities** | Executes BTT actions with configurable parameters | Full native code execution |
+| **Distribution** | Share the file directly | Must be notarized |
+| **Custom UI** | Form fields only | Custom AppKit/SwiftUI views |
+| **Use case** | Reusable action sequences, sharing action recipes | Complex logic, custom rendering, API calls |
+
+JSON action plugins are ideal when you want to package a reusable action configuration that others can install and customize through form fields — without requiring them to compile anything or trust executable code.

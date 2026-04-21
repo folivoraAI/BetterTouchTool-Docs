@@ -1,0 +1,230 @@
+---
+title: "Stream Deck Plugins"
+sidebar_position: 4
+slug: "/docs/plugins/stream-deck"
+---
+
+# Stream Deck Plugins
+
+Stream Deck plugins render custom widgets on Elgato Stream Deck buttons. They conform to the `BTTStreamDeckPluginInterface` protocol and use the `.bttstreamdeckplugin` bundle extension for Xcode projects.
+
+## Protocol: `BTTStreamDeckPluginInterface`
+
+### Rendering Options
+
+Implement **one** of the following four methods. If multiple are implemented, BTT uses the first one found in this order:
+
+#### Option 1: Title Strings
+
+Return an array of strings. BTT renders each string as a button with the user-configured appearance settings (background color, font, etc.).
+
+```swift
+func widgetTitleStrings() -> [String]? {
+    return ["42%"]
+}
+```
+
+#### Option 2: Attributed Title Strings
+
+Return attributed strings for custom text styling. BTT still applies additional user-configured styling (e.g. background color).
+
+```swift
+func widgetAttributedTitleStrings() -> [NSAttributedString]? {
+    let attrs: [NSAttributedString.Key: Any] = [
+        .font: NSFont.systemFont(ofSize: 20, weight: .bold),
+        .foregroundColor: NSColor.systemGreen
+    ]
+    return [NSAttributedString(string: "OK", attributes: attrs)]
+}
+```
+
+#### Option 3: Rendering Dictionaries
+
+Return dictionaries with detailed rendering descriptions for full control over appearance including images, SF Symbols, colors, and corner radius.
+
+```swift
+func widgetDictionaries() -> [NSDictionary]? {
+    return [
+        [
+            "BTTStreamDeckBackgroundColor": "80, 96, 94, 255",
+            "BTTStreamDeckCornerRadius": 13,
+            "BTTStreamDeckSFSymbolName": "cpu",
+            "BTTStreamDeckSFSymbolStyle": 3,
+            "BTTStreamDeckIconColor1": "255, 255, 255, 255"
+        ]
+    ]
+}
+```
+
+**Available dictionary keys:**
+
+| Key | Type | Description |
+|---|---|---|
+| `BTTStreamDeckBackgroundColor` | String | RGBA color string (e.g. `"80, 96, 94, 255"`) |
+| `BTTStreamDeckCornerRadius` | Number | Corner radius in points |
+| `BTTStreamDeckSFSymbolName` | String | SF Symbol name |
+| `BTTStreamDeckSFSymbolStyle` | Number | SF Symbol rendering style |
+| `BTTStreamDeckIconType` | Number | Icon type identifier |
+| `BTTStreamDeckIconColor1` | String | Primary icon color (RGBA) |
+| `BTTStreamDeckIconColor2` | String | Secondary icon color (RGBA) |
+| `BTTStreamDeckIconColor3` | String | Tertiary icon color (RGBA) |
+| `BTTStreamDeckImage` | String | Base64-encoded image data |
+| `BTTStreamDeckImageReal` | NSImage | NSImage instance |
+| `BTTStreamDeckImageWidth` | Number | Image width |
+| `BTTStreamDeckImageHeight` | Number | Image height |
+| `BTTStreamDeckImageOffsetX` | Number | Image horizontal offset |
+| `BTTStreamDeckImageOffsetY` | Number | Image vertical offset |
+| `BTTStreamDeckImageChangeColor` | Number | Whether to tint the image |
+| `BTTStreamDeckResizeImage` | Number | Image resize mode |
+| `BTTStreamDeckAttributedTitle` | String | Base64-encoded RTF attributed string |
+| `BTTStreamDeckAttributedTitleReal` | NSAttributedString | NSAttributedString instance |
+| `BTTStreamDeckAlternateImageHeight` | Number | Alternate image height |
+
+#### Option 4: Pre-rendered Images
+
+Return fully rendered `NSImage` instances. Images should be approximately 140x140 pixels — BTT resizes them to fit the specific device.
+
+```swift
+func widgetImages() -> [NSImage]? {
+    let image = NSImage(size: NSSize(width: 140, height: 140))
+    image.lockFocus()
+    // ... custom drawing ...
+    image.unlockFocus()
+    return [image]
+}
+```
+
+### Button Handling
+
+Handle press and release events on Stream Deck buttons:
+
+```swift
+// Called when the user presses the button. Return true to cancel assigned BTT actions.
+func buttonDown(_ identifier: String) -> Bool {
+    count += 1
+    delegate?.requestUpdate(self)
+    return false
+}
+
+// Called when the user releases the button. Return true to cancel assigned BTT actions.
+func buttonUp(_ identifier: String) -> Bool {
+    return false
+}
+```
+
+If your widget returns multiple buttons, implement `buttonIdentifiers()` to identify them:
+
+```swift
+func buttonIdentifiers() -> [String]? {
+    return ["button1", "button2"]
+}
+```
+
+### Appearance Configuration
+
+Control whether appearance tabs are shown in BTT's configuration sidebar:
+
+```swift
+// Show the standard appearance tab (background color, font, etc.)
+static func showAppearanceTab() -> Bool { return true }
+
+// Show the alternate appearance tab
+static func showAlternateAppearanceTab() -> Bool { return false }
+
+// Whether to use alternate appearance mode
+func alternateModeActive() -> Bool { return false }
+```
+
+Return default appearance configuration values:
+
+```swift
+static func defaultConfiguration() -> [String: Any]? {
+    return [
+        "BTTStreamDeckCornerRadius": 13,
+        "BTTStreamDeckBackgroundColor": "40, 40, 40, 255"
+    ]
+}
+```
+
+### Delegate Methods
+
+The `delegate` property (type `BTTStreamDeckPluginDelegate`) provides:
+
+| Method | Description |
+|---|---|
+| `executeAssignedBTTActions(_:)` | Execute the BTT actions assigned to this widget |
+| `executeNamedTrigger(_:withReply:)` | Execute a named trigger configured in BTT |
+| `executeScriptCommand(_:withParameters:asyncReply:)` | Execute a BTT script command |
+| `requestUpdate(_:)` | Request BTT to re-render the widget |
+| `setVariable(_:value:)` | Set a BTT variable |
+| `getVariable(_:)` | Read a BTT variable |
+
+### Requesting Updates
+
+Call `delegate?.requestUpdate(self)` whenever your widget's data changes and the display needs to refresh. BTT will then call your rendering method again.
+
+```swift
+private func onDataChanged() {
+    delegate?.requestUpdate(self)
+}
+```
+
+## Complete Example: CPU Usage Monitor
+
+```swift
+// BTT-Plugin-Name: CPU Monitor
+// BTT-Plugin-Type: StreamDeck
+// BTT-Plugin-Icon: cpu
+
+import Cocoa
+
+class CPUMonitor: NSObject, BTTStreamDeckPluginInterface {
+    weak var delegate: (any BTTStreamDeckPluginDelegate)?
+    private var cpuUsage: Double = 0
+    private var timer: Timer?
+
+    static func configurationFormItems() -> BTTPluginFormItem? { nil }
+
+    func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]) {}
+
+    func widgetTitleStrings() -> [String]? {
+        return [String(format: "%.0f%%", cpuUsage)]
+    }
+
+    func buttonDown(_ identifier: String) -> Bool {
+        delegate?.executeAssignedBTTActions(self)
+        return true
+    }
+
+    func buttonUp(_ identifier: String) -> Bool {
+        return false
+    }
+
+    // Start monitoring when the widget is loaded
+    init(delegate: (any BTTStreamDeckPluginDelegate)? = nil) {
+        self.delegate = delegate
+        super.init()
+        timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
+            self?.updateCPU()
+        }
+    }
+
+    private func updateCPU() {
+        // ... measure CPU usage ...
+        delegate?.requestUpdate(self)
+    }
+}
+```
+
+See the [CPU Usage Plugin on GitHub](https://github.com/folivoraAI/BetterTouchToolPlugins) for the complete implementation with system-level CPU monitoring.
+
+## Xcode Bundle Setup
+
+For Xcode-based Stream Deck plugins, the bundle extension is `.bttstreamdeckplugin`. Set these `Info.plist` keys:
+
+| Key | Value |
+|---|---|
+| `BTTPluginType` | `StreamDeck` |
+| `NSPrincipalClass` | `$(PRODUCT_MODULE_NAME).YourClassName` |
+
+See [Xcode Bundle Plugins & Distribution](/docs/plugins/xcode-bundle-distribution) for the full setup process.

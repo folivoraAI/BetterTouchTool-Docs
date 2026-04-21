@@ -6,20 +6,54 @@ slug: "/docs/stream-deck/swift-plugins"
 
 # Custom Swift / Objective-C Plugins
 
+:::info Moved to Plugins Section
+The full plugin documentation has been consolidated into a dedicated **Plugins** section. Please see:
+
+- **[Stream Deck Plugins](/docs/plugins/stream-deck)** — full protocol reference, all 4 rendering options, button handling, delegate methods
+- **[Swift Source Plugins](/docs/plugins/swift-source-plugins)** — how to create simple `.swift` file plugins (no Xcode required)
+- **[Plugin Overview](/docs/plugins/overview)** — overview of all plugin types and development approaches
+:::
+
 BetterTouchTool allows you to add your own custom Swift or Objective-C plugins for the Stream Deck.
 
+For a quick start, create a `.swift` file and drop it onto the BTT preferences window:
+
+```swift
+// BTT-Plugin-Name: Counter
+// BTT-Plugin-Type: StreamDeck
+// BTT-Plugin-Icon: number.circle.fill
+
+import Cocoa
+
+class Counter: NSObject, BTTStreamDeckPluginInterface {
+    weak var delegate: (any BTTStreamDeckPluginDelegate)?
+    private var count = 0
+
+    static func configurationFormItems() -> BTTPluginFormItem? { nil }
+
+    func widgetTitleStrings() -> [String]? {
+        return ["\(count)"]
+    }
+
+    func buttonDown(_ identifier: String) -> Bool {
+        count += 1
+        delegate?.requestUpdate(self)
+        return false
+    }
+
+    func buttonUp(_ identifier: String) -> Bool {
+        return false
+    }
+}
+```
+
+See the [Stream Deck Plugins](/docs/plugins/stream-deck) page for the complete documentation including all rendering options, appearance configuration, and delegate methods.
 
 ## Example: CPU Usage Plugin
-As an example I have created a little plugin that shows the current CPU usage. You can download a ready to use version here:
+A ready-to-use CPU usage plugin is available for download:
 http://folivora.ai/releases/BTTStreamDeckPluginCPUUsage.zip
 
-The code is available here:
+The source code is available on GitHub:
 https://github.com/folivoraAI/BetterTouchToolPlugins
 
-Plugins are installed at this location: ~/Library/Application Support/BetterTouchTool/Plugins
-
-
-## Plugin Distribution
-macOS only allows to run notarized plugins, thus if you want to share your plugin with others you have to follow the notarization process. It's relatively simple, I have listed the necessary commands here: https://github.com/folivoraAI/BetterTouchToolPlugins#distributing-plugins
-
-If you have any questions about native plugins, please ping me via andreas@folivora.ai.
+Plugins can be installed in either `~/Library/Application Support/BetterTouchTool/Plugins/` or `/Library/Application Support/BetterTouchTool/Plugins/`

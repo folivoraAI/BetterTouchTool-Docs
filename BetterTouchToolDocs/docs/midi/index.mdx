@@ -1,0 +1,132 @@
+---
+title: "MIDI Triggers"
+sidebar_position: 1
+slug: "/docs/midi/overview"
+---
+# MIDI Triggers
+
+BetterTouchTool can connect to MIDI devices and trigger actions based on MIDI input. This allows you to use MIDI controllers, keyboards, drum pads, and other MIDI hardware to control your Mac.
+
+---
+
+
+## Creating a MIDI Trigger
+
+To create a MIDI trigger:
+
+1. Select **MIDI Triggers** in the BTT toolbar.
+2. Click the **+** button and choose **MIDI Trigger**.
+3. Configure the trigger using the options described below.
+
+### Using the MIDI Event Viewer
+
+The easiest way to configure a MIDI trigger is to use the built-in **MIDI Event Viewer**:
+
+1. Click **"Show MIDI Event Viewer"** in the trigger configuration.
+2. Interact with your MIDI device (press a key, turn a knob, etc.).
+3. The viewer will display the incoming MIDI data including the command type, note/control number, value/velocity, and device name.
+4. Click **"Auto-configure using last MIDI event"** to automatically fill in the trigger settings based on the last received event.
+
+---
+
+## Trigger Configuration
+
+### Command Type
+
+Select the type of MIDI message to listen for:
+
+| Command | Code | Description |
+|---------|------|-------------|
+| **Note On** | 159 | Triggered when a note is pressed (key down). |
+| **Note Off** | 143 | Triggered when a note is released (key up). |
+| **Polyphonic Key Pressure** | 175 | Aftertouch pressure for individual keys. |
+| **Control Change** | 191 | Messages from knobs, sliders, pedals, and other controllers. |
+| **Program Change** | 207 | Program/patch change messages. |
+| **Channel Pressure** | 207 | Overall channel aftertouch pressure. |
+| **Pitch Wheel Change** | 239 | Pitch bend wheel messages. |
+
+### Note or Control Number
+
+The specific note or controller number to listen for (0-127). This corresponds to the key on a keyboard, the specific knob/slider on a controller, etc. Use the MIDI Event Viewer to find the correct number for your device.
+
+### Device Name Filter
+
+By default, a trigger responds to events from **all connected devices** (indicated by `*`). You can restrict a trigger to a specific device by entering its name. The device name supports wildcard matching.
+
+### Channel Filter
+
+MIDI messages are sent on channels 0-15. You can optionally enable **"Filter On Channel"** to only trigger on events from a specific MIDI channel.
+
+---
+
+## Value / Velocity Conditions
+
+MIDI messages carry a value (velocity for notes, position for knobs/sliders, etc.). You can configure when a trigger fires based on this value:
+
+| Condition | Description |
+|-----------|-------------|
+| **On Every Change** | Triggers on every incoming matching message regardless of value. |
+| **Equal to X** | Only triggers when the value exactly equals X. |
+| **Smaller than X** | Only triggers when the value is less than X. |
+| **Greater than X** | Only triggers when the value is greater than X. |
+| **By X smaller than previous value** | Triggers when the value has decreased by at least X compared to the highest recent value. Useful for detecting significant downward knob/slider movements. |
+| **By X greater than previous value** | Triggers when the value has increased by at least X compared to the lowest recent value. Useful for detecting significant upward knob/slider movements. |
+| **By X different than previous value** | Triggers when the value differs from the last triggered value by at least X in either direction. |
+
+---
+
+## Chord / Multi-Note Triggers
+
+You can require that multiple notes or controls are simultaneously active before a trigger fires. Enter a comma-separated list of note/control numbers in the **"Only if all these notes/controls are on"** field.
+
+For example, entering `60, 64, 67` means the trigger will only fire when notes 60, 64, and 67 are all held down at the same time (a C major chord on a standard MIDI keyboard).
+
+---
+
+## Action Repeat While Note Held
+
+For **Note On** triggers, you can enable action repeating while the note is held down:
+
+1. Check **"Repeat assigned action"**.
+2. Set the **Repeat Rate** (how frequently the action repeats, 0-2 seconds).
+3. Set the **Repeat Delay** (how long to wait before repeating starts, 0-2 seconds).
+
+The action will stop repeating when the note is released.
+
+---
+
+## Using MIDI Values in Scripts
+
+When a MIDI trigger's assigned action is a script (AppleScript or JavaScript), BTT passes the MIDI value (velocity, control value, etc.) to the script via a special function.
+
+### AppleScript Example
+
+When using "Run AppleScript in Background", define a handler named `bttMIDIValueChanged`:
+
+```applescript
+on bttMIDIValueChanged(midiValue)
+    -- Example: control system volume with a MIDI knob
+    set volume output volume (midiValue / 127) * 100
+end bttMIDIValueChanged
+```
+
+### JavaScript Example
+
+When using "Run JavaScript" or "Run JavaScript in Background", define a function named `bttMIDIValueChanged`:
+
+```javascript
+function bttMIDIValueChanged(midiValue) {
+    // midiValue is 0-127
+    // Example: map MIDI value to brightness
+    let brightness = midiValue / 127;
+    // ... do something with brightness
+}
+```
+
+This is especially useful with **Control Change** triggers, where the value continuously changes as you move a knob or slider.
+
+---
+
+## Sending MIDI Commands
+
+BTT can also **send** MIDI commands to devices as an action. See the [Send MIDI Command](/docs/actions/action-definitions#send-midi-command) action for details.

@@ -1,0 +1,142 @@
+---
+title: "Touch Bar Plugins"
+sidebar_position: 3
+slug: "/docs/plugins/touch-bar"
+---
+
+# Touch Bar Plugins
+
+Touch Bar plugins render custom widgets on the MacBook Pro Touch Bar. They conform to the `BTTPluginInterface` protocol and use the `.btttouchbarplugin` bundle extension for Xcode projects.
+
+## Protocol: `BTTPluginInterface`
+
+### Rendering Options
+
+Implement **one** of the following three methods. If multiple are implemented, BTT uses the first one found in this order:
+
+#### Option 1: Return a String
+
+The simplest option. BTT renders the string using its standard Touch Bar widget styling, so all user-configured appearance properties (background color, font, etc.) are applied.
+
+```swift
+func touchBarTitleString() -> String? {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm:ss"
+    return formatter.string(from: Date())
+}
+```
+
+#### Option 2: Return an NSButton
+
+Return a custom `NSButton` instance for full control over the button appearance. **Always return the same instance** — do not create a new button on each call.
+
+```swift
+private lazy var button: NSButton = {
+    let btn = NSButton(title: "Click Me", target: nil, action: nil)
+    btn.bezelColor = .systemBlue
+    return btn
+}()
+
+func touchBarButton() -> NSButton? {
+    return button
+}
+```
+
+#### Option 3: Return an NSViewController
+
+Return a custom view controller for complete control over the widget's view hierarchy. **Always return the same instance.**
+
+```swift
+private lazy var viewController: NSViewController = {
+    let vc = NSViewController()
+    let view = NSView(frame: NSRect(x: 0, y: 0, width: 40, height: 30))
+    view.wantsLayer = true
+    view.layer?.backgroundColor = NSColor.systemRed.cgColor
+    view.layer?.cornerRadius = 8
+    vc.view = view
+    return vc
+}()
+
+func touchBarViewController() -> NSViewController? {
+    return viewController
+}
+```
+
+### Configuration
+
+```swift
+// Optional: return form items for the BTT sidebar
+static func configurationFormItems() -> BTTPluginFormItem? { ... }
+
+// Called when the user changes configuration values
+func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]) { ... }
+```
+
+See the [Configuration Forms Reference](/docs/plugins/configuration-forms) for available field types.
+
+### Delegate Methods
+
+The `delegate` property (type `BTTTouchBarPluginDelegate`) provides:
+
+| Method | Description |
+|---|---|
+| `executeAssignedBTTActions(_:)` | Execute the BTT actions assigned to this widget |
+| `updateWithString(_:sender:)` | Update the widget's displayed title |
+| `setVariable(_:value:)` | Set a BTT variable |
+| `getVariable(_:)` | Read a BTT variable |
+
+## Complete Example
+
+A Touch Bar widget that shows a configurable label and executes assigned actions when tapped:
+
+```swift
+// BTT-Plugin-Name: Custom Label
+// BTT-Plugin-Type: TouchBar
+// BTT-Plugin-Icon: textformat
+
+import Cocoa
+
+class CustomLabel: NSObject, BTTPluginInterface {
+    weak var delegate: (any BTTTouchBarPluginDelegate)?
+    private var labelText = "Hello"
+
+    static func configurationFormItems() -> BTTPluginFormItem? {
+        let group = BTTPluginFormItem()
+        group.formFieldType = BTTFormTypeFormGroup
+
+        let title = BTTPluginFormItem()
+        title.formFieldType = BTTFormTypeTitleField
+        title.formLabel1 = "Custom Label Settings"
+
+        let textField = BTTPluginFormItem()
+        textField.formFieldType = BTTFormTypeTextField
+        textField.formLabel1 = "Label Text"
+        textField.formFieldID = "labelText"
+        textField.defaultValue = "Hello"
+
+        group.formOptions = [title, textField]
+        return group
+    }
+
+    func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]) {
+        if let text = configurationValues["plugin_var_labelText"] as? String {
+            labelText = text
+        }
+    }
+
+    func touchBarTitleString() -> String? {
+        return labelText
+    }
+}
+```
+
+## Xcode Bundle Setup
+
+For Xcode-based Touch Bar plugins, the bundle extension is `.btttouchbarplugin`. Set these `Info.plist` keys:
+
+| Key | Value |
+|---|---|
+| `BTTPluginType` | `TouchBar` |
+| `NSPrincipalClass` | `$(PRODUCT_MODULE_NAME).YourClassName` |
+
+See [Xcode Bundle Plugins & Distribution](/docs/plugins/xcode-bundle-distribution) for the full setup process.

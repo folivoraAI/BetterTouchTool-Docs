@@ -1,0 +1,43 @@
+---
+title: "Launcher Plugins"
+sidebar_position: 12
+slug: "/docs/launcher/plugins"
+---
+
+# Launcher Plugins
+
+Launcher plugins are BetterTouchTool plugins that contribute their own rows, commands, and optional rich surfaces to the Launcher. Unlike [action plugins](/docs/plugins/action) or [trigger plugins](/docs/plugins/trigger), a launcher plugin is free to render a completely custom UI inside the Launcher window.
+
+This page is aimed at **users** installing and using launcher plugins. If you want to build one, see [Launcher Plugins](/docs/plugins/launcher).
+
+## Installing
+
+Launcher plugins install the same way as other BTT plugins:
+
+- Open a compiled `.bttlauncherplugin` bundle and confirm the prompt
+- Or drop a `.swift` source plugin onto the BTT preferences window if the author distributes it as a Swift source plugin
+
+Installed launcher plugins appear in **BetterTouchTool Settings → Plugins** alongside other plugin types.
+
+## Using Installed Plugins
+
+Each installed launcher plugin contributes:
+
+- **Top-level rows** in the Launcher's **Launcher Plugins** section.
+- Optional **child items** that appear when you drill into a plugin row.
+- An optional **rich surface** with its own interactive UI.
+
+In the results list, rows from launcher plugins are marked with the plugin's icon.
+
+## Enabling / Disabling
+
+In the Launcher settings you can:
+
+- Toggle the **Launcher Plugins** section entirely off.
+- Individually enable or disable specific plugin rows through the per-item popover (`⌘P → Hide From Launcher`).
+
+Uninstalling a plugin from **Settings → Plugins** removes all of its rows and surfaces from the Launcher.
+
+## Permissions
+
+Launcher plugins run inside BetterTouchTool and have access to the same APIs other BTT plugins use. Review a plugin's source or documentation before installing — especially if it asks for network or filesystem access.
