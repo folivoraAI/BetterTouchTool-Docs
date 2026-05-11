@@ -30,7 +30,7 @@ static func configurationFormItems() -> BTTPluginFormItem? {
 
 ## Receiving Configuration Values
 
-When the user changes a form field value, BTT calls `didReceiveNewConfigurationValues(_:)` on your plugin. Values arrive with a `plugin_var_` prefix on the `formFieldID`:
+When BTT loads the plugin and when the user changes a form field value, BTT calls `didReceiveNewConfigurationValues(_:)` on your plugin. Use plain field IDs in the form definition; values arrive with a `plugin_var_` prefix on the `formFieldID`:
 
 ```swift
 func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]?) {
@@ -45,6 +45,8 @@ func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]?) {
 }
 ```
 
+For example, `formFieldID = "labelText"` arrives as `configurationValues["plugin_var_labelText"]`. Including the `plugin_var_` prefix manually is supported, but not required.
+
 For [JSON Action Plugins](/docs/plugins/json-action-plugins), form values are referenced with `@@@fieldID@@@` placeholders instead of the `plugin_var_` prefix.
 
 ## Form Field Types
@@ -56,7 +58,7 @@ For [JSON Action Plugins](/docs/plugins/json-action-plugins), form values are re
 | `BTTFormTypeTextArea` | Multi-line text input |
 | `BTTFormTypeCheckbox` | Boolean toggle |
 | `BTTFormTypeSlider` | Numeric slider (set `minValue`, `maxValue`, `dataType` to `BTTFormDataNumber`) |
-| `BTTFormTypePopupButton` | Dropdown selector (set `formOptions` to an array of option items) |
+| `BTTFormTypePopupButton` | Dropdown selector (set `formOptions` to an array of option items; if no `defaultValue` is set, BTT uses the first option) |
 | `BTTFormTypeColorPicker` | Color picker |
 | `BTTFormTypeImagePicker` | Image picker (value arrives as Base64 string) |
 | `BTTFormTypeSeparator` | Visual separator line (no value) |
@@ -78,7 +80,7 @@ For [JSON Action Plugins](/docs/plugins/json-action-plugins), form values are re
 
 | Property | Type | Description |
 |---|---|---|
-| `formFieldID` | `String` | Unique identifier for this field. Values are passed with a `plugin_var_` prefix. |
+| `formFieldID` | `String` | Unique identifier for this field. Use the plain key; values are passed with a `plugin_var_` prefix. |
 | `formFieldID2` | `String` | Secondary field identifier (used by `BTTFormTypeTwoTextFields`) |
 | `formFieldType` | `String` | One of the form field type constants above |
 | `formLabel1` | `String` | Primary label displayed next to the field |
@@ -105,8 +107,8 @@ For [JSON Action Plugins](/docs/plugins/json-action-plugins), form values are re
 | `BTTFormDataString` | 1 | String data |
 | `BTTFormDataNumber` | 2 | Numeric data |
 | `BTTFormDataJSON` | 3 | JSON data |
-| `BTTFormDataIcon` | 4 | Icon data |
-| `BTTFormDataData` | 5 | Raw data |
+| `BTTFormDataIcon` | 5 | Icon data |
+| `BTTFormDataData` | 6 | Raw data |
 
 ## Common Patterns
 
@@ -169,6 +171,7 @@ opt2.formLabel1 = "Detailed"
 opt2.formOption = "detailed"
 
 popup.formOptions = [opt1, opt2]
+popup.defaultValue = "compact" // optional; BTT uses the first option if omitted
 ```
 
 ### Image Picker

@@ -1,340 +1,38 @@
 ---
 title: "Tools"
-sidebar_position: 5
+sidebar_position: 6
 slug: "/docs/ai-assistants/tools"
 ---
-# h@llo.ai Available Tools
+# Tools
 
-By default the AI Assistants do not have access to any of BTT's tools. You need to enable access for each (or all) tools you want to allow in the configuration of the predefined action "h@llo.ai - Show Customizable AI Assistant". There go to the AI Configuration => Tools & Context section and scroll down.
+Tools are the low-level actions an assistant can call. Skills decide which tools are available, so most users should configure [Skills](./skills) first and only adjust individual tools for advanced use cases.
 
-![Tools](/media/hallo_ai_tools_config.png)
+## Common Tool Groups
 
----
+- **BTT configuration:** Search BTT docs, look up action and trigger definitions, create or update triggers, edit action lists, create snippets, and inspect selected triggers.
+- **Computer use:** Screenshots, windows, accessibility trees, UI element search, clicks, typing, shortcuts, OCR, and menu bar actions.
+- **Background computer use:** Targeted background clicks, shortcuts, key presses, scrolling, window state, app launching, and fake cursor display.
+- **Text workflows:** Read selected text, transform it, replace it, paste text, and update the clipboard.
+- **Files and code:** Read, write, search, edit, diff, patch, run diagnostics, and execute scripts when the skill allows it.
+- **Web and research:** Search the web, fetch pages, inspect browser content, and automate Safari.
+- **Memory:** Save, recall, and forget persistent memories.
+- **UI output:** Show HUDs, status messages, interactive chat content, and files.
+- **MCP:** Use tools from configured external MCP servers.
 
-## UI Automation: End‑to‑End Flow
+## When To Edit Tools Manually
 
-Use these to find UI elements in running apps and interact with them reliably.
+Manual tool selection is useful when you want a very narrow assistant, when you are migrating an older setup, or when a custom skill needs one extra capability.
 
-### 1) Discover running apps
-**get_running_apps_for_ui** → List apps with `process_identifier`, `bundleId`, name, etc.
-Use the `process_identifier` in the next steps.
+For new assistants, prefer this order:
 
-### 2) Inspect UI hierarchy
-**get_app_ui_structure** → Returns the UI tree for a given process.
-Includes an `interactive_summary` of clickable and text-input elements.
-Options: `max_depth` (default 4, up to 20).
+1. Pick the right built-in skill.
+2. Add a custom skill if the workflow is recurring.
+3. Only then add or remove individual tools.
 
-### 3) Search elements
-**find_ui_elements** → Search by role/title/value/description across attributes.
-- Supports `use_regex`
-- Returns elements with `path` like `0,2,1` and matched criteria.
-**Tip:** Use this `path` for clicks or typing.
+## Custom User Tools
 
-### 4A) Click an element
-**click_ui_element** → Click by `path` and `process_identifier`.
-Returns `{success, path, click_method, element_info}`.
+Custom tools can be created from BetterTouchTool Named Triggers. This is useful when you already have a trusted BTT automation and want an assistant to call it by name.
 
-### 4B) Type into an element
-**type_in_ui_element** → Type text into fields/search boxes by `path`.
-Returns `{success, path, text, element_info, value_verified}`.
+## Safety
 
-### 4C) Diagnose when things fail
-**diagnose_accessibility_element** → Get details, state, available actions, and recommendations for a `path`.
-Great for flaky or non-standard controls.
-
----
-
-## Mouse, Keyboard & Text
-
-### Pointer & clicks
-- **move_mouse** → Move (and optionally drag) the mouse to (`x`,`y`). Supports `anchorPoint` (screen origin), `duration`, `drag`.
-- **click** → Click at current or specific coordinates; supports `type` (left|right|middle|double), `count`, modifiers (`mods`), and optional move & click in one call.
-- **save_mouse_pos** / **restore_mouse_pos** → Store/recall a named cursor position.
-
-### Keyboard & text
-- **type_or_paste_text** → Type or paste text; optionally provide `format` (RTF/HTML/PDF/PNG/URL) or set `type: true` to simulate typing.
-- **send_shortcut** → Send keys/shortcuts to an app (or the focused app): specify `key` and `mods` (e.g., `cmd+shift`).
-- **get_selected_text** → Read the current selection. *(Use mainly to refresh the selection after other tools.)*
-- **transform_selected_text** → Run your JS transformer on the current selection and return the result.
-- **replace_selected_text** → Replace the current selection with your provided text.
-
-### Heads-up display
-- **show_hud** → Show a temporary HUD message (supports SF Symbols via `icon` and a `duration`).
-
-### Haptics & clipboard
-- **haptic_feedback** → Trigger light/medium/heavy haptics.
-- **set_clipboard_content** → Set clipboard text (optionally with a specific pasteboard format).
-- **paste_clipboard_item** → Paste an item from clipboard history by `index` (0 = most recent).
-- **show_clipboard_manager** → Open the BetterTouchTool clipboard manager UI.
-- **check_clipboard_changes** → Check for recent clipboard changes and return current clipboard content.
-
-### Wait helper
-- **wait_for_x_seconds** → Pause execution for a number of seconds (use this instead of `setTimeout`).
-
----
-
-## Computer Control (Full Desktop Agents)
-
-Two agent-style tools that can move the mouse, click, type, scroll, drag, press keys, wait, and take screenshots.
-
-- **computer_20250124** → Actions like `screenshot`, `left_click`, `drag`, `scroll {direction, amount}`, `key`, `type {text}`, `wait {seconds}` with coordinates where needed.
-- **computer_use_preview** → Similar capabilities with explicit `environment` (`mac`, `windows`, `ubuntu`, `browser`) and optional `display_width/height` for context.
-
-Use these when you need holistic, step-by-step desktop control.
-
----
-
-## Browser & Web
-
-- **safari_automation** → Execute JavaScript in Safari's active window. Modes: `active` (fast, active window) or `webdriver` (faster when possible, falls back). Supports batching via `batch` array.
-- **get_browser_html** → Grab HTML/text/metadata from Safari, Chrome, Edge, Arc, Brave, Firefox, Opera, Vivaldi, etc. Target the `active` tab, `all` tabs, or a specific tab id. Optional `cleanHTML` and `extractText`.
-- **web_search** → DuckDuckGo-based web search. Returns top results with titles, snippets, and URLs.
-- **web_fetch** → Fetch a URL and return `text`, `markdown`, `html`, or `json`. Handles redirects and timeouts.
-
----
-
-## Screen, Windows & OCR
-
-- **get_screens** → Info on all connected screens.
-- **screenshot** → Capture the whole space, a screen, or a specific window. Use `target` to pick scope; `window_id` when targeting a single window.
-- **get_windows_sorted_front_to_back** → List visible windows in z-order (front to back). Each includes app, pid, bounds, id, title.
-- **activate_window** → Bring a window to the front by `id`.
-- **set_window_frame** → Move/resize a window: provide `id` and `frame`.
-- **screenshot_window** → Screenshot a single window by `id`.
-- **ocr_window** → OCR text from a window (no need to screenshot first). Returns text with global bounds.
-
-### Window management
-- **activate_app** → Activate an app by its `bundleId` (e.g., `com.apple.Safari`).
-- **save_window_layout** → Save the current window layout under a `layoutName`.
-- **restore_window_layout** → Restore a previously saved window layout by `layoutName`.
-- **minimize_window_under_cursor** → Minimize the window currently under the cursor.
-- **close_window_under_cursor** → Close the window currently under the cursor.
-- **zoom_window_under_cursor** → Maximize/zoom the window currently under the cursor.
-- **activate_hovered_app_in_dock** → Activate the app currently hovered in the Dock.
-
----
-
-## Files & Projects
-
-### Create, read, write
-- **file_create** → Create a new file (fails if it exists).
-- **file_read** → Read text files with line numbers (up to ~250KB).
-- **file_write** → Overwrite a file with new content (read first to avoid data loss).
-- **file_write_enhanced** → Safer write: backups, permission checks, encoding handling, atomic writes, auto-create directories.
-
-### Edit & patch
-- **file_edit** → Simple find/replace (optionally replace all).
-- **file_edit_smart** → Context-aware edits using surrounding lines to uniquely match the target location. Supports preview and rollback.
-- **file_edit_multi** → Apply multiple edits in one atomic operation with optional conflict validation. Useful for coordinated changes across a file.
-- **file_patch** → Apply unified diff patches (multi-file supported). Preview via dry-run; reverse or strict modes available.
-
-### Find files & content
-- **file_list** → Show files/folders as a flat list or tree (includes hidden files and sizes).
-- **file_glob** → Glob-based matching (e.g., `**/*.swift`, `src/**/*.js`). Results sorted newest first.
-- **file_search** → Powerful file search by name/type/size/date; supports regex and depth limits.
-- **file_grep** → Regex search inside files with optional context and line numbers.
-- **file_find_content** → Simple text search across files; returns file path, line number, and matching line.
-
----
-
-## Versioning & History
-
-- **file_diff** → Compare file versions (current vs previous or any two versions). Unified or split diff; ignore whitespace; control context lines; show line numbers.
-- **file_undo** → Undo by transaction ID or by the last N operations; restore specific versions; view history.
-- **file_redo** → Redo an undone change (limited). For anything else, use **file_undo** with `restore`.
-
----
-
-## Diagnostics for Code (LSP)
-
-### Core diagnostics
-- **lsp_diagnostics** → Run language server checks (TypeScript/JavaScript/Swift/Python/Go/Rust) to surface errors and warnings for a given file.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `filePath` | string (required) | Path to the file to analyze |
-| `waitForAnalysis` | boolean | Wait for fresh results (default: true) |
-
-### Reading files with diagnostics
-- **read_file_with_lsp_diagnostics** → Read a file with inline comments showing diagnostics next to the relevant lines.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `path` | string (required) | Path to the file to read |
-| `lineNumbers` | boolean | Include line numbers (default: true) |
-| `startLine` | integer | Starting line number (1-based) |
-| `endLine` | integer | Ending line number (1-based, inclusive) |
-
-### Exploring projects with diagnostics
-- **explore_with_diagnostics** → Scan a folder and list files with error/warning counts (optionally recursive or filtered by file types).
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `path` | string (required) | Directory path to explore |
-| `recursive` | boolean | Include subdirectories (default: false) |
-| `fileTypes` | array of strings | Filter by extensions, e.g. `["ts", "js"]` |
-
----
-
-## Memory (Persistent)
-
-The memory system gives your AI assistant the ability to remember information across conversations. Memories are stored locally in a SQLite database and are searchable via keyword, semantic, and graph-based search. See [Memory](/docs/ai-assistants/memory) for a detailed guide.
-
-### memory_save
-Save information to persistent memory that will be available across all future conversations.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `content` | string (required) | The information to remember. Be specific and self-contained. |
-| `memory_type` | string (required) | One of: `fact`, `preference`, `decision`, `identity`, `event`, `observation`, `goal`, `todo` |
-| `importance` | number | Importance score from 0.0 to 1.0. Defaults to a type-appropriate value. |
-| `associations` | array | Optional links to existing memories: `[{memory_id, relation_type}]`. Relation types: `related_to`, `updates`, `contradicts`, `caused_by`, `part_of` |
-
-### memory_recall
-Search and retrieve information from persistent memory.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `query` | string | Search query (required for `hybrid` mode) |
-| `mode` | string | `hybrid` (default — keyword + semantic + graph), `recent`, `important`, or `typed` |
-| `memory_type` | string | Filter by type |
-| `max_results` | integer | 1–25, default 10 |
-
-### memory_forget
-Soft-delete a memory so it no longer appears in searches or the memory bulletin.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `memory_id` | string (required) | The ID of the memory to forget (from `memory_recall` results) |
-| `reason` | string | Optional reason for forgetting (logged for audit) |
-
----
-
-## Interactive Content
-
-### render_interactive_content
-Render interactive HTML/CSS/JavaScript content inline in the chat. Use for charts, forms, interactive demos, data visualizations, custom UIs, games, etc. The content is displayed in an embedded web view within the chat message.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `html` | string (required) | Complete HTML content. Can include inline `<style>` and `<script>` tags. Rendered in a sandboxed web view. |
-| `width` | number | Width in points. If omitted, fills the available chat width. |
-| `height` | number | Height in points. Default: 300. |
-| `enable_add_message_callback` | boolean | If true, the HTML can call `window.BTT.addUserMessage(text)` to add a user message to the chat. |
-| `enable_tool_grant_callback` | boolean | If true, the HTML can call `window.BTT.grantToolUsage(toolName, argsObject)` to execute a tool directly. |
-| `granted_tools` | array of strings | Tool names that the HTML is allowed to invoke via `grantToolUsage`. Only used when `enable_tool_grant_callback` is true. |
-
----
-
-## File Delivery
-
-### provide_file_to_user
-Provide one or more files to the user, displayed inline in the chat with file icon, name, and size. The user can Quick Look, drag & drop, Save As, Open With, or Reveal in Finder.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `files` | array (required) | Array of file objects (see below) |
-
-Each file object can contain:
-- **Existing file**: `path` (absolute path to the file)
-- **Generated file**: `content` (text) or `base64_content` (binary) + `file_name` + `file_extension`
-- **Optional**: `mime_type` to override auto-detection
-
----
-
-## Variables, Haptics, Wait
-
-- **get_variable_value** / **set_variable_value** → Read/write persistent BetterTouchTool variables (store text, numbers, or JSON). Use in triggers, conditions, and scripts.
-- **haptic_feedback** → Light/medium/heavy feedback for quick confirmations.
-- **wait_for_x_seconds** → Pause tool execution for timing/sequencing.
-
----
-
-## Calendars & Reminders
-
-**manage_calendar_and_reminders**
-- **get_events**: Pull events/reminders in a date range.
-- **create_event / create_reminder**: Add items (supports title, times, all-day, location, notes).
-- **list_calendars / list_reminder_lists**: Discover available calendars/lists.
-Returns structured JSON with titles, dates, times, location, notes, calendar name, and identifiers. Reminders include `dueDate`, `completed`, and `priority`.
-
----
-
-## Menubar, Context Menus & Triggers
-
-- **retrieve_app_menubar_items** → Query an app's menubar (enabled/checked state). Provide a path (or empty for root) to get that level's items.
-- **find_menubar_item** → Search a menubar item by name (supports regex). Returns the full path string.
-- **trigger_menubar_item** → Trigger a menubar item using the full path and `pid` (or focused app).
-- **show_menubar_in_context_menu** → Show an app's menubar as a context menu.
-- **trigger_context_menu_item** → Trigger a context menu item by `itemName`.
-- **trigger_named_trigger** → Fire a BetterTouchTool Named Trigger by name.
-- **create_new_btt_trigger_from_json** → Import a trigger from its JSON string (into a specific app via `app_bundle_identifier` or globally). Triggers with the same UUID will be updated/replaced.
-- **add_action_to_trigger** → Import an action JSON and attach it to an existing trigger by UUID.
-- **get_trigger_json** → Retrieve the JSON representation for a trigger by UUID.
-
----
-
-## Scripting
-
-- **run_javascript** → Execute JavaScript code via BetterTouchTool's JavaScriptCore runtime (not the browser). The code should be an async named function that returns a result. Supports `offset` and `length` for paginating large results.
-- **run_shell_script** → Run any shell command or script. Use `directory`, `environmentVariables`, and `background` as needed. For long-running servers, use `autoReturnTimeout` to return after inactivity.
-- **run_apple_script** → Run AppleScript code (with optional function/arguments). Perfect for deep macOS automation.
-- **call_bettertouchtool_scripting_interface** → Call BetterTouchTool's scripting interface directly with a `function` name and optional `parameters` (JSON format).
-
----
-
-## Reasoning & Analysis
-
-- **sequential_thinking** → A multi-step reasoning tool for structured problem-solving. Supports branching, revisions, and tool-aware step recommendations. Use for complex problems that benefit from chain-of-thought reasoning.
-- **think** → Create an isolated multi-turn reasoning session for a complex `problem`. Uses sequential_thinking internally and returns only the final conclusion. Supports `max_turns` (default: 5, max: 15).
-- **self_instruct** → Allows the AI to give itself new instructions based on the output of a previous step. Useful for chaining multi-step workflows.
-
----
-
-## Sub-Agents & Batch Execution
-
-- **agent** → Launch a specialized sub-agent to handle complex, multi-step tasks autonomously. Specify a `task` description, `agent_type` (from the allowed agents for your chat), optional `context`, and `max_iterations` (default: 10, max: 50). Available agent types depend on the skills configured for the chat.
-- **batch** → Execute multiple tool calls in parallel for efficiency. Max 10 calls per batch. Each item specifies a `tool` name and `parameters` object. Useful for independent operations like reading multiple files or running several searches at once.
-
----
-
-## BetterTouchTool Knowledge Search
-
-- **search_bettertouchtool_documentation** → Ask anything about BTT; returns the most relevant docs from a vector search.
-- **search_bettertouchtool_trigger_and_action_definitions** → Find trigger/action definitions when creating automations.
-- **retrieve_floating_menu_definition** → Retrieve JSON definitions for Floating Menus (optionally filter results).
-- **retrieve_swift_plugin_reference** → Returns the full reference documentation for creating custom native Swift plugin widgets for BetterTouchTool floating menus.
-
----
-
-## Function Library
-
-- **search_function_library** → Search the library of previously generated JavaScript functions. Use before writing new code to check if a similar function already exists. Returns matching functions with scripts, descriptions, and usage counts. Params: `query` (required), `limit` (default: 5).
-- **get_execution_log** → Get a log of recently executed JavaScript functions across all AI chats. Params: `days` (default: 3), `limit` (default: 50), `name_filter` (optional substring match).
-
----
-
-## System Tools
-
-- **close_all_notifications** → Close all macOS notifications.
-- **bluetooth_device_connection** → Manage Bluetooth state and connected devices. Actions: `connectDevice`, `disconnectDevice`, `enable`, `disable`, `toggle`. Provide `deviceAddressOrName` for connect/disconnect.
-- **get_tools** → Retrieve full descriptions for tools marked as `onDemand`. Provide an array of `names` to get their complete parameter documentation.
-
----
-
-## Global JavaScript Utilities
-
-These are available globally in your JS execution context (not via tool calls):
-
-### Internet access
-- `fetch` (standard modern fetch)
-- `fetchURLAsBase64(url, readAsBase64)` → Synchronous fetch helper returning base64 if desired.
-
-### File access
-- `readFile(path, readAsBase64)` → Synchronous read.
-- `writeStringToFile(dataString, path, stringIsBase64)` → Synchronous write (supports base64 input).
-
----
-
-**Tip:** For reliable UI automation, follow the flow:
-`get_running_apps_for_ui → get_app_ui_structure → find_ui_elements → (click_ui_element | type_in_ui_element) → diagnose_accessibility_element (if needed)`
+Tools such as shell scripts, AppleScript, file writes, plugin compilation, and desktop control can affect your Mac directly. Keep powerful tools inside focused skills and avoid granting full access to general chat assistants.

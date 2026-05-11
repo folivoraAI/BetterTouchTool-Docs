@@ -6,7 +6,7 @@ slug: "/docs/plugins/swift-source-plugins"
 
 # Swift Source Plugins
 
-The simplest way to create a BetterTouchTool plugin. Write a single `.swift` file, drop it into the Plugins folder, and BTT compiles and loads it automatically — no Xcode project required.
+The simplest way to create a BetterTouchTool plugin. Write a single `.swift` file, drop it into the Plugins folder, and BTT compiles and loads it automatically - no Xcode project required.
 
 ## Requirements
 
@@ -44,7 +44,7 @@ Supported `BTT-Plugin-Type` values: `FloatingMenuWidget`, `Action`, `StreamDeck`
 
 ## Protocols and Bridging Header
 
-All plugin protocols are defined in `BTTSwiftPluginHeader.h`, shipped inside the BTT app bundle. The bridging header is automatically provided during compilation — you don't need to import it manually. Just conform to the protocol and BTT handles the rest.
+All plugin protocols are defined in `BTTSwiftPluginHeader.h`, shipped inside the BTT app bundle. The bridging header is automatically provided during compilation - you don't need to import it manually. Just conform to the protocol and BTT handles the rest.
 
 ## Examples by Plugin Type
 
@@ -290,5 +290,7 @@ func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]?) {
     }
 }
 ```
+
+Use plain field IDs in `configurationFormItems()`, for example `labelText`; BTT applies the `plugin_var_` prefix when saving and delivering configuration values. For trigger plugins, configuration is saved per configured BTT trigger instance and is delivered before `startObserving()` runs.
 
 See the [Configuration Forms Reference](/docs/plugins/configuration-forms) for all available field types.

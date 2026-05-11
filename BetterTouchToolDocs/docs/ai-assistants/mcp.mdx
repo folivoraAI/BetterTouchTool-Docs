@@ -1,50 +1,52 @@
 ---
-title: "MCP"
-sidebar_position: 10
+title: "External MCP Servers"
+sidebar_position: 11
 slug: "/docs/ai-assistants/mcp"
 ---
-# h@llo.ai MCP
+# External MCP Servers
 
-BetterTouchTool's MCP server configuration by default is stored in this file:
+BetterTouchTool assistants can use external MCP servers as additional tool providers. This is useful when a feature is better provided by another app, command line tool, local service, or project-specific MCP server.
+
+## Configuration
+
+The main BTT MCP client configuration file is:
+
+```text
 ~/Library/Application Support/BetterTouchTool/AI/btt-mcp-config.json
+```
 
-You can either edit it directly in your favorite text editor or in BTT's UI.
+You can edit it directly or through BTT's UI.
 
-
-Example configuration:
+Example:
 
 ```json
 {
   "mcpServers": {
     "shell": {
       "command": "uvx",
-      "args": [
-        "mcp-shell-server"
-      ],
+      "args": ["mcp-shell-server"],
       "env": {
-        "ALLOW_COMMANDS": "say, ls,cat,pwd,grep,wc,touch,find"
+        "ALLOW_COMMANDS": "say,ls,cat,pwd,grep,wc,find"
       }
-    },
-    "sequential-thinking": {
-		"command": "npx",
-		"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-	}
+    }
   }
 }
 ```
 
-**Important:** Even after configuring your MCP JSON file, you still need to activate the MCP tools individually for any of your assistants. This is done in the [Tools & Context section in the configuration](/docs/ai-assistants/tools).
+After adding a server, expose its tools through a skill or through the assistant's advanced tool configuration. Prefer creating a small custom skill for MCP tools you use often.
 
-### Alternative Configuration Locations
-It can also be stored in these files - however you should pick one and stick with that.
+## Other Supported Locations
 
-"~/.config/btt/mcp/.mcp.json"
+BTT can also read MCP configuration from:
 
-"~/.btt/mcp/.mcp.json"
+```text
+~/.config/btt/mcp/.mcp.json
+~/.btt/mcp/.mcp.json
+/Library/Application Support/BetterTouchTool/AI/
+```
 
-"~/Library/Application Support/BetterTouchTool/AI/"
+Pick one location and keep it consistent.
 
-"/Library/Application Support/BetterTouchTool/AI/"
+## BTT As An MCP Server
 
-
-      
+If you want Codex, Claude Code, or another external MCP client to use your configured BTT assistants, see [BTT as MCP Provider](./external-mcp-provider).

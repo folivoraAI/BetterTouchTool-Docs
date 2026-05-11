@@ -1,17 +1,17 @@
 ---
-title: "Providing Initial Screenshot / Message"
-sidebar_position: 9
+title: "Initial Screenshot Or Message"
+sidebar_position: 10
 slug: "/docs/ai-assistants/initial-screenshot"
 ---
-# Providing an initial Screenshot or Message 
+# Initial Screenshot Or Message
 
-BTT's AI assistants allow you to configure initial screenshots or messages that are added automatically once the assistant is triggered.
+An assistant action can start with a predefined user message, a screenshot, or both. This is useful when a trigger should immediately ask the assistant to process something without waiting for manual input.
 
-For example you could make an assistant that lets you capture a screenshot when triggered and then automatically make the assistant do something with the captured screenshot.
+Examples:
 
+- capture a selected screen region and ask the assistant to describe it
+- send the current clipboard text for summarization
+- run a fixed prompt whenever a Stream Deck button is pressed
+- attach a screenshot before a computer-use task starts
 
-This example will start interactive screen capture if you press ctrl+opt+cmd+S, then it will directly ask the AI Assistant "Please tell me what you see on this screenshot".
-![Example Setup](/media/hallo_ai_initial_screenshot_setup.png)
-
-Here you can see what happens when I press ctrl+opt+cmd+S, it first allows the macOS interactive screenshot capture, then automatically posts the captured screenshot and defined user message to the AI Assistant:
-<video controls src="/media/3003_providing_initial_screenshot_or_message2025-09-15T21:10:08.776Z.mov" width="540" title="Title"></video>
+For repeated background tasks, also see [Usage Without UI](./usage-without-ui).

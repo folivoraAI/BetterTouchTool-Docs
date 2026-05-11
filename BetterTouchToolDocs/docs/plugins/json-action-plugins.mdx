@@ -6,11 +6,11 @@ slug: "/docs/plugins/json-action-plugins"
 
 # JSON Action Plugins (`.bttjsonplugin`)
 
-JSON Action Plugins are a simple way to create reusable, configurable action plugins for BetterTouchTool — **without writing any compiled code**. Instead of building an Xcode project, you write a single `.bttjsonplugin` file containing:
+JSON Action Plugins are a simple way to create reusable, configurable action plugins for BetterTouchTool - **without writing any compiled code**. Instead of building an Xcode project, you write a single `.bttjsonplugin` file containing:
 
-- **Metadata** — plugin name, identifier, description, and icon
-- **Form fields** — user-configurable parameters that appear in the BTT preferences
-- **Actions** — a sequence of BTT actions (same format as exported presets) with placeholders that get replaced by the form field values at execution time
+- **Metadata** - plugin name, identifier, description, and icon
+- **Form fields** - user-configurable parameters that appear in the BTT preferences
+- **Actions** - a sequence of BTT actions (same format as exported presets) with placeholders that get replaced by the form field values at execution time
 
 ## Quick Start
 
@@ -63,7 +63,7 @@ An array of form field definitions. These create the configuration UI that appea
 | `formLabel1` | String | No | Primary label displayed next to the field |
 | `formLabel2` | String | No | Secondary label |
 | `defaultValue` | Any | No | Default value for the field |
-| `dataType` | Number | No | `1` = String, `2` = Number, `3` = JSON, `4` = Icon, `5` = Data |
+| `dataType` | Number | No | `1` = String, `2` = Number, `3` = JSON, `5` = Icon, `6` = Data |
 | `minValue` | Number | No | Minimum value (for sliders) |
 | `maxValue` | Number | No | Maximum value (for sliders) |
 | `formOptions` | Array | No | Options for popup buttons (see below) |
@@ -77,7 +77,7 @@ An array of form field definitions. These create the configuration UI that appea
 | `BTTFormTypeTextArea` | Multi-line text input |
 | `BTTFormTypeCheckbox` | Boolean toggle |
 | `BTTFormTypeSlider` | Numeric slider (set `minValue`, `maxValue`, `dataType` to `2`) |
-| `BTTFormTypePopupButton` | Dropdown selector |
+| `BTTFormTypePopupButton` | Dropdown selector. If `defaultValue` is omitted, BTT uses the first option. |
 | `BTTFormTypeColorPicker` | Color picker |
 | `BTTFormTypeImagePicker` | Image picker (value is Base64 encoded) |
 | `BTTFormTypeSeparator` | Visual separator line (no value) |
@@ -93,6 +93,7 @@ For `BTTFormTypePopupButton`, provide an array of option objects:
   "formFieldType": "BTTFormTypePopupButton",
   "formFieldID": "position",
   "formLabel1": "Position:",
+  "defaultValue": "top",
   "formOptions": [
     { "formLabel1": "Top", "formOption": "top" },
     { "formLabel1": "Center", "formOption": "center" },
@@ -103,7 +104,7 @@ For `BTTFormTypePopupButton`, provide an array of option objects:
 
 ### BTTPluginActions
 
-An array of BTT action dictionaries — the same JSON format used when exporting triggers/actions from BTT. These actions are executed in sequence when the plugin is triggered.
+An array of BTT action dictionaries - the same JSON format used when exporting triggers/actions from BTT. These actions are executed in sequence when the plugin is triggered.
 
 Use `@@@fieldID@@@` placeholders anywhere in the action JSON. At execution time, each placeholder is replaced with the corresponding form field value (properly JSON-escaped).
 
@@ -113,9 +114,9 @@ Use `@@@fieldID@@@` placeholders anywhere in the action JSON. At execution time,
     "BTTIsPureAction": true,
     "BTTPredefinedActionType": 254,
     "BTTAdditionalActionData": {
-      "BTTActionHUDTitle": "@@@hudTitle@@@"
-    },
-    "BTTHUDDuration": "@@@duration@@@"
+      "BTTActionHUDTitle": "@@@hudTitle@@@",
+      "BTTActionHUDDuration": "@@@duration@@@"
+    }
   }
 ]
 ```
@@ -163,9 +164,9 @@ This plugin shows a configurable macOS notification:
       "BTTPredefinedActionType": 254,
       "BTTAdditionalActionData": {
         "BTTActionHUDTitle": "@@@notifTitle@@@",
-        "BTTActionHUDDetail": "@@@notifMessage@@@"
-      },
-      "BTTHUDDuration": 2
+        "BTTActionHUDDetail": "@@@notifMessage@@@",
+        "BTTActionHUDDuration": 2
+      }
     }
   ]
 }
@@ -179,18 +180,18 @@ When the user sets "Notification Title" to `Meeting Reminder` and "Notification 
   "BTTPredefinedActionType": 254,
   "BTTAdditionalActionData": {
     "BTTActionHUDTitle": "Meeting Reminder",
-    "BTTActionHUDDetail": "Standup in 5 minutes"
-  },
-  "BTTHUDDuration": 2
+    "BTTActionHUDDetail": "Standup in 5 minutes",
+    "BTTActionHUDDuration": 2
+  }
 }
 ```
 
 ## Placeholder Replacement
 
 - Placeholders use the format `@@@fieldID@@@` where `fieldID` matches a `formFieldID` from your form fields
-- Placeholders can appear anywhere in the action JSON — in string values, numeric values, or even keys
+- Placeholders can appear anywhere in the action JSON - in string values, numeric values, or even keys
 - Values are automatically JSON-escaped, so special characters like quotes and backslashes in user input are handled safely
-- Replacement is done on the serialized JSON string, then parsed back — this means placeholders work even inside nested objects
+- Replacement is done on the serialized JSON string, then parsed back - this means placeholders work even inside nested objects
 
 ## Multiple Actions
 
@@ -234,4 +235,4 @@ JSON action plugins appear in the BTT Plugin Manager (accessible from the BTT me
 | **Custom UI** | Form fields only | Custom AppKit/SwiftUI views |
 | **Use case** | Reusable action sequences, sharing action recipes | Complex logic, custom rendering, API calls |
 
-JSON action plugins are ideal when you want to package a reusable action configuration that others can install and customize through form fields — without requiring them to compile anything or trust executable code.
+JSON action plugins are ideal when you want to package a reusable action configuration that others can install and customize through form fields - without requiring them to compile anything or trust executable code.

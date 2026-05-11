@@ -2543,9 +2543,9 @@ Example:
 }
 ```
 
-### Move All Windows to Mouse Display
+### Move & Maximize All Windows to Mouse Display
 
-> Moves all windows to the display where mouse is.
+> Moves and maximizes all windows to the display where the mouse is.
 
 Parameters:
 * **BTTPredefinedActionType**: 267
@@ -2554,6 +2554,20 @@ Example:
 ```json
 {
   "BTTPredefinedActionType": 267
+}
+```
+
+### Move All Windows to Mouse Display
+
+> Moves all windows to the display where the mouse is, preserving each window's size and relative position.
+
+Parameters:
+* **BTTPredefinedActionType**: 273
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 273
 }
 ```
 
@@ -5948,6 +5962,7 @@ Parameters:
   - Go Back: 511
   - Enable: 514
   - Disable: 515
+  - Start Keyboard Input: 598 (shows the keyboard input overlay on the connected iOS device)
 
 Example:
 ```json
@@ -6878,12 +6893,12 @@ Example:
 
 Parameters:
 * **BTTPredefinedActionType**: 254
-* **BTTHUDActionConfiguration**: HUD configuration JSON string (legacy format)
-* **BTTAdditionalActionData**: JSON object with HUD configuration
+* **BTTHUDActionConfiguration**: HUD configuration JSON string (legacy compatibility format)
+* **BTTAdditionalActionData**: JSON object with HUD configuration (recommended)
   - `BTTActionHUDTitle`: string - Main title text (plain text)
   - `BTTActionHUDAttributedTitle`: string - Attributed title (rich text, alternative to BTTActionHUDTitle)
   - `BTTActionHUDDetail`: string - Detail/subtitle text
-  - `BTTActionHUDBackground`: string - Background color (hex, e.g. "#000000CC")
+  - `BTTActionHUDBackground`: string - Background color. Accepts legacy RGBA strings and common CSS color strings such as `#000000CC`
   - `BTTActionHUDBlur`: boolean - Enable system blur effect behind HUD
   - `BTTActionHUDDuration`: number - Display duration in seconds (0 = stays until dismissed)
   - `BTTActionHUDHideWhenOtherHUDAppears`: boolean - Close immediately when another HUD appears
@@ -6896,7 +6911,7 @@ Parameters:
   - `BTTActionHUDWidth`: number - HUD width in pixels (0 = auto)
   - `BTTActionHUDHeight`: number - HUD height in pixels (0 = auto)
   - `BTTActionHUDPadding`: number - Inner padding in pixels
-  - `BTTActionHUDBorderColor`: string - Border color (hex)
+  - `BTTActionHUDBorderColor`: string - Border color. Accepts the same formats as `BTTActionHUDBackground`
   - `BTTActionHUDBorderWidth`: number - Border width in pixels
 
 Example:
@@ -7214,7 +7229,7 @@ Example:
 
 ### JSON Action Plugin
 
-> Executes a JSON-based action plugin (.bttjsonplugin). JSON plugins are simple JSON files that define actions with configurable form fields and placeholder substitution. They do not require compiled code — just a .bttjsonplugin file placed in the BetterTouchTool Plugins folder.
+> Executes a JSON-based action plugin (.bttjsonplugin). JSON plugins are simple JSON files that define actions with configurable form fields and placeholder substitution. They do not require compiled code - just a .bttjsonplugin file placed in the BetterTouchTool Plugins folder.
 
 Parameters:
 * **BTTPredefinedActionType**: 588
@@ -7415,7 +7430,21 @@ Parameters:
 * **BTTAdditionalActionData**: JSON object (optional) with positioning configuration
   - `BTTActionLauncherID`: string (optional) - stable launcher instance identifier. Actions that use the same launcher ID operate on the same launcher window. Leave empty for the default launcher.
   - `BTTActionLauncherShortcut`: string (optional) - shortcut for the launcher’s per-item actions popover, in the same recorded shortcut format used elsewhere in BetterTouchTool. Defaults to `⌘P`.
-  - `BTTActionLauncherOpenGroup`: string (optional) - title of a top-level launcher group to open immediately when the launcher appears (for example `Apps`). Matched case- and diacritic-insensitively against the group title or identifier.
+  - `BTTActionLauncherInitialRoute`: JSON object (optional) - a specific Launcher item, group, or surface to open immediately when the launcher appears. Preferred over the legacy `BTTActionLauncherOpenGroup`. Recognized keys:
+    - `BTTLauncherRouteType`: string - one of `group`, `surface`, or `item`.
+    - `BTTLauncherRouteID`: string - identifier of the route (for groups: the group title or identifier; for surfaces: e.g. `surface:clipboard`; or one of the built-in IDs `builtin:clipboard`, `builtin:calendar`, `builtin:timer`, `builtin:appleTVRemote`, `builtin:emojiPicker`, `builtin:speechDictation`, `builtin:fileBrowser`, `builtin:bttActions`).
+    - `BTTLauncherRouteTitle`: string (optional) - human-readable title shown in the configuration UI.
+    - `BTTLauncherSurfaceKind`: string (optional, surfaces/items only) - explicit surface kind, e.g. `clipboard`, `calendar`, `timer`, `appleTVRemote`, `emojiPicker`, `speechDictation`, `fileBrowser`, `bttActions`.
+    - `BTTLauncherRouteSystemImage`: string (optional) - SF Symbol name for display.
+    - `BTTLauncherInitialClipboardItemID`: string (optional) - clipboard item to focus when entering the clipboard surface.
+    - `BTTLauncherInitialAppleTVDeviceIdentifier`: string (optional) - Apple TV device to target when entering the Apple TV remote surface.
+    - `BTTLauncherInitialFloatingMenuIdentifier` / `BTTLauncherInitialFloatingMenuTitle`: string (optional) - floating menu to focus.
+    - `BTTLauncherInitialPluginIdentifier` / `BTTLauncherInitialPluginItemIdentifier` / `BTTLauncherInitialPluginSurfaceIdentifier` / `BTTLauncherInitialPluginSurfaceTitle`: string (optional) - plugin surface targeting.
+    - `BTTLauncherInitialTimerInput`: string (optional) - text to seed in the timer surface.
+    - `BTTLauncherInitialTimerDuration`: number (optional) - timer duration in seconds.
+    - `BTTLauncherInitialTimerIdentifier`: string (optional) - existing timer to focus.
+    - `BTTLauncherInitialFileBrowserDirectoryPath`: string (optional) - starting directory for the file browser surface.
+  - `BTTActionLauncherOpenGroup`: string (optional, legacy) - title of a top-level launcher group to open immediately when the launcher appears (for example `Apps`). Matched case- and diacritic-insensitively against the group title or identifier. Superseded by `BTTActionLauncherInitialRoute`; still supported for existing configurations.
   - `BTTMenuPositioningType`: int - how the window is positioned (0=Move & Resize Freely (default), 1=Fixed Position, 3=Center on Focused Screen, 4=Fixed Initial Position then Free)
   - `BTTMenuPositionRelativeTo`: int - reference frame for fixed positioning (0=Focused Window, 1=Focused Screen, 2=Notch, 3=Focused Menubar, etc.)
   - `BTTMenuAnchorMenu`: int - which point of the launcher to anchor (0=Top Left, 1=Top Right, 2=Bottom Left, 3=Bottom Right, 4=Center)
@@ -7457,6 +7486,35 @@ Example (fixed position relative to focused screen):
 }
 ```
 
+Example (open the clipboard surface immediately):
+```json
+{
+  "BTTPredefinedActionType": 594,
+  "BTTAdditionalActionData": {
+    "BTTActionLauncherInitialRoute": {
+      "BTTLauncherRouteType": "surface",
+      "BTTLauncherRouteID": "surface:clipboard",
+      "BTTLauncherSurfaceKind": "clipboard",
+      "BTTLauncherRouteTitle": "Clipboard"
+    }
+  }
+}
+```
+
+Example (open a top-level Launcher group immediately):
+```json
+{
+  "BTTPredefinedActionType": 594,
+  "BTTAdditionalActionData": {
+    "BTTActionLauncherInitialRoute": {
+      "BTTLauncherRouteType": "group",
+      "BTTLauncherRouteID": "Apps",
+      "BTTLauncherRouteTitle": "Apps"
+    }
+  }
+}
+```
+
 ### Hide Launcher
 
 > Hides the BetterTouchTool Launcher. Requires macOS 13.0 or later. You can optionally target a specific launcher instance via `BTTActionLauncherID`. If no launcher ID is provided, BetterTouchTool hides the currently active launcher.
@@ -7485,11 +7543,11 @@ Example (hide a specific launcher instance):
 
 ### Toggle Launcher
 
-> Toggles the BetterTouchTool Launcher visibility. Requires macOS 13.0 or later. Supports the same optional positioning configuration as Show Launcher to control where the launcher window appears, including stable launcher IDs and the optional `BTTActionLauncherOpenGroup` to open a top-level group immediately.
+> Toggles the BetterTouchTool Launcher visibility. Requires macOS 13.0 or later. Supports the same optional positioning configuration as Show Launcher to control where the launcher window appears, including stable launcher IDs and the optional `BTTActionLauncherInitialRoute` (or legacy `BTTActionLauncherOpenGroup`) to open a specific Launcher item or group immediately.
 
 Parameters:
 * **BTTPredefinedActionType**: 596
-* **BTTAdditionalActionData**: JSON object (optional) - same launcher ID, item-actions shortcut, open-group title, and positioning options as Show Launcher (see above)
+* **BTTAdditionalActionData**: JSON object (optional) - same launcher ID, item-actions shortcut, initial route, and positioning options as Show Launcher (see above)
 
 Example (default):
 ```json

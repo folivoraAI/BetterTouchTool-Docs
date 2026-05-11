@@ -115,7 +115,7 @@ When a snippet is imported, BetterTouchTool:
 
 | Property | Value | Configurable |
 |----------|-------|--------------|
-| Pause between keys | 0.3 s | Yes — via `#BTTBetweenTime:` in CSV or `"betweenTime"` in JSON |
+| Pause between keys | 0.3 s | Yes - via `#BTTBetweenTime:` in CSV or `"betweenTime"` in JSON |
 | Pause before / after | 0 s | No |
 
 ---
@@ -237,7 +237,7 @@ matches:
 
 ### How It Works
 
-For simple `trigger → replace` matches (no variables), BTT creates a plain-text paste action — identical to the CSV/JSON import.
+For simple `trigger → replace` matches (no variables), BTT creates a plain-text paste action - identical to the CSV/JSON import.
 
 For matches with **variables, case propagation, cursor positioning, or HTML**, BTT generates a JavaScript function that:
 1. Evaluates each variable in order (date formatting, shell commands, clipboard, etc.)
@@ -246,7 +246,7 @@ For matches with **variables, case propagation, cursor positioning, or HTML**, B
 4. Handles `$|$` cursor positioning
 5. Calls `paste_text()` to insert the result
 
-This means the full power of BTT's JavaScript API is available — shell scripts, Apple Shortcuts, BTT variables, and more.
+This means the full power of BTT's JavaScript API is available - shell scripts, Apple Shortcuts, BTT variables, and more.
 
 ---
 
@@ -295,11 +295,11 @@ Best regards
 
 | Option | Effect in BTT |
 |--------|---------------|
-| `*` | Immediate trigger (no ending character) — this is BTT's default behavior |
+| `*` | Immediate trigger (no ending character) - this is BTT's default behavior |
 | `B0` | Don't delete the typed abbreviation (`deleteAfterwards = 0`) |
 | `B1` | Delete the abbreviation (default) |
 | `C` | Case-sensitive matching |
-| `O` | Omit ending character — accepted (BTT always omits) |
+| `O` | Omit ending character - accepted (BTT always omits) |
 | `R`, `T`, `S` | Accepted but no effect in BTT |
 
 ### Not Supported

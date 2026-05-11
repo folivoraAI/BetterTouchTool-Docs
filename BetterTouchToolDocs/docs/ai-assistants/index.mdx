@@ -1,110 +1,88 @@
 ---
-title: "h@llo.AI - AI Assistants"
+title: "AI Assistants"
 sidebar_position: 1
 slug: "/docs/ai-assistants/overview"
 ---
-# h@llo.ai - BetterTouchTool integrated AI Assistants
+# h@llo.ai / AI Assistants
 
-![Building Blocks](/media/hallo_ai_logo.png)
-**Building Blocks for custom AI macOS automation assistants**
+BetterTouchTool AI Assistants let you build your own Mac assistants for chat, BTT configuration, automation, research, coding, and computer use.
 
-Starting with version 5.611 BetterTouchTool allows you to create custom AI Assistants tailored to your specific needs. They come with many building blocks that allow for macOS automation but also generic usage. You can create one or multiple AI Assistants that can be triggered via any of BTT's triggers.
+BTT does not provide the AI model service itself. You choose the provider or local model, and BTT sends requests directly to that provider from your Mac. No assistant chat data is routed through BetterTouchTool servers.
 
-I call this feature h@llo.ai :-)
+![alt text](../../static/media/index2026-04-30T11:04:43.735Z.png)
 
-**Note:** BetterTouchTool does not offer the AI services for h@llo.ai assistants itself. This means you will need to use your own API Keys (or use on-device models like Apple Foundation Models).
+![alt text](../../static/media/index2026-04-30T11:07:06.308Z.png)
 
-h@llo.ai assistants always directly communicate with the AI provider (e.g. OpenAI, Anthropic, local LLMs etc.). No chat data is sent to our servers. Make sure to accept the terms of the specific provider you chose to use.
+## Main Features
 
-# Overview
+- **Skills:** The recommended way to configure assistants. A skill bundles instructions, tools, context, subagents, and thinking settings for a specific job.
+- **BTT configuration:** Assistants can search BTT documentation and create or edit triggers, actions, floating menus, snippets, and plugins.
+- **Computer use:** Assistants can inspect windows, use accessibility data, click, type, use menu bar commands, and verify results with screenshots.
+- **Background computer use:** Assistants can target specific windows without activating them, including optional fake cursor feedback for background clicks.
+- **Text and document workflows:** Assistants can read selected text, transform it, replace it, inspect active documents, and work with files when allowed.
+- **Memory and context:** Assistants can remember useful information and receive selected context such as date, active app, selected text, windows, and project files.
+- **Subagents:** Larger assistants can delegate focused tasks to specialized helper agents.
+- **MCP support:** Assistants can use external MCP servers, and BTT can also expose configured assistants to external MCP clients.
 
-In the next sections I'll quickly describe the various building blocks you can use to create your own custom AI assistants.
+## Get Started
 
-Go to [Getting Started](/docs/ai-assistants/getting-started) if you want to see instructions on how to get started with your own assistant.
+1. Create or edit an action using **h@llo.ai - Show Customizable AI Assistant**.
+2. Choose an AI provider or local model and add the required credentials.
+3. Open **AI Configuration** and select **Manage Skills...**.
+4. Turn on one or more skills that match what the assistant should do.
+5. Trigger the assistant from any BetterTouchTool trigger, for example a keyboard shortcut, menu item, Stream Deck button, or floating menu.
 
-## The Chat Interface
-While h@llo.ai assistants can also operate without showing user interface (see [Use Without Showing UI](/docs/ai-assistants/usage-without-ui)), most of the time you'll probably want to use the chat interface:
+For a first assistant, start with **General Assistant** plus one focused skill such as **BTT Expert**, **Computer Use**, or **Research Assistant**. Add more skills only when the assistant needs them.
 
-Initially the assistant opens a Spotlight like interface where you can enter a new request or choose from your existing ones:
+![alt text](../../static/media/index2026-04-30T10:22:15.509Z.png)
 
-![Spotlight Like Interface](/media/hallo_ai_spotlight_interface.png)
+Next use the setup wizard to configure your AI Assistant:
+![alt text](../../static/media/index2026-04-30T10:44:29.302Z.png)
+![alt text](../../static/media/index2026-04-30T10:45:06.985Z.png)
 
-The interface then expands once you submit your request:
+Then use the predefined action "Show h@llo.ai AI Assistant" and assign it to some trigger:
+![alt text](../../static/media/index2026-04-30T10:54:41.086Z.png)
 
-![Expanded](/media/hallo_ai_expanded_view.png)
+## Example Prompts For Chosen Skills
 
-## Tools
+**BTT Expert**
 
-BetterTouchTool integrates many tools the AI Assistants can use. By default the h@llo.ai assistants don't have access to any tool, you need to enable the ones you want it to be able to access.
+- "Create a keyboard shortcut that toggles Dark Mode."
+- "Add a Stream Deck button that opens my daily apps."
+- "Explain what the selected BTT trigger does and suggest improvements."
 
-Many of the tools are super powerful, but also pretty dangerous. Make sure you have a good backup system in place and be wary of prompt injections.
+**Computer Use**
 
-Some examples for powerful tools are:
-* **run_shell_script**: to run arbitrary shell / terminal commands.
-* **run_apple_script**: automate apps via AppleScript. Same security considerations as for run_shell_script apply
-* **transform_selected_text**: To transform any selected text with AI.
-* **safari_automation**: Execute JavaScript in Safari
-* **render_interactive_content**: Render interactive HTML/CSS/JS inline in the chat (charts, forms, games, etc.)
-* **provide_file_to_user**: Deliver files to the user with Quick Look and drag & drop support
+- "Use the current window and click the Export button, then verify it worked."
+- "Open System Settings and turn on Do Not Disturb."
 
-For a list of all available tools and instructions how to configure them have a look here: [Available Tools and How To Configure Them](/docs/ai-assistants/tools)
+**Background Computer Use**
 
-### MCP
+- "Refresh Safari in the background without bringing it to the front."
+- "Click Play in the Spotify window without moving my real cursor."
 
-In case the built-in tools do not cover your requirements, you can also link MCP servers. See [MCP](/docs/ai-assistants/mcp).
+**General Assistant / Text Workflows**
 
-### Custom User Defined Tools
+- "Summarize the selected text and replace it with a shorter version."
+- "Rewrite the selected text in a friendlier tone."
 
-BetterTouchTool also allows to create custom tools the AI can access. Custom tools are based on [Named Triggers](/docs/other-triggers/named-triggers)
+**Research Assistant**
 
-## Context
+- "Research this topic and save the most useful findings to memory."
+- "Compare these two products and summarize the tradeoffs."
 
-To work well, AI Assistants often need some context about the environment they are running in. BetterTouchTool allows you to add such context and offers some defaults like Date & Time, Selected Text, Active Application, Active Document etc.
-However just like tools, BTT doesn't add context by default as it is a complex balance that involves considerations about your context window, token usage and required interaction speed.
+**Floating Menu & Widget Creator**
 
-![Context](/media/hallo_ai_context_menu.png)
+- "Create a floating menu with buttons for my daily actions."
+- "Build a small widget that shows the current clipboard length."
 
-It is also possible to retrieve custom context via scripts if required.
+**Plugin Creator / Editor**
 
-See [h@llo.ai - Context](/docs/ai-assistants/context) for more details on how to configure your Assistant's context.
+- "Create a JSON Action Plugin that shows a configurable HUD message."
+- "Update this Swift plugin to add a polling interval setting."
 
-## Persistent Memory
+## Safety
 
-h@llo.ai assistants can remember information across conversations using a built-in persistent memory system. Memories are stored locally in a SQLite database and searchable via keyword, semantic, and graph-based search.
+Skills can grant powerful capabilities such as file editing, shell scripts, AppleScript, and desktop control. Only enable skills you need, and use optional skills for capabilities that should be loaded on demand.
 
-The AI can save facts, preferences, decisions, goals, and more — and recall them in future conversations. A memory bulletin is automatically included in the system prompt so the assistant starts each conversation with relevant context.
-
-See [Memory](/docs/ai-assistants/memory) for details on how the memory system works.
-
-## Extended Thinking
-
-For complex tasks, h@llo.ai supports extended thinking (chain-of-thought reasoning). When enabled, the AI model reasons through the problem before responding, producing better results for multi-step tasks, coding, and analysis.
-
-You can configure the thinking budget from minimal (~1K tokens) to maximum (~100K tokens) depending on task complexity.
-
-See [Extended Thinking](/docs/ai-assistants/extended-thinking) for configuration details.
-
-## Skills
-
-Skills are preconfigured bundles of tools, context items, system prompt additions, and thinking settings. They make it easy to quickly set up an assistant for a specific use case (e.g., coding, desktop automation, general assistance) without manually configuring each tool.
-
-Built-in skills include **General Assistant**, **Code Assistant**, and **Desktop Automation**. You can also create custom skills.
-
-## Reusable Code Generation
-
-When running automation tasks from your AI Assistants, BetterTouchTool takes a slightly different approach than many others.
-Instead of relying on the AI to call tools directly, BetterTouchTool asks the AI to create JavaScript code that calls the tools.
-This approach allows us to save that JavaScript code and create reusable BetterTouchTool actions out of it.
-
-![OpenHeiseExample](/media/hallo_ai_open_heise_example.png)
-
-## Specialized Sub-Agents
-
-Sometimes it might be good to have a generic main chat and delegate specific tasks to specific AI models with different instructions. For this BetterTouchTool allows you to define custom specialized sub-agents. They can use different APIs than the main chat and you can provide custom tools, context and instructions to them.
-The main chat can then call these subagents when needed.
-
-See [Subagents](/docs/ai-assistants/subagents) for info on how to set them up.
-
-## Projects
-
-When calling the AI Assistant while in some sort of project, BTT checks whether there is an AGENT.md or BTT.md file. If so it will read the content of that file and use it to adapt the assistant to the project.
+See [Skills](./skills), [Tools](./tools), and [BTT as MCP Provider](./external-mcp-provider) for the details behind the setup.

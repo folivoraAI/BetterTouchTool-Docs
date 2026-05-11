@@ -214,6 +214,116 @@ Examples:
 
 ---
 
+## subitemsFunction
+
+This is only relevant for using Simple JSON Format in the [Launcher](../launcher/index.mdx).
+
+For Launcher Simple JSON items you can load submenu items lazily by providing a JavaScript function name instead of a static `subitems` array. BetterTouchTool calls that function only when the user opens the item in the Launcher.
+
+The loader function is called as:
+
+```javascript
+async function loadItems(prompt, itemIdentifier) {
+  // return JSON.stringify([...items])
+}
+```
+
+* **prompt** is the current Launcher prompt text at the time the item is opened.
+* **itemIdentifier** is the full Simple JSON item path. It is built from each item's `meta` value if present, otherwise from the item title.
+
+Supported property: `subitemsFunction`.
+
+Example that creates three Launcher categories and loads each category's subitems asynchronously via `runShellScript` only when that category is opened:
+
+```javascript
+async function retrieveJSON(prompt) {
+  return JSON.stringify([
+    {
+      title: "Overview",
+      meta: "overview",
+      icon: "sfsymbol::desktopcomputer",
+      subitemsFunction: "loadOverviewItems"
+    },
+    {
+      title: "Hardware",
+      meta: "hardware",
+      icon: "sfsymbol::cpu",
+      subitemsFunction: "loadHardwareItems"
+    },
+    {
+      title: "Storage",
+      meta: "storage",
+      icon: "sfsymbol::internaldrive",
+      subitemsFunction: "loadStorageItems"
+    }
+  ]);
+}
+
+async function loadOverviewItems(prompt, itemIdentifier) {
+  const output = await runShellScript({
+    launchPath: "/bin/zsh",
+    parameters: "-lc",
+    script: `
+      printf 'macOS|%s\\n' "$(/usr/bin/sw_vers -productVersion)"
+      printf 'Uptime|%s\\n' "$(/usr/bin/uptime | /usr/bin/sed 's/^.*up //; s/, [0-9]* users.*$//')"
+      printf 'Computer Name|%s\\n' "$(/usr/sbin/scutil --get ComputerName 2>/dev/null || /bin/hostname)"
+    `
+  });
+
+  return JSON.stringify(itemsFromPipeOutput(output, "sfsymbol::info.circle"));
+}
+
+async function loadHardwareItems(prompt, itemIdentifier) {
+  const output = await runShellScript({
+    launchPath: "/bin/zsh",
+    parameters: "-lc",
+    script: `
+      printf 'Model|%s\\n' "$(/usr/sbin/sysctl -n hw.model)"
+      printf 'Chip|%s\\n' "$(/usr/sbin/sysctl -n machdep.cpu.brand_string 2>/dev/null || /usr/sbin/sysctl -n hw.model)"
+      printf 'CPU Cores|%s\\n' "$(/usr/sbin/sysctl -n hw.ncpu)"
+      printf 'Memory|%s\\n' "$(/usr/sbin/sysctl -n hw.memsize | /usr/bin/awk '{printf "%.1f GB", $1/1024/1024/1024}')"
+    `
+  });
+
+  return JSON.stringify(itemsFromPipeOutput(output, "sfsymbol::cpu"));
+}
+
+async function loadStorageItems(prompt, itemIdentifier) {
+  const output = await runShellScript({
+    launchPath: "/bin/zsh",
+    parameters: "-lc",
+    script: `
+      /bin/df -h / /System/Volumes/Data 2>/dev/null | /usr/bin/awk 'NR>1 {print $9 "|" $4 " free of " $2}'
+    `
+  });
+
+  return JSON.stringify(itemsFromPipeOutput(output, "sfsymbol::internaldrive"));
+}
+
+function itemsFromPipeOutput(output, icon) {
+  return String(output)
+    .trim()
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => {
+      const [title, ...valueParts] = line.split("|");
+      const value = valueParts.join("|");
+      const text = `${title}: ${value}`;
+
+      return {
+        title,
+        subtitle: value,
+        icon,
+        action: `btt::paste_text@@${JSON.stringify({ text })}`
+      };
+    });
+}
+```
+
+This is currently supported by Launcher Simple JSON items. Other Simple JSON consumers such as context menus, searchable lists and Floating Menus still use static `subitems`.
+
+---
+
 ## setvariable
 This allows you to set a variable value before the action is executed. If the simple string based action format is used, the **setvariable** must be at the top level of the item definition. If you have multiple actions all string based actions will use that setvariable definition.
 If you use the object based action definition you can set a variable per action.

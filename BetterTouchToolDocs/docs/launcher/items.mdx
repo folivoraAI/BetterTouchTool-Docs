@@ -1,0 +1,108 @@
+---
+title: "Items & Widgets"
+sidebar_position: 2
+slug: "/docs/launcher/items"
+---
+
+# Items & Widgets
+
+The Launcher ships with a catalogue of built-in sections ("items"). Some are simple rows that run a command; others are **widgets** - rich surfaces that expand the Launcher window into a full interactive view (clipboard, calendar, Apple TV remote, file browser, speech dictation, …).
+
+Every section can be enabled, disabled, reordered, renamed, grouped into folders, and - per row - pinned, re-ranked, given aliases, or hidden. The Launcher settings sheet (menu button in the top-left) and the per-item popover (`⌘P`) control all of it.
+
+## Finder Context
+
+When Finder is the frontmost app, the Launcher shows the current Finder selection (or the frontmost folder) as a top row. `↩` opens it; `Tab` opens an **Open With…** sublist so you can pick a specific app.
+
+## Apps
+
+Recent, running, and installed apps, ordered by recency. `Tab` or `→` on a running app lists its open windows with live thumbnails and on-screen highlight previews. Window rows expose tiling commands (left/right/top/bottom half, maximize) via `⌘P`.
+
+The app index covers `/Applications`, `/System/Applications`, `/System/Library/CoreServices`, macOS cryptex roots, and `~/Applications`.
+
+Per-row commands include **Quit** (`⌘Q`), **Force Quit** (`⌘⌥Q`), and **Show in Finder** (`⌘R`) for app rows.
+
+## Clipboard Manager (Widget)
+
+A full-featured clipboard manager surface. The main results list shows a single Clipboard row; pressing `↩` expands the Launcher into a two-pane view (sidebar scopes, list, preview).
+
+- Previews for text, rich text, images, PDFs, videos, office documents, and URL previews.
+- Edit text entries inline (`⌘S` to save).
+- Apply text transformers, including any custom JavaScript transformers you've configured.
+- Annotate images with the built-in markup tool before pasting.
+- Favorite snippets so they're kept forever, independent of the history limit.
+- Quick paste without opening the surface: `⌘1` / `⌘2` / `⌘3` paste the three most recent entries directly from the main results list.
+
+Entries are shared with the classic BTT Clipboard Manager. Everything stays on the Mac - nothing is synced to any cloud service.
+
+## Calendar (Widget)
+
+A calendar surface backed by EventKit - the same calendars and reminder lists you see in Apple's Calendar and Reminders apps. Month / week / day views, inline event detail, and inline composers for new events and reminders.
+
+- `⌘N` creates a new event.
+- `⌘⇧N` creates a new reminder.
+
+Calendar and reminders access is requested the first time you open the surface.
+
+## Speech Dictation (Widget)
+
+Live voice-to-text powered by Apple's speech recognition. Review, edit, copy (`⌘C`), or paste (`↩`) the transcript into the previously focused app. `⌘R` restarts recording. Leaving the surface (`Esc`) stops recording.
+
+Requires microphone and speech-recognition permission.
+
+## Apple TV Remote (Widget)
+
+A full on-screen remote - directional pad, menu / back, home, play/pause, skip, volume, sleep, and Siri where supported - rendered as a rich surface. Keyboard-drivable too: arrow keys act as the d-pad, `↩` selects, `Esc` closes the surface. First use pairs with a PIN, matching the physical-remote pairing flow.
+
+## File Search
+
+Indexed file-name search. To keep normal queries flat and fast, file search is opt-in per query:
+
+- Type a **leading space**, then the filename - e.g. ` report.pdf`.
+- Or type the configured keyword (default: `file`), a space, and the query - e.g. `file report`.
+
+In the settings sheet you can add keywords, configure **scope folders** that are searched first, set a result-count limit, and enable a broader Spotlight fallback when the scope returns nothing.
+
+Per-row commands: **Quick Look** (`Space`), **Reveal in Finder** (`⌘R`), **Open Containing Folder** (`⌘⌥R`), **Copy Path** (`⌘⇧C`).
+
+## File Browser (Widget)
+
+A Finder-like rich surface. Arrow keys navigate, `↩` opens, `←` / `Backspace` goes up, `Space` previews, typing filters the current folder. Dragging files onto the Launcher's search bar pins them to the **drawer shelf** - a quick-access bar of files that appears below the search field and persists across Launcher restarts.
+
+## BetterTouchTool Actions
+
+The entire BTT predefined-action catalogue, searchable by name. Type an action name directly (e.g. `paste custom text`, `volume up`), or open the **BetterTouchTool Actions** row to drill through the hierarchy.
+
+Use this for ad-hoc execution. For actions with custom parameters (specific text, a specific shortcut, scripts), create a named trigger in BTT and expose it via **Configured Triggers** instead.
+
+## Configured Triggers
+
+Any BTT trigger with **Show in Launcher** enabled appears as a searchable item. This turns BetterTouchTool into a command palette for your own automations.
+
+Each entry has a title, subtitle, icon, and optional aliases. Running one runs the full trigger pipeline - conditions, variables, scripts, everything. A single trigger can also expose multiple distinct Launcher entries with different names, icons, and sort order.
+
+## Launcher Plugins
+
+Third-party plugins can contribute their own rows, commands, and rich surfaces. Install a `.bttlauncherplugin` bundle the same way as any other BTT plugin; installed plugins appear under **Settings → Plugins**.
+
+Individual plugin rows can be hidden via `⌘P → Hide From Launcher`, and the whole Launcher Plugins section can be toggled off. See [building launcher plugins](/docs/plugins/launcher) for the developer side.
+
+## AI Chat Conversations
+
+Recent h@llo.AI conversations. `↩` jumps back into one. The maximum number of conversations shown is configurable in the settings sheet.
+
+## Always-Available Items
+
+These don't live in their own section - they show up inline whenever the query matches:
+
+- **Math** - type an expression (e.g. `37*19+4`); the result appears at the top and `↩` copies it.
+- **URL** - type a URL (e.g. `github.com/foo/bar`) and press `↩` to open it in your default browser.
+- **Floating Menu embeds** - floating menus with a Launcher embedding mode appear inline in results.
+
+## Groups (Folders)
+
+Sections can be collected into folders that appear as a single browsable entry when the search field is empty. While you're searching, results stay flat so matches never hide inside a folder. Groups can be renamed, assigned an SF Symbol icon, reordered, and given their own keyboard shortcut. Default groups: **Widgets**, **Commands**, **AI**, **Apps**.
+
+## Multiple Launcher Instances
+
+Every Launcher has a stable ID. Two instances with different IDs keep independent window positions, pinned items, aliases, priorities, hidden-state overrides, and query memory - so you can run, say, a general-purpose Launcher alongside a "work" Launcher or a "media" Launcher that auto-opens the Apple TV remote. Set `BTTActionLauncherID` on the **Show Launcher** / **Toggle Launcher** action to target a specific instance.

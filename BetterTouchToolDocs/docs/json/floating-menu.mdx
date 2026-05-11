@@ -123,7 +123,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `$StealKeyboardFocusOnShow`: 1 to steal focus
 
 ### Visibility
-- `$Visibility`: 0=onLaunch, 1=viaAction
+- `$Visibility`: 0=onLaunch, 1=viaAction, 2=viaActionRestoreOnAppActivation (app-specific menus only; remembers shown state and restores when app becomes active again)
 - `$OpacityActive`/`$OpacityInactive`: Opacity 0-1
 - `$AlwaysUseLightMode`: 1 to force light mode
 - `$KeepCached`: 1 to keep cached when hidden
@@ -352,7 +352,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 
 ## Default Values
 
-Properties listed below can be **omitted** from `$Config` when their value matches the default — the runtime will behave identically whether the key is present-with-default or absent. This keeps exported JSON minimal.
+Properties listed below can be **omitted** from `$Config` when their value matches the default - the runtime will behave identically whether the key is present-with-default or absent. This keeps exported JSON minimal.
 
 ### Defaults = 0
 `§MarginLeft`, `§MarginRight`, `§MarginTop`, `§MarginBottom`,

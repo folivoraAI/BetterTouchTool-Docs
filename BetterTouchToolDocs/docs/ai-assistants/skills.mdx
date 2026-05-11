@@ -1,0 +1,64 @@
+---
+title: "Skills"
+sidebar_position: 4
+slug: "/docs/ai-assistants/skills"
+---
+# Skills
+
+Skills are the main way to configure AI Assistants in BetterTouchTool. Instead of manually picking many individual tools, choose skills that describe what the assistant should be able to do.
+
+A skill can provide:
+
+- system instructions
+- allowed tools
+- context items
+- subagents
+- thinking settings
+- example prompts
+- file access limits
+
+## Active, Optional, Or Off
+
+In **AI Configuration -> Tools & Context -> Manage Skills...**, each skill can be set to:
+
+- **Active:** Loaded whenever the assistant starts.
+- **Optional:** Available on demand. The assistant can request it when the task needs it.
+- **Off:** Not available to that assistant.
+
+Use **Active** for the assistant's normal job. Use **Optional** for powerful or occasional capabilities such as plugin creation, shell access, or background computer use.
+
+## Built-In Skills
+
+- **General Assistant:** Writing, questions, selected text, web lookup, and everyday help.
+- **BTT Expert:** BetterTouchTool documentation, triggers, actions, snippets, and configuration changes.
+- **Computer Use:** Frontmost visible app control with screenshots, accessibility, keyboard, mouse, windows, and menu bar tools.
+- **Background Computer Use:** Targeted background window control without activating the app.
+- **Desktop Automation:** General macOS automation using BTT's desktop tools.
+- **Floating Menu & Widget Creator:** Floating menus and Swift widget plugins.
+- **BTT Plugin Creator / Editor:** JSON action plugins and native Swift plugins.
+- **Code Assistant:** File editing, shell commands, diagnostics, and project work.
+- **Research Assistant:** Web research, document reading, and memory.
+- **Safari Automation:** Browser automation and page inspection.
+- **Anthropic / OpenAI Computer Use:** Provider-native computer-use tools when using the matching provider.
+
+## Custom Skills
+
+You can create, duplicate, edit, and import skills from the skill manager. Custom BTT skills are stored here:
+
+```text
+~/Library/Application Support/BetterTouchTool/AI/Skills/custom
+```
+
+BTT can also load OpenClaw-style `SKILL.md` folders from:
+
+```text
+~/Library/Application Support/BetterTouchTool/AI/Skills/openclaw
+~/.openclaw/skills
+```
+
+## Practical Tips
+
+- Prefer one or two focused skills over a large collection of unrelated skills.
+- Keep risky skills optional unless they are central to the assistant.
+- Create task-specific assistants rather than one assistant with every capability.
+- If a background or computer-use workflow behaves oddly, use the matching dedicated skill instead of generic automation tools.

@@ -6,13 +6,35 @@ slug: "/docs/launcher"
 
 # The BetterTouchTool Launcher
 
-The Launcher is a Spotlight-style command window built into BetterTouchTool. It can start apps, run BetterTouchTool actions and triggers, manage your clipboard, show a calendar, dictate speech, control an Apple TV, browse files, host custom plugins, and much more — all from one search field.
+The Launcher is a Spotlight-style command window built into BetterTouchTool. Access apps, files, your BTT triggers, your clipboard, your calendar, and much more.
 
-The Launcher requires **macOS 13 or newer**.
+Requires **macOS 13 or newer and BetterTouchTool 6.440 or newer**.
+
+![launcher screenshot1](../../static/media/index2026-04-24T07:50:28.474Z.png)
+
+## Highlights
+
+- **Reuse Your Configured BTT Triggers** - You can put **any BetterTouchTool trigger** into the Launcher, simply by enabling "Show in Launcher" in its configuration. Every BTT trigger can become a searchable, named command - a true command palette for your automations. The prompt is saved to variables BTTLauncherPrompt (full prompt), BTTLauncherPromptKeyword (first word) and BTTLauncherPromptInputWithoutKeyword (remaining text) and can be accessed from your automations.
+- **Search everything** - apps, windows, files, BTT actions, your own triggers, and calendar events from one field.
+- **Clipboard Manager** - full history with previews, inline editing, text transformers, and image markup.
+- **Calendar & Reminders** - browse your macOS calendars and create events or reminders without leaving the keyboard.
+- **Speech Dictation** - voice-to-text with review, edit, paste, or copy.
+- **File Search & Browser** - fast name search with configurable scopes, plus a Finder-like browser.
+- **Apple TV Remote** - full on-screen remote as a built-in widget.
+- **Plugins** - third-party extensions can contribute their own rows, commands, and rich surfaces.
+- **AI Chat** - jump straight back into recent h@llo.AI conversations, run AI queries or use it to configure BTT.
+- **AI Launcher Plugin Generation** - use BetterTouchTool's AI Configuration Assistants (Ask AI) to generate completely custom native launcher plugins
+- **Multiple Instances** - run several launchers in parallel, each with its own pinned items, window position, aliases, and query memory.
+
+<video src="/media/bttlauncher.mp4" autoPlay muted loop style={{width: '100%'}}>
+    Sorry, your browser doesn't support embedded videos, but don't worry, you can
+    <a href="/media/bttlauncher.mp4">download it</a>
+    and watch it with your favorite video player!
+</video>
 
 ## Opening the Launcher
 
-The Launcher is controlled through predefined BetterTouchTool actions. Assign any of these to a trigger (hotkey, trackpad gesture, menu bar item, etc.):
+The Launcher is controlled through three predefined BetterTouchTool actions. Assign any of them to a trigger (hotkey, trackpad gesture, menu bar item, Stream Deck button, …):
 
 | Action | Description |
 | --- | --- |
@@ -20,75 +42,40 @@ The Launcher is controlled through predefined BetterTouchTool actions. Assign an
 | **Hide Launcher** | Hides the currently active Launcher. |
 | **Toggle Launcher** | Shows the Launcher if hidden, otherwise hides it. |
 
-All three actions accept optional positioning parameters and a stable launcher ID so you can run multiple independent Launcher instances side by side. See [Multiple Launchers & Positioning](/docs/launcher/multiple-launchers) for details.
+A typical setup is a keyboard shortcut like `⌥ Space` bound to **Toggle Launcher**.
 
-A typical setup is a keyboard shortcut trigger (e.g. `⌥ Space`) that runs **Toggle Launcher**.
+All three actions accept an optional **launcher ID** and positioning parameters so you can run several independent Launcher instances side by side and place them exactly where you want.
 
-## What the Launcher Can Do
+![alt text](../../static/media/index2026-04-29T18:16:55.732Z.png)
 
-Out of the box the Launcher comes with a number of **built-in sections**. Every section can be individually enabled, disabled, renamed, reordered, and grouped in the Launcher settings.
+## Customizing Results
 
-- **Finder Context** — current Finder selection or folder, with "Open With…"
-- **Clipboard Manager** — full clipboard history with preview, edit, transformers
-- **Calendar** — create events and reminders, browse month/week/day views
-- **Apple TV Remote** — on-screen remote for Apple TV devices
-- **Speech Dictation** — voice-to-text with review, edit, paste, copy
-- **Running Apps / Installed Apps** — launch or switch to apps, list their open windows
-- **File Search / File Browser** — spotlight-style file search and a Finder-like browser
-- **BetterTouchTool Actions** — browse and execute any predefined BTT action
-- **Launcher Plugins** — third-party extensions that add their own commands and surfaces
-- **AI Chat Conversations** — jump into recent h@llo.AI conversations
-- **Configured Triggers** — any gesture/shortcut you configured to appear in the Launcher
-- **Math** — quick calculator evaluation straight in the search field
-- **URL suggestions** — type a URL to open it directly in your browser
+Every row in the Launcher can be tailored - no code required:
 
-In addition, you can put **any BetterTouchTool trigger** into the Launcher simply by enabling "Show in Launcher" in its configuration — see [Configured Triggers](/docs/launcher/configured-triggers).
+- **Aliases / keywords** - make a row match extra search terms.
+- **Pinning** - keep a quick pill above the results for one-click access.
+- **Priority** - boost or lower a row's ranking in filtered searches.
+- **Hide** - remove a row from results without deleting the underlying trigger.
+- **Groups (folders)** - collect related sections into browsable folders with their own SF Symbol icons and keyboard shortcuts.
 
-## Result Types
+All of this is reachable from the per-item actions popover (`⌘P` by default) or the Launcher settings sheet, opened from the menu button in the top-left corner of the Launcher window.
 
-A Launcher row can do one of four things when activated:
+![alt text](../../static/media/index2026-04-24T07:51:10.795Z.png)
 
-1. **Execute an action** (e.g. launch an app, run a BTT action, paste a clipboard item)
-2. **Open child items** — a nested list (e.g. the windows of an app)
-3. **Open a rich surface** — an expanded interface inside the Launcher (clipboard, calendar, dictation, Apple TV remote, file browser, floating menu)
-4. **Open a browser or Finder target** directly
+## Keyboard-First
 
-## Main Keyboard Shortcuts
+The Launcher is designed to be driven from the keyboard. The most important keys:
 
 | Key | Action |
 | --- | --- |
-| `↑` / `↓` | Move selection. Pressing `↑` at the top returns focus to the search field. |
-| `↩` | Activate selected item. |
-| `⌘↩` | Alternate activation (varies per item type). |
-| `Tab` or `→` | Enter child items (e.g. an app's windows, subcommands). |
-| `←` | Go back one level in child navigation. |
-| `Esc` | Close the Launcher or exit the current surface/child list. |
-| `Space` | Quick Look preview (on file rows). |
-| `⌘P` | Open the per-item actions popover (customizable). |
-| `⌘L` / `⌘A` | Focus the search field and select all text. |
+| `↑` / `↓` | Move selection. |
+| `↩` | Activate the selected item. |
+| `Tab` / `→` | Enter child items (e.g. an app's windows). |
+| `←` | Go back one level. |
+| `Esc` | Exit the current surface, or close the Launcher. |
+| `Space` | Quick Look preview on file rows. |
+| `⌘P` | Per-item actions popover. |
 
-More keyboard details are in [Keyboard & Shortcuts](/docs/launcher/keyboard-shortcuts).
+## Learn More
 
-## Window Behavior
-
-- **Drag to move**: grab any passive chrome (header, empty area) to move the window.
-- **Pin button** in the top right keeps the Launcher open when you click outside.
-- **Outside click** closes the Launcher (unless it is pinned or showing a sticky surface).
-- **Window position and size** are remembered per Launcher ID.
-- Rich surfaces like clipboard or calendar automatically resize the window and restore it when you leave them.
-
-## Where to Go Next
-
-- [Built-In Items & Sections](/docs/launcher/built-in-items) — all built-in providers, default order, groups
-- [Clipboard Manager](/docs/launcher/clipboard) — full clipboard surface
-- [Calendar](/docs/launcher/calendar) — events and reminders surface
-- [File Search & Browser](/docs/launcher/files) — file search keywords, scopes, and the file browser
-- [Speech Dictation](/docs/launcher/speech-dictation)
-- [Apple TV Remote](/docs/launcher/apple-tv-remote)
-- [BetterTouchTool Actions Surface](/docs/launcher/btt-actions)
-- [Configured Triggers](/docs/launcher/configured-triggers) — adding your own triggers to the Launcher
-- [Customization](/docs/launcher/customization) — aliases, priority, hiding, pinning
-- [Keyboard & Shortcuts](/docs/launcher/keyboard-shortcuts)
-- [Launcher Plugins](/docs/launcher/plugins)
-- [Multiple Launchers & Positioning](/docs/launcher/multiple-launchers)
-- [Theme & Settings](/docs/launcher/settings)
+See [Items & Widgets](/docs/launcher/items) for the full catalogue of what can appear in the Launcher and what each item can do.

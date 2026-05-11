@@ -1,112 +1,29 @@
 ---
 title: "Context"
-sidebar_position: 6
+sidebar_position: 7
 slug: "/docs/ai-assistants/context"
 ---
-# h@llo.ai Context
+# Context
 
+Context is information BTT adds so the assistant understands what is happening on your Mac. Skills usually choose the right context automatically.
 
-To work well, AI Assistants often need some context about the environment they are running in. BetterTouchTool allows you to add such context and offers some defaults like Date & Time, Selected Text, Active Application, Active Document etc.
-However just like tools, BTT doesn't add context by default as it is a complex balance that involves considerations about your context window, token usage and required interaction speed.
+## Common Context Items
 
-You can enable any of the default context items here:
-![Context](/media/hallo_ai_context_settings.png)
+- **Date and time:** Useful for scheduling and relative dates.
+- **Selected text:** Lets the assistant explain, transform, or replace the current selection.
+- **Active application:** Helps the assistant adapt to the app you are using.
+- **Active windows:** Gives app names, window titles, bounds, and identifiers.
+- **Active document / project:** Useful for coding and document workflows.
+- **Screen information:** Lists connected displays and their coordinate spaces.
+- **Accessibility tree:** Describes controls in the frontmost app. Powerful, but can be large.
+- **Memory bulletin:** Adds relevant saved memories to the conversation.
 
-Be aware that enabling more context items also means a larger context size. This leads to higher token usage and often slower response times.
+## Keep It Small
 
----
+More context can make an assistant smarter, but it also makes requests slower and more expensive. Avoid enabling screenshots, accessibility trees, or large project context unless the assistant's skill needs them.
 
-## Available Context Items
+## Custom Context
 
-### Date & Time
-**ID:** `BTTAIContextDateTime`
+You can create dynamic custom context from **Automations, Named & Other Triggers** using **h@llo.ai - Custom AI Context**.
 
-Provides the current date and time. Useful for time-aware responses, scheduling, and relative date references.
-
-- **Refresh:** Dynamic (updates continuously)
-- **Token impact:** Very low
-
-### Selected Text
-**ID:** `BTTAIContextSelectedText`
-
-Captures the user's currently selected text from any application. Updated automatically when new text is selected.
-
-- **Refresh:** Dynamic (event-driven via text selection changes)
-- **Token impact:** Depends on selection length
-- **Note:** Falls back to a "no text selected" message when empty
-
-### Active Application
-**ID:** `BTTAIContextActiveApplication`
-
-Reports the frontmost application name and process ID. Useful for app-aware behavior and UI automation.
-
-- **Refresh:** Dynamic (updates on app switch)
-- **Token impact:** Very low
-
-### Active Windows
-**ID:** `BTTAIContextActiveWindows`
-
-Lists up to 20 open windows sorted front-to-back, including window title, bounds, owning app, PID, and bundle identifier.
-
-- **Refresh:** Dynamic (continuous window state tracking)
-- **Token impact:** Moderate (depends on number of open windows)
-
-### Active Document
-**ID:** `BTTAIContextActiveDocument`
-
-Tracks the currently active document path using intelligent path resolution. Particularly useful for coding and file-editing assistants.
-
-- **Refresh:** Dynamic (monitors active document path changes)
-- **Token impact:** Very low
-
-### Accessibility Tree
-**ID:** `BTTAIContextAXTree`
-
-Provides the UI hierarchy of the frontmost application via the macOS Accessibility API. Configurable depth. Essential for UI automation tasks.
-
-- **Refresh:** Once (captured on initialization)
-- **Token impact:** High (can be very large depending on depth)
-- **Tip:** Use a low `max_depth` to keep token usage manageable
-
-### Screen Information
-**ID:** `BTTAIContextScreens`
-
-Lists all connected displays with resolution and position coordinates.
-
-- **Refresh:** Once (captured on initialization)
-- **Token impact:** Very low
-
-### Persistent Memory
-**ID:** `BTTAIContextMemoryBulletin`
-
-Injects a summary of stored persistent memories into the system prompt, organized by category (identity, goals, decisions, preferences, todos, events, facts, observations). See [Memory](/docs/ai-assistants/memory) for more.
-
-- **Refresh:** Periodic (every 60 minutes)
-- **Token impact:** Low to moderate (capped at ~2000 characters)
-
----
-
-## Refresh Policies
-
-Each context item has a refresh policy that controls how often its data is updated:
-
-| Policy | Behavior |
-|--------|----------|
-| **Never** | Data is never refreshed after creation |
-| **Once** | Data is captured once on initialization |
-| **Dynamic** | Data updates continuously in response to system events (app switch, text selection, etc.) |
-| **Periodic** | Data refreshes at a configurable interval (in seconds) |
-
-You can override refresh intervals per context item via the configuration. For example, you could set Active Windows to refresh every 5 seconds or Date & Time to refresh every second.
-
----
-
-## Custom Contexts
-
-If you want to provide custom, dynamic context to your AI Assistant you can go to the "Automations, Named & Other Triggers" section in BetterTouchTool and add a new "h@llo.ai - Custom AI Context"
-
-![alt text](/media/hallo_ai_context_details.png)
-
-Custom contexts are defined by a JavaScript function that can use all of BTT's scripting functionality, see [BetterTouchTool JavaScript](/docs/scripting/java-script).
-
-Custom contexts follow the same `BTTAIContextItem` protocol as built-in items — they have an ID, title, refresh policy, and a function that generates the context string. This means you can create context items that pull data from APIs, read files, query databases, or compute dynamic values.
+Custom context can call BTT JavaScript, read variables, inspect app state, or provide any small text summary the assistant should see.

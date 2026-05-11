@@ -8,7 +8,7 @@ slug: "/docs/plugins/launcher"
 
 Launcher plugins add custom rows, commands, and native surfaces to the BetterTouchTool Launcher. They conform to the `BTTLauncherPluginInterface` protocol and use the `.bttlauncherplugin` bundle extension for Xcode projects.
 
-Launcher plugins appear in the Launcher's **Launcher Plugins** section. For the user-facing install and usage documentation, see [Launcher Plugins](/docs/launcher/plugins).
+Launcher plugins appear in the Launcher's **Launcher Plugins** section. For the user-facing install and usage documentation, see [Launcher Plugins](/docs/launcher/items#launcher-plugins).
 
 ## What Launcher Plugins Can Do
 
@@ -16,6 +16,7 @@ Launcher plugins appear in the Launcher's **Launcher Plugins** section. For the 
 - Return **child items** for drill-down style navigation
 - Attach **per-item commands** with optional keyboard shortcuts
 - Open **native launcher surfaces** with custom `NSView` content
+- Load **async results** and **lazy child items** for external APIs, CLIs, and large data sets
 - React to the current **search query**, frontmost app, and Finder selection
 - Read and write **BTT variables**
 - Execute **named triggers**
@@ -43,10 +44,15 @@ Launcher plugins appear in the Launcher's **Launcher Plugins** section. For the 
 | Method | Description |
 |---|---|
 | `launcherResults(for:)` | Return launcher results for the current query and context |
+| `loadLauncherResults(for:completion:)` | Return launcher results asynchronously |
+| `launcherChildren(forItemIdentifier:childrenIdentifier:context:)` | Return lazy children for a result synchronously |
+| `loadLauncherChildren(forItemIdentifier:childrenIdentifier:context:completion:)` | Return lazy children for a result asynchronously |
 | `performAction(forItemIdentifier:actionIdentifier:context:)` | Run the action for a result or command |
 | `launcherSurface(forItemIdentifier:surfaceIdentifier:context:)` | Return a launcher-hosted native surface |
 
 A useful launcher plugin usually implements `launcherResults(for:)` plus either `performAction(...)`, `launcherSurface(...)`, or both.
+
+If your plugin needs to call a command line tool, web API, database, or other potentially slow provider, implement `loadLauncherResults(for:completion:)` instead of blocking inside `launcherResults(for:)`. BetterTouchTool prefers the async method when available and falls back to the synchronous method for older or simpler plugins.
 
 ## Context: `BTTLauncherPluginContext`
 
@@ -81,15 +87,77 @@ Use `query` for result filtering, `frontmostBundleIdentifier` for app-aware rows
 | `sortOrder` | Ordering hint |
 | `searchMatchPriority` | Search ranking hint |
 | `opensChildrenByDefault` | Whether activation should drill into children first |
+| `dynamicChildrenIdentifier` | Marker used to load this result's children only when the user opens the result |
 | `children` | Nested `BTTLauncherPluginResult` values |
 | `commands` | Per-item commands shown in the launcher command list |
 
 Typical patterns:
 
 - For a simple actionable row, set `itemIdentifier` and `primaryActionIdentifier`.
-- For a browse-style plugin, attach `children`.
+- For a small browse-style plugin, attach `children`.
+- For expensive or large browse lists, set `dynamicChildrenIdentifier` and implement a child-loading method.
 - For a row that opens native UI, set `surfaceIdentifier` and implement `launcherSurface(...)`.
 - For row-specific shortcuts and actions, attach `commands`.
+
+## Async Results And Lazy Children
+
+Use the async result API when a plugin should remain responsive while waiting for slow work:
+
+```swift
+func loadLauncherResults(
+    for context: BTTLauncherPluginContext,
+    completion: @escaping ([BTTLauncherPluginResult]?) -> Void
+) {
+    let query = context.query?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+    DispatchQueue.global(qos: .userInitiated).async {
+        let results = self.searchExternalProvider(query: query)
+
+        DispatchQueue.main.async {
+            completion(results)
+        }
+    }
+}
+```
+
+Call the completion handler exactly once. Return `nil` or an empty array when the plugin has no results for the current query. If you also implement `launcherResults(for:)`, BetterTouchTool uses it as a compatibility fallback when the async method is not available.
+
+For drill-down plugins, use `dynamicChildrenIdentifier` instead of eagerly attaching a large `children` array:
+
+```swift
+func launcherResults(for context: BTTLauncherPluginContext) -> [BTTLauncherPluginResult]? {
+    let result = BTTLauncherPluginResult()
+    result.itemIdentifier = "accounts"
+    result.title = "Accounts"
+    result.subtitle = "Browse accounts from the external provider"
+    result.systemImageName = "folder"
+    result.dynamicChildrenIdentifier = "accounts"
+    result.opensChildrenByDefault = true
+    return [result]
+}
+
+func loadLauncherChildren(
+    forItemIdentifier itemIdentifier: String,
+    childrenIdentifier: String?,
+    context: BTTLauncherPluginContext,
+    completion: @escaping ([BTTLauncherPluginResult]?) -> Void
+) {
+    guard itemIdentifier == "accounts", childrenIdentifier == "accounts" else {
+        completion(nil)
+        return
+    }
+
+    DispatchQueue.global(qos: .userInitiated).async {
+        let children = self.loadAccountRows()
+
+        DispatchQueue.main.async {
+            completion(children)
+        }
+    }
+}
+```
+
+`dynamicChildrenIdentifier` is passed back to your child-loading method, so a single plugin can expose multiple lazy child lists from different result rows. Use eager `children` for small static lists and lazy children for content that requires I/O, authorization, or significant processing.
 
 ## Commands And Shortcuts
 

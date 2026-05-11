@@ -8,7 +8,7 @@ slug: "/docs/plugins/trigger"
 
 Trigger plugins monitor system events and fire BTT triggers when conditions are met. They conform to the `BTTTriggerPluginInterface` protocol and use the `.btttriggerplugin` bundle extension for Xcode projects.
 
-Trigger plugins appear in BTT under **Other Triggers > Trigger Plugins**.
+Trigger plugins appear in BTT under **Other Triggers > Trigger Plugins**. BTT creates a separate plugin object for every configured trigger, so two triggers using the same plugin can keep different configuration values and fire different assigned actions.
 
 ## Protocol: `BTTTriggerPluginInterface`
 
@@ -27,15 +27,17 @@ Trigger plugins appear in BTT under **Other Triggers > Trigger Plugins**.
 |---|---|
 | `startObserving()` | Start monitoring for events. Called when the trigger becomes active. |
 | `stopObserving()` | Stop monitoring and clean up resources. Called when the trigger is no longer needed. |
-| `didReceiveNewConfigurationValues(_:)` | Handle configuration changes from the user |
+| `didReceiveNewConfigurationValues(_:)` | Handle saved and default configuration values. Called before observing starts and whenever this trigger instance's configuration changes. |
 
 ## Lifecycle
 
 BTT manages the trigger plugin lifecycle:
 
-1. **`startObserving()`** is called when a trigger using this plugin is active (e.g. the app context matches, the trigger is enabled)
-2. Your plugin monitors events and calls `delegate?.triggerFired(self)` or `delegate?.triggerFired(self, withContext:)` when conditions are met
-3. **`stopObserving()`** is called when the trigger is no longer needed (app change, trigger deleted, BTT quit, etc.)
+1. BTT loads the plugin and creates one plugin object per configured trigger instance.
+2. **`didReceiveNewConfigurationValues(_:)`** is called with the trigger's saved configuration plus default values from `configurationFormItems()`.
+3. **`startObserving()`** is called when a trigger using this plugin is active (e.g. the app context matches, the trigger is enabled).
+4. Your plugin monitors events and calls `delegate?.triggerFired(self)` or `delegate?.triggerFired(self, withContext:)` when conditions are met.
+5. **`stopObserving()`** is called when the trigger is no longer needed (app change, trigger deleted, BTT quit, etc.).
 
 Always clean up resources (timers, file descriptors, observers) in `stopObserving()` to avoid leaks.
 
@@ -59,6 +61,12 @@ delegate?.triggerFired(self, withContext: [
 ```
 
 In this example, the user can access `{TriggerPlugin_clipboardContent}` and `{TriggerPlugin_changeType}` in their BTT actions.
+
+## Configuration Values
+
+Use plain `formFieldID` values in `configurationFormItems()`, for example `watchPath`. BTT stores and delivers the value as `plugin_var_watchPath` in `didReceiveNewConfigurationValues(_:)`. Including the `plugin_var_` prefix manually is supported, but not required.
+
+Trigger plugin configuration is saved per BTT trigger, not globally per plugin bundle. The delegate's `getVariable(_:)` checks the current trigger instance's configuration before falling back to global BTT variables, so both `delegate?.getVariable("watchPath")` and `delegate?.getVariable("plugin_var_watchPath")` can read the configured value.
 
 ## Basic Example: Clipboard Monitor
 
@@ -129,10 +137,10 @@ class FileWatcherTrigger: NSObject, BTTTriggerPluginInterface {
 
         let pathField = BTTPluginFormItem()
         pathField.formFieldType = BTTFormTypeTextField
-        pathField.formFieldID = "plugin_var_watchPath"
+        pathField.formFieldID = "watchPath"
         pathField.formLabel1 = "Path to watch"
         pathField.defaultValue = "~/Desktop" as NSString
-        pathField.dataType = .string
+        pathField.dataType = BTTFormDataString
 
         group.formOptions = [pathField]
         return group
@@ -181,6 +189,28 @@ class FileWatcherTrigger: NSObject, BTTTriggerPluginInterface {
 }
 ```
 
+## Configuration Form Items
+
+Trigger plugins use the same `BTTPluginFormItem` system as other Swift plugin types. See [Configuration Forms Reference](/docs/plugins/configuration-forms) for the full field list.
+
+Common field types:
+
+- `BTTFormTypeTextField` - Text input field
+- `BTTFormTypeCheckbox` - Boolean toggle
+- `BTTFormTypePopupButton` - Dropdown selector. If `defaultValue` is omitted, BTT uses the first option.
+- `BTTFormTypeSlider` - Numeric slider (use `minValue`, `maxValue`, and `BTTFormDataNumber`)
+- `BTTFormTypeDescription` - Static description text
+- `BTTFormTypeDetailTitleField` - Detailed title/description text
+- `BTTFormTypeFormGroup` - Container for grouping fields
+
+Useful properties:
+
+- `formFieldID` - Plain field key. BTT automatically stores and delivers it with a `plugin_var_` prefix.
+- `formLabel1` - Display label
+- `dataType` - `BTTFormDataString`, `BTTFormDataNumber`, `BTTFormDataJSON`, `BTTFormDataIcon`, or `BTTFormDataData`
+- `defaultValue` - Initial value
+- `formOptions` - Array of child items for groups or popup options
+
 ## Delegate Methods
 
 The `delegate` property (type `BTTTriggerPluginDelegate`) provides:
@@ -188,9 +218,9 @@ The `delegate` property (type `BTTTriggerPluginDelegate`) provides:
 | Method | Description |
 |---|---|
 | `triggerFired(_:)` | Fire the trigger (no context) |
-| `triggerFired(_:withContext:)` | Fire with a context dictionary — values become `TriggerPlugin_<key>` BTT variables |
+| `triggerFired(_:withContext:)` | Fire with a context dictionary - values become `TriggerPlugin_<key>` BTT variables |
 | `setVariable(_:value:)` | Set a BTT variable |
-| `getVariable(_:)` | Read a BTT variable |
+| `getVariable(_:)` | Read this trigger instance's config value first, then fall back to global BTT variables |
 
 ## Xcode Bundle Setup
 

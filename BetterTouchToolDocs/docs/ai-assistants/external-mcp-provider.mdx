@@ -1,0 +1,62 @@
+---
+title: "BTT As MCP Provider"
+sidebar_position: 12
+slug: "/docs/ai-assistants/external-mcp-provider"
+---
+# BTT As MCP Provider
+
+BetterTouchTool can expose its configured AI assistants to external MCP clients such as Codex or Claude Code.
+
+This is controlled by the setting **Enable BetterTouchTool MCP Server For External AI Clients** (`BTTExternalMCPServerEnabled`) in BTT's MCP settings. The server listens on localhost only.
+
+## Endpoint
+
+The HTTP MCP endpoint is:
+
+```text
+http://127.0.0.1:64832/mcp
+```
+
+Port `64832` is the default. You can change it with `BTTExternalMCPServerPort`. For OpenCode remote MCP, BTT also provides:
+
+```text
+http://127.0.0.1:64832/sse
+```
+
+## Recommended Session Flow
+
+External clients should use assistant-session mode:
+
+1. Call `list_btt_assistants`.
+2. Pick the assistant you want to use.
+3. Call `activate_btt_assistant`.
+4. Call `load_bettertouchtool_assistant_instructions`.
+5. Follow the returned instructions for the rest of the session.
+
+After activation, the visible tools are filtered to the selected assistant's skills and permissions. Direct MCP tools can be called directly. Other allowed BTT helper functions can be called through `run_javascript` using the `ai` object.
+
+## Codex Setup
+
+```bash
+codex mcp add btt --url http://127.0.0.1:64832/mcp
+```
+
+A useful first prompt in a new Codex chat:
+
+```text
+Use the BetterTouchTool MCP server in assistant-session mode. First call list_btt_assistants, then activate the BTT assistant I name, then call load_bettertouchtool_assistant_instructions and follow those instructions.
+```
+
+BTT can also install a BetterTouchTool-managed Codex plugin that uses the currently configured port.
+
+## Claude Code Setup
+
+```bash
+claude mcp add --transport http btt http://127.0.0.1:64832/mcp
+```
+
+Use `--scope user` to make it available across projects, or `--scope project` to write a project `.mcp.json`.
+
+## Security Notes
+
+This is a local bridge, not a sandbox. Any local process that can reach the configured localhost port can ask BTT's MCP server for tools. Only enable it on Macs and user accounts you trust, and keep assistant skills scoped to what external clients should be allowed to do.

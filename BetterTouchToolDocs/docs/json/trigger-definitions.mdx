@@ -370,7 +370,7 @@ The trigger should have a Launcher Config with `BTTLauncherShowInLauncher` set t
 }
 ```
 
-Note: `604` (Switch to Application) and `779` (App Did Change) do not use `BTTAdditionalConfiguration` — they trigger based on the app assignment scope (which app group the trigger is in).
+Note: `604` (Switch to Application) and `779` (App Did Change) do not use `BTTAdditionalConfiguration` - they trigger based on the app assignment scope (which app group the trigger is in).
 
 #### Window Events
 - `784` - Focused Window Did Change
@@ -394,7 +394,7 @@ These triggers have no additional configuration. They fire based on the app scop
 - `824` - Spotlight Did Show
 - `825` - Spotlight Did Hide
 
-These are simple event triggers with no configuration — just assign actions.
+These are simple event triggers with no configuration - just assign actions.
 
 ```json
 {
@@ -415,7 +415,7 @@ These are simple event triggers with no configuration — just assign actions.
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `BTTAdditionalConfiguration` | String | Battery percentage threshold (e.g. `"20"` for 20%) — for 706/707 only |
+| `BTTAdditionalConfiguration` | String | Battery percentage threshold (e.g. `"20"` for 20%) - for 706/707 only |
 
 ```json
 {
@@ -759,7 +759,7 @@ Accelerometer triggers use the built-in Bosch BMI286 IMU on Apple Silicon MacBoo
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `BTTRepeatDelay` | Number | Magnitude threshold in g — fires when combined per-sample delta across all axes exceeds this value |
+| `BTTRepeatDelay` | Number | Magnitude threshold in g - fires when combined per-sample delta across all axes exceeds this value |
 
 ```json
 {
@@ -865,7 +865,7 @@ Plugin-specific configuration values (defined by the plugin's `configurationForm
 
 #### Other
 - `675` - Dock Icon (no config)
-- `791` - Finder Context Menu Extension (no config — provides variables `BTTFinderContextMenuTargetPath`, `BTTFinderContextMenuSelectedItemPaths`)
+- `791` - Finder Context Menu Extension (no config - provides variables `BTTFinderContextMenuTargetPath`, `BTTFinderContextMenuSelectedItemPaths`)
 - `819` - Input Text Received (no config)
 - `826` - Logitech Craft Crown (configured via BTT UI)
 
@@ -919,16 +919,16 @@ The time configuration is stored in `BTTAdditionalConfiguration` as a JSON strin
 |----------|------|-------------|
 | `BTTShortcutKeyCode` | Number | macOS virtual key code |
 | `BTTShortcutModifierKeys` | Number | Modifier key flags (see Modifier Keys section) |
-| `BTTTriggerOnDown` | Number | Trigger on key down (1) or key up (0). **Default: 1** — always set to 1 unless key-up triggering is explicitly needed |
+| `BTTTriggerOnDown` | Number | Trigger on key down (1) or key up (0). **Default: 1** - always set to 1 unless key-up triggering is explicitly needed |
 | `BTTLayoutIndependentChar` | String | Layout-independent character (the character the key produces, e.g. `"a"`, `"s"`) |
 | `BTTAutoAdaptToKeyboardLayout` | Number | Auto-adapt to keyboard layout (0/1) |
 | `BTTShortcutAdvancedModifierKeys` | String | Advanced modifier key combination as string (same value as `BTTShortcutModifierKeys` but as string, e.g. `"1179658"`) |
 | `BTTAdditionalConfiguration` | String | Additional modifier configuration as string (typically same value as `BTTShortcutAdvancedModifierKeys`) |
-| `BTTShortcutKeyboardType` | Number | Keyboard type identifier (internal keyboard ID, e.g. `-2052004921`). Optional — omit to match any keyboard |
+| `BTTShortcutKeyboardType` | Number | Keyboard type identifier (internal keyboard ID, e.g. `-2052004921`). Optional - omit to match any keyboard |
 | `BTTShortcutScope` | Number | Where shortcut is active |
 | `BTTKeyboardShortcutMinTime` | Number | Minimum hold time in seconds |
 | `BTTKeyboardShortcutMaxTime` | Number | Maximum hold time in seconds |
-| `BTTKeyboardShortcutPerformDefaultOnAdvancedConditionMismatch` | Boolean | If true and this trigger has advanced conditions that evaluate to false, BetterTouchTool will pass the original keyboard event through so the frontmost app can handle it normally. Only applies to the standard action category — triggers with key long-press, release, or other keyboard action categories will still be swallowed. Default: false |
+| `BTTKeyboardShortcutPerformDefaultOnAdvancedConditionMismatch` | Boolean | If true and this trigger has advanced conditions that evaluate to false, BetterTouchTool will pass the original keyboard event through so the frontmost app can handle it normally. Only applies to the standard action category - triggers with key long-press, release, or other keyboard action categories will still be swallowed. Default: false |
 
 ```json
 {
@@ -971,6 +971,13 @@ The time configuration is stored in `BTTAdditionalConfiguration` as a JSON strin
 **BTTTriggerClass**: `"BTTTriggerTypeKeySequence"`
 
 Key sequences use trigger type `624`.
+
+Common `BTTKeySequence` properties include:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTCharactersToDeleteAfterwards` | Number | Number of typed characters to remove after recognition |
+| `BTTKeySequenceDeleteAfterwardsDelay` | Number | Delay in seconds between generated backspace presses |
 
 ### 6. Drawings
 
@@ -1828,7 +1835,7 @@ Any trigger can optionally include a `BTTLauncherConfig` object to control how i
 | `BTTLauncherOrder` | Number | Sort order for this item in the launcher. Lower values appear first. Use negative values to place items above the built-in sections. |
 | `BTTLauncherIconConfig` | String | JSON string describing the launcher icon configuration |
 
-Mode 3 (`launcherResultAlwaysVisible`) keeps the item visible in the launcher results even when the typed prompt does not match. This is useful for items that want to react to the current prompt text via the `BTTLauncherLastPrompt` variable.
+Mode 3 (`launcherResultAlwaysVisible`) keeps the item visible in the launcher results even when the typed prompt does not match. This is useful for items that want to react to the current prompt text via the `BTTLauncherPrompt` variable.
 
 Mode 4 (`launcherResultKeywordOnly`) hides the item until the current prompt starts with one of its assigned launcher keywords (see `BTTLauncherKeywords`).
 
@@ -1836,9 +1843,9 @@ Mode 5 (`launcherResultPromptMatchesOnly`) hides the item until the current prom
 
 The launcher also exposes the current prompt through these variables:
 
-- `BTTLauncherLastPrompt` — the full current prompt text.
-- `BTTLauncherLastPromptKeyword` — the first whitespace-separated word of the prompt (useful when combined with display mode 4).
-- `BTTLauncherLastPromptAfterKeyword` — the remainder of the prompt after the first word.
+- `BTTLauncherPrompt` — the full current prompt text.
+- `BTTLauncherPromptKeyword` — the first whitespace-separated word of the prompt (useful when combined with display mode 4).
+- `BTTLauncherPromptInputWithoutKeyword` — the remainder of the prompt after the first word.
 
 ```json
 {
@@ -1863,7 +1870,7 @@ The launcher also exposes the current prompt through these variables:
 2. Use `BTTTriggerConfig` for Touch Bar, Stream Deck, Notch Bar, and Menu Bar Icon properties
 3. Use `BTTAdditionalConfiguration` for most other trigger-specific settings (app paths, variable names, file paths, battery %)
 4. Specific keys override `BTTAdditionalConfiguration`: `BTTWifiName`, `BTTDistributedNotificationName`, `BTTInputSourceName`, `BTTDidOpenURLAdress`, `BTTTriggerName`, `BTTMachineSerialNumber`, `BTTUSBDeviceName`
-5. Actions go in `BTTActionsToExecute` for standard actions; use dedicated action category keys (e.g. `BTTActionCategoryLongPress`, `BTTActionCategoryTouchRelease`) for additional event-based action groups — see the [Action Categories](#action-categories) section above for all available keys
+5. Actions go in `BTTActionsToExecute` for standard actions; use dedicated action category keys (e.g. `BTTActionCategoryLongPress`, `BTTActionCategoryTouchRelease`) for additional event-based action groups - see the [Action Categories](#action-categories) section above for all available keys
 6. Test your JSON with BTT's import feature before deploying
 7. Use UUIDs to update existing triggers
 8. Omit optional fields to use defaults
