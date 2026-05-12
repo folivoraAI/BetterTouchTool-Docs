@@ -833,16 +833,20 @@ Trigger plugins are custom Swift plugins that observe arbitrary system events an
 | Property | Type | Description |
 |----------|------|-------------|
 | `BTTGestureConfig` | String | Plugin bundle identifier (selects which trigger plugin to use) |
+| `BTTAdditionalData` | JSON object | Optional per-trigger plugin configuration values, keyed as `plugin_var_<fieldID>` |
 
 The plugin identifier is stored in `BTTGestureConfig` (aka `gestureConfig`). When a trigger plugin fires, any context values it provides are stored as BTT variables with the `TriggerPlugin_` prefix (e.g. context key `clipboardContent` becomes variable `TriggerPlugin_clipboardContent`).
 
-Plugin-specific configuration values (defined by the plugin's `configurationFormItems`) are stored alongside the trigger with keys prefixed by `plugin_var_`.
+Plugin-specific configuration values (defined by the plugin's `configurationFormItems`) are stored alongside the trigger in `BTTAdditionalData` / `icondata3` with keys prefixed by `plugin_var_`. Plugin authors can use plain `formFieldID` values such as `watchPath`; BTT adds the `plugin_var_` prefix when saving and when passing values to `didReceiveNewConfigurationValues(_:)`.
 
 ```json
 {
   "BTTTriggerType": 837,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTGestureConfig": "com.example.myTriggerPlugin",
+  "BTTAdditionalData": {
+    "plugin_var_watchPath": "~/Desktop"
+  },
   "BTTActionsToExecute": [{
     "BTTPredefinedActionType": 172,
     "BTTNotificationText": "Plugin triggered!"

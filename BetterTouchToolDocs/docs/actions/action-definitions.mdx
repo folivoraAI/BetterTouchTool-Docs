@@ -3245,13 +3245,15 @@ Parameters:
 * **BTTGenericActionConfig**: Timeout in seconds (deprecated - use BTTAdditionalActionData)
 * **BTTAdditionalActionData**: JSON object with wait configuration
   - `BTTActionWaitForClipboardTimeout`: number - Wait timeout in seconds (default: 5)
+  - `BTTActionWaitForClipboardAllowedTypes`: string - Optional comma-separated pasteboard UTIs to accept, e.g. `public.rtf, public.png`
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 499,
   "BTTAdditionalActionData": {
-    "BTTActionWaitForClipboardTimeout": 10
+    "BTTActionWaitForClipboardTimeout": 10,
+    "BTTActionWaitForClipboardAllowedTypes": "public.rtf, public.png"
   }
 }
 ```

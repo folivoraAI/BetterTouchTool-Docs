@@ -105,3 +105,135 @@ function itemsFromPipeOutput(output, icon) {
     });
 }
 ```
+
+## Preserving the Launcher prompt for subitems
+
+When a Launcher Simple JSON item uses `subitemsFunction`, BetterTouchTool normally calls that function with the current prompt and the item's identifier:
+
+```javascript
+async function loadItems(prompt, itemIdentifier) {
+  return JSON.stringify([
+    // ...
+  ]);
+}
+```
+
+If an item should carry the prompt that created it into the next page, add `preservePrompt: true`. BetterTouchTool will then pass that original prompt as a third argument:
+
+```javascript
+async function loadItems(prompt, itemIdentifier, preservedPrompt) {
+  return JSON.stringify([
+    // ...
+  ]);
+}
+```
+
+Keep `meta` stable and use it as the item identifier. Do not put the typed prompt into `meta`; that would make item identity change depending on what the user typed.
+
+## Using the subgroup prompt as input
+
+For command-style groups you often want a different behavior:
+
+1. Search for a Launcher Simple JSON item, for example `Open URL`.
+2. Open that item.
+3. Type the actual input, for example `https://heise.de`.
+4. Choose one of the visible actions, for example "Open in Safari" or "Paste URL".
+
+In that case the typed prompt should be treated as input, not as a filter for the subgroup. Set `launcherDisplayMode: "always"` on the returned action items. This is the Simple JSON equivalent of **Show In Launcher (Ignore Prompt Filter, Always Show)**.
+
+The current subgroup prompt is available to actions as the `BTTLauncherPrompt` variable. The following script returns browser actions that stay visible while you type the URL:
+
+```javascript
+async function retrieveJSON() {
+  return JSON.stringify([
+    {
+      title: "Open in Safari",
+      subtitle: "Uses the current Launcher prompt as URL",
+      meta: "open-in-safari",
+      icon: "sfsymbol::safari",
+      launcherDisplayMode: "always",
+      action: openUrlAction("com.apple.Safari")
+    },
+    {
+      title: "Open in Default Browser",
+      subtitle: "Uses the current Launcher prompt as URL",
+      meta: "open-in-default-browser",
+      icon: "sfsymbol::globe",
+      launcherDisplayMode: "always",
+      action: openUrlAction("Default")
+    },
+    {
+      title: "Paste URL",
+      subtitle: "Uses the current Launcher prompt as URL",
+      meta: "paste-url",
+      icon: "sfsymbol::doc.on.clipboard",
+      launcherDisplayMode: "always",
+      action: pasteUrlAction()
+    }
+  ]);
+}
+
+function openUrlAction(browserBundleIdentifier) {
+  return {
+    js: `
+      async function run() {
+        const input = await get_string_variable({ variable_name: "BTTLauncherPrompt" });
+        const url = normalizeUrl(input);
+        return await trigger_action({
+          json: JSON.stringify({
+            BTTPredefinedActionType: 59,
+            BTTPredefinedActionName: "Open URL  or  Open URL With Selection",
+            BTTOpenURL: url,
+            BTTOpenURLBrowser: ${JSON.stringify(browserBundleIdentifier)}
+          }),
+          wait_for_reply: true
+        });
+      }
+
+      function normalizeUrl(value) {
+        const text = String(value || "").trim();
+        if (/^https?:\\/\\//i.test(text)) {
+          return text;
+        }
+        return "https://" + text;
+      }
+    `,
+    function: "run"
+  };
+}
+
+function pasteUrlAction() {
+  return {
+    js: `
+      async function run() {
+        const input = await get_string_variable({ variable_name: "BTTLauncherPrompt" });
+        const url = normalizeUrl(input);
+        return await paste_text({
+          text: url,
+          insert_by_pasting: true
+        });
+      }
+
+      function normalizeUrl(value) {
+        const text = String(value || "").trim();
+        if (/^https?:\\/\\//i.test(text)) {
+          return text;
+        }
+        return "https://" + text;
+      }
+    `,
+    function: "run"
+  };
+}
+```
+
+`launcherDisplayMode` accepts the same modes as the configured Launcher UI:
+
+| Value | UI behavior |
+| --- | --- |
+| `"hidden"` or `0` | Don't Include In Launcher |
+| `"filter"` or `1` | Show In Launcher (Filter With Prompt) |
+| `"always"` or `3` | Show In Launcher (Ignore Prompt Filter, Always Show) |
+| `"keyword"` or `4` | Only Show If Keyword Matches |
+| `"prompt"` or `5` | Only Show If Prompt Matches |
+| `"fallback"` or `6` | Only Show If Prompt Matches, Or If Nothing Else Matches |

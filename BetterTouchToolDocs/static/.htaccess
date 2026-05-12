@@ -1,3 +1,30 @@
+# ---------------------------------------------------------------------------
+# Cache control
+#
+# Docusaurus fingerprints JS/CSS/asset filenames (e.g. main.2162d149.js), so
+# those are safe to cache forever. The HTML pages reference those hashed names,
+# so the HTML itself must NEVER be served stale - otherwise a fresh deploy is
+# not picked up until the browser's heuristic cache expires (the "I have to
+# hard-refresh after every deploy" bug). Force HTML to revalidate every time;
+# the ETag/Last-Modified make that a cheap 304.
+# ---------------------------------------------------------------------------
+<IfModule mod_headers.c>
+  # Content-hashed build assets - immutable for a given URL.
+  <FilesMatch "\.(js|css|woff2?|ttf|eot|otf)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # HTML pages + generated data/manifest files - always revalidate.
+  <FilesMatch "\.(html|json|xml)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+
+  # Images / other media - short cache, then revalidate.
+  <FilesMatch "\.(png|jpe?g|gif|svg|webp|ico)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+</IfModule>
+
 # Redirect old GitBook URLs to new Docusaurus URLs
 # 301 permanent redirects for SEO preservation
 # Auto-generated from migration FILE_MAP

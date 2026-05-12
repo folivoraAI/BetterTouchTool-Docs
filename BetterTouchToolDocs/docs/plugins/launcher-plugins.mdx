@@ -16,6 +16,7 @@ Launcher plugins appear in the Launcher's **Launcher Plugins** section. For the 
 - Return **child items** for drill-down style navigation
 - Attach **per-item commands** with optional keyboard shortcuts
 - Open **native launcher surfaces** with custom `NSView` content
+- Create and manage **saved per-instance launcher items**
 - Load **async results** and **lazy child items** for external APIs, CLIs, and large data sets
 - React to the current **search query**, frontmost app, and Finder selection
 - Read and write **BTT variables**
@@ -49,6 +50,7 @@ Launcher plugins appear in the Launcher's **Launcher Plugins** section. For the 
 | `loadLauncherChildren(forItemIdentifier:childrenIdentifier:context:completion:)` | Return lazy children for a result asynchronously |
 | `performAction(forItemIdentifier:actionIdentifier:context:)` | Run the action for a result or command |
 | `launcherSurface(forItemIdentifier:surfaceIdentifier:context:)` | Return a launcher-hosted native surface |
+| `launcherResult(for:context:)` | Optional custom result rendering for a saved plugin instance |
 
 A useful launcher plugin usually implements `launcherResults(for:)` plus either `performAction(...)`, `launcherSurface(...)`, or both.
 
@@ -66,8 +68,9 @@ The launcher passes contextual information through `BTTLauncherPluginContext`:
 | `finderURLs` | Current Finder selection URLs when available |
 | `finderSelection` | Whether Finder currently has a selection |
 | `timestamp` | Timestamp for the current context snapshot |
+| `launcherPluginInstance` | Saved plugin instance currently being rendered, acted on, or opened, when applicable |
 
-Use `query` for result filtering, `frontmostBundleIdentifier` for app-aware rows, and the Finder fields when building file-sensitive actions.
+Use `query` for result filtering, `frontmostBundleIdentifier` for app-aware rows, the Finder fields when building file-sensitive actions, and `launcherPluginInstance` when handling a saved item created by the plugin.
 
 ## Result Model: `BTTLauncherPluginResult`
 
@@ -86,6 +89,7 @@ Use `query` for result filtering, `frontmostBundleIdentifier` for app-aware rows
 | `surfaceIdentifier` | Surface ID to open native launcher UI |
 | `sortOrder` | Ordering hint |
 | `searchMatchPriority` | Search ranking hint |
+| `launcherDisplayMode` | Optional per-result display mode as an `NSNumber` using `BTTLauncherPluginDisplayMode` raw values |
 | `opensChildrenByDefault` | Whether activation should drill into children first |
 | `dynamicChildrenIdentifier` | Marker used to load this result's children only when the user opens the result |
 | `children` | Nested `BTTLauncherPluginResult` values |
@@ -98,6 +102,143 @@ Typical patterns:
 - For expensive or large browse lists, set `dynamicChildrenIdentifier` and implement a child-loading method.
 - For a row that opens native UI, set `surfaceIdentifier` and implement `launcherSurface(...)`.
 - For row-specific shortcuts and actions, attach `commands`.
+
+## Saved Plugin Instances
+
+Saved instances are for plugins that expose one main creator item and then create many configured launcher items. For example, a Quick Link plugin can show a `Create Quick Link` row, save a configured link from a launcher surface, and then show each saved link as its own launcher item. A Stocks plugin can show `Create Stock Tracker`, save selected symbols, and then show each symbol as an actionable item with its own detail surface.
+
+The plugin is the extension. A `BTTLauncherPluginInstance` is one saved configured item owned by that extension.
+
+The `BetterTouchToolPlugins/BTTQuickLinkLauncherPlugin/QuickLinkLauncherPlugin.swift` sample shows this pattern end to end.
+
+### `BTTLauncherPluginInstance`
+
+| Property | Description |
+|---|---|
+| `instanceIdentifier` | Stable plugin-local ID. BTT creates one when saving if omitted |
+| `title` | Default row title |
+| `subtitle` | Default row subtitle |
+| `systemImageName` | Default SF Symbol |
+| `keywords` | Extra searchable terms |
+| `trailingHint` | Compact row hint |
+| `primaryActionIdentifier` | Default action for the saved item |
+| `surfaceIdentifier` | Default surface for the saved item |
+| `sortOrder` | Ordering hint |
+| `searchMatchPriority` | Search ranking hint |
+| `launcherDisplayMode` | Optional per-instance display mode |
+| `configuration` | Property-list-safe per-instance values |
+| `isEnabled` | Whether the saved instance should appear |
+
+Only store property-list-safe values in `configuration`: strings, numbers, booleans, dates, data, arrays, and dictionaries.
+
+### Instance Display Modes
+
+Set `launcherDisplayMode` when a saved instance should use a different prompt behavior than the plugin entry itself. For Quick Link style items, use `NSNumber(value: BTTLauncherPluginDisplayMode.launcherResultKeywordOnly.rawValue)` so a saved item named `Google` still appears for `google cats`.
+
+Useful values:
+
+| Value | Behavior |
+|---|---|
+| `BTTLauncherPluginDisplayMode.launcherResult` | Show normally and filter with the prompt |
+| `BTTLauncherPluginDisplayMode.launcherResultKeywordOnly` | Show when one of the item's terms is the leading prompt token |
+| `BTTLauncherPluginDisplayMode.launcherResultAlwaysVisible` | Keep visible while typing |
+| `BTTLauncherPluginDisplayMode.launcherResultPromptMatchesOnly` | Only show when the prompt matches |
+| `BTTLauncherPluginDisplayMode.launcherResultPromptMatchesOrFallback` | Show on match or as fallback |
+
+### Instance Delegate Methods
+
+`BTTLauncherPluginDelegate` includes:
+
+| Method | Description |
+|---|---|
+| `launcherPluginInstances(forPluginIdentifier:launcherID:)` | Return saved instances for this plugin and launcher |
+| `saveLauncherPluginInstance(_:pluginIdentifier:launcherID:)` | Create or update an instance |
+| `deleteLauncherPluginInstance(_:pluginIdentifier:launcherID:)` | Delete an instance by ID |
+
+Saving or deleting an instance asks the launcher to refresh results. Calling `requestLauncherResultsRefresh()` after larger changes is still fine.
+
+### Rendering Saved Instances
+
+If a plugin implements `launcherResult(for:context:)`, BTT calls it for each saved instance:
+
+```swift
+func launcherResult(
+    for instance: BTTLauncherPluginInstance,
+    context: BTTLauncherPluginContext
+) -> BTTLauncherPluginResult? {
+    let result = BTTLauncherPluginResult()
+    let instanceID = instance.instanceIdentifier ?? UUID().uuidString
+    result.itemIdentifier = "instance:\(instanceID)"
+    result.title = instance.title
+    result.subtitle = instance.subtitle
+    result.systemImageName = instance.systemImageName ?? "link"
+    result.primaryActionIdentifier = "open"
+    return result
+}
+```
+
+If a plugin does not implement this method, BTT creates a default result from the instance fields.
+
+Saved instance results inherit `instance.launcherDisplayMode` unless `launcherResult(for:context:)` explicitly sets `result.launcherDisplayMode`.
+
+Use stable item identifiers. The recommended pattern is `instance:<instanceIdentifier>`. For child rows under an instance, include the instance identifier too, for example `instance:<instanceIdentifier>:details`. This keeps aliases, ranking, commands, and action routing stable.
+
+### Creating An Instance From A Surface
+
+A top-level creator item can open a launcher-hosted surface:
+
+```swift
+let result = BTTLauncherPluginResult()
+result.itemIdentifier = "create-quick-link"
+result.title = "Create Quick Link"
+result.systemImageName = "link.badge.plus"
+result.surfaceIdentifier = "create-quick-link-surface"
+```
+
+The surface can save an instance:
+
+```swift
+let instance = BTTLauncherPluginInstance()
+instance.title = name
+instance.subtitle = urlTemplate
+instance.systemImageName = "link"
+instance.primaryActionIdentifier = "open"
+instance.configuration = [
+    "urlTemplate": urlTemplate,
+    "openWithBundleIdentifier": selectedBundleID
+]
+
+delegate?.saveLauncherPluginInstance(
+    instance,
+    pluginIdentifier: "com.example.quicklink",
+    launcherID: context.launcherID
+)
+delegate?.requestLauncherSurfaceGoBack()
+```
+
+When a saved item action, command, child loader, or surface runs, BTT sets `context.launcherPluginInstance`:
+
+```swift
+func performAction(
+    forItemIdentifier itemIdentifier: String,
+    actionIdentifier: String?,
+    context: BTTLauncherPluginContext
+) -> BTTLauncherPluginActionResult? {
+    guard let instance = context.launcherPluginInstance,
+          let config = instance.configuration,
+          let urlTemplate = config["urlTemplate"] as? String else {
+        return nil
+    }
+
+    // Resolve placeholders and open the configured URL.
+    let result = BTTLauncherPluginActionResult()
+    result.success = true
+    result.closeLauncher = true
+    return result
+}
+```
+
+For saved items, add commands like Edit, Duplicate, and Delete from `launcherResult(for:context:)`.
 
 ## Async Results And Lazy Children
 
@@ -229,6 +370,19 @@ The `delegate` property (type `BTTLauncherPluginDelegate`) provides:
 | `getVariable(_:)` | Read a BTT variable |
 | `executeNamedTrigger(_:)` | Execute a named BTT trigger |
 | `requestLauncherResultsRefresh()` | Ask the launcher to rebuild the plugin's results |
+| `replaceVariables(in:extraVariables:)` | Resolve BTT placeholders in a string, optionally adding plugin-specific variables |
+| `launcherPluginInstances(forPluginIdentifier:launcherID:)` | Read saved instances |
+| `saveLauncherPluginInstance(_:pluginIdentifier:launcherID:)` | Create or update a saved instance |
+| `deleteLauncherPluginInstance(_:pluginIdentifier:launcherID:)` | Delete a saved instance |
+
+Use `replaceVariables(in:extraVariables:)` for user-editable templates:
+
+```swift
+let resolved = delegate?.replaceVariables(
+    in: "https://example.com/search?q={argument}&name={my_btt_variable}",
+    extraVariables: ["argument": "cats"]
+)
+```
 
 Inside a launcher surface, the delegate also conforms to `BTTLauncherPluginSurfaceDelegate`:
 
