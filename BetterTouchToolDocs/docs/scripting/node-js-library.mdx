@@ -64,34 +64,51 @@ await btt.call("update_menu_item", { item_uuid: "…", json: { BTTMenuItemText: 
 [action](/docs/actions/action-definitions) and [trigger](/docs/json/trigger-definitions) reference data with
 documented parameters (`actionCatalog.search("floating menu")`).
 
-## Using npm packages inside BetterTouchTool
+## Inside BetterTouchTool: `require("bettertouchtool")`
 
-BTT's [Real JavaScript](/docs/scripting/java-script) engine has no `require`/`import`. To use this package
-(or any other npm module that does not depend on Node/browser APIs) inside BTT, bundle your script into a
-single file and load it from a *Run Real JavaScript* action:
-
-```bash
-npx esbuild my-script.js --bundle --format=iife --platform=browser --outfile=~/Library/Application\ Support/BetterTouchTool/my-script.js
-```
-
-```js
-// my-script.js – runs inside BTT, no configuration needed
-import { Btt, actions } from "bettertouchtool";
-(async () => {
-  const btt = Btt.inProcess();
-  const sel = await btt.getSelection();
-  await btt.triggerAction(actions.showHUD(`Selected ${sel.length} characters`));
-  returnToBTT(sel.toUpperCase());
-})();
-```
+Since BTT 6.735 a copy of the library ships inside BetterTouchTool and BTT's JavaScript engine has a
+CommonJS-style `require()`. Nothing to install:
 
 ```js
 // Run Real JavaScript action
 async function main() {
-  eval(readFile("~/Library/Application Support/BetterTouchTool/my-script.js"));
-  return "started";
+  const { Btt, actions, triggers } = require("bettertouchtool");
+  const btt = Btt.inProcess();
+  const app = await btt.getStringVariable("BTTActiveAppBundleIdentifier");
+  await btt.triggerAction(actions.showHUD("Hello", { detail: app, duration: 1.5 }));
+  await btt.chain().sendShortcut("cmd+s").delay(0.3).showHUD("saved").run();
+  return app;
 }
 ```
+
+`require()` resolves, in this order:
+
+1. modules bundled with BTT – currently `bettertouchtool` (also `require("bettertouchtool").catalog` for the action/trigger reference data)
+2. `~/Library/Application Support/BetterTouchTool/JavaScriptModules/<name>.js` (or `.cjs`, or `<name>/index.js`) – put your own bundles there and load them by name
+3. a file path (`require("~/Scripts/my-bundle.cjs")`, `require("/absolute/path.js")`)
+
+Modules are evaluated once per JavaScript context and cached (`require.cache`); `module.exports` /
+`exports` work like in Node, and IIFE bundles that assign to a global work as well.
+
+### Using other npm packages inside BetterTouchTool
+
+The engine itself has no Node.js module resolution, so third-party npm packages must be bundled into one
+CommonJS file first (they must not depend on Node-only APIs such as `fs` or `child_process`):
+
+```bash
+# my-module.js:  import dayjs from "dayjs"; module.exports = { today: () => dayjs().format("YYYY-MM-DD") };
+npx esbuild my-module.js --bundle --format=cjs --platform=browser \
+  --outfile=~/Library/Application\ Support/BetterTouchTool/JavaScriptModules/my-module.js
+```
+
+```js
+async function main() {
+  const { today } = require("my-module");
+  return today();
+}
+```
+
+For BTT versions before 6.735 use `eval(readFile("/path/to/bundle.js"))` with an IIFE bundle instead.
 
 ## Command line
 

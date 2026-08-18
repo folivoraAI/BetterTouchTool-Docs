@@ -168,11 +168,14 @@ async function doSomething() {
 }
 ```
 
-### Using npm packages / external modules
-The JavaScript engine has no `require` or `import`. If you want to use external modules, bundle your script
-into a single file (e.g. with esbuild) and load it via `eval(readFile(...))` - see
-[Node.js / TypeScript Library](/docs/scripting/node-js-library) for a complete recipe. The same page describes
-the official `bettertouchtool` npm package, which lets one script talk to BTT both from Node.js and from inside BTT.
+### Using npm packages / external modules: `require()`
+Since BTT 6.735 the engine offers a CommonJS-style `require()`. `require("bettertouchtool")` loads the
+bundled copy of the [official npm package](/docs/scripting/node-js-library) (typed helpers, action & trigger
+builders). Other modules must be bundled into a single CommonJS file (e.g. `esbuild --format=cjs
+--platform=browser`) and can then be loaded by name from
+`~/Library/Application Support/BetterTouchTool/JavaScriptModules/<name>.js` or by file path -
+see [Node.js / TypeScript Library](/docs/scripting/node-js-library) for the recipe. ES `import` statements
+are not supported.
 
 ## 8.) Using the JavaScript to call BTT scripting functions
 All BetterTouchTool scripting functions can be accessed from JavaScript.
