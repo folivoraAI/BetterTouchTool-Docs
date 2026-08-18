@@ -7,7 +7,7 @@ slug: "/docs/normal-mouse/logitech"
 
 Current versions of BetterTouchTool natively support Logitech Mice (by implementing parts of Logitech's HID++ 2.0 protocol - https://github.com/Logitech/cpg-docs/tree/master/hidpp20)
 
-Huge thanks to the many testers! Now most of the Logitech mice and [keyboards](/docs/keyboard-shortcuts/logitech-keyboards) are supported directly in BetterTouchTool without the need for any other mouse driver/software! Here are some of the mice/keyboards that have been tested successfully: MX Master 3, MX Master 3S, MX Master 4, MX Master 3S For Mac, MX Anywhere 3, MX Anywhere 3S, MX Vertical, MX Ergo Precision, M720, G402, All G502 variants (Proteus Core, Proteus Spectrum, HERO, HERO Wireless, X, X PLUS, X Wireless), G903 / G903 HERO. Others might also work fine!
+Huge thanks to the many testers! Now most of the Logitech mice and [keyboards](/docs/keyboard-shortcuts/logitech-keyboards) are supported directly in BetterTouchTool without the need for any other mouse driver/software! Here are some of the mice/keyboards that have been tested successfully: MX Master 3, MX Master 3S, MX Master 4, MX Master 3S For Mac, MX Anywhere 3, MX Anywhere 3S, MX Vertical, MX Ergo Precision, M720, G402, All G502 variants (Proteus Core, Proteus Spectrum, HERO, HERO Wireless, X, X PLUS, X Wireless), G903 / G903 HERO, MX Creative Dialpad. Others might also work fine!
 
 
 **Note** This is supposed to be a full alternative/replacement to the Logitech apps like Logitech Options+ or G-Hub. Actually BTT won't work correctly while any of these are installed.
@@ -58,6 +58,44 @@ Afterwards you can assign any action sequence to that button:
 ![alt text](/media/logitech_mouse_button_config.png)
 
 ![alt text](/media/logitech_mouse_gestures.png)
+
+## MX Creative Dialpad
+
+The Dialpad half of the Logitech MX Creative Console is configured here, like any
+other Logitech mouse — add a "Logitech Mouse Configuration" and select **MX Creative
+Dialpad**. (The Keypad half, with the 9 screens, is a
+[macro pad](/docs/macro-pads/supported-devices) instead.)
+
+Its **four buttons** work like any other Logitech mouse buttons: switch on "Make All
+Buttons Available For Remapping in BTT" and assign actions to them as described in
+[Remapping Buttons](#remapping-buttons) above.
+
+Its **two dials** get their own section, where each one can be set independently:
+
+| Mode | What the dial does |
+|---|---|
+| Scroll (Handled By macOS) | Normal scrolling, exactly as without BetterTouchTool |
+| Scroll (Handled By BTT) | Still scrolls, but BetterTouchTool generates the scrolling |
+| Trigger Actions | Stops scrolling and runs your own actions instead |
+
+Pick **Trigger Actions** and two new sections appear in the action list on the right
+of that very same Logitech Mouse Configuration — one for turning the dial left and
+one for turning it right. Assign any action sequence to them.
+
+The dials are named after their shape: the small wheel is the **Vertical Dial**, the
+large flat one is the **Big Dial**.
+
+:::note
+A dial set to either non-native mode stops scrolling on its own, so it does nothing
+while BetterTouchTool is not running. Set it back to "Scroll (Handled By macOS)" to
+give it back to the system.
+:::
+
+:::caution
+The dials cannot be captured with the mouse click recorder. A dial in "Trigger
+Actions" mode produces no mouse events at all — it reports directly to
+BetterTouchTool — which is why its actions live in those dedicated sections instead.
+:::
 
 ## Smooth Scrolling
 

@@ -75,12 +75,14 @@ Every variable that can be used inside of [advanced trigger conditions or condit
 - `leftmost_touch_y`
 - `rightmost_touch_x`
 - `rightmost_touch_y`
+- `leftmost_rightmost_touch_distance_percent`
 - `fingers_touching_magic_mouse`
 - `magic_mouse_touch_duration`
 - `leftmost_mouse_touch_x`
 - `leftmost_mouse_touch_y`
 - `rightmost_mouse_touch_x`
 - `rightmost_mouse_touch_y`
+- `leftmost_rightmost_mouse_touch_distance_percent`
 - `mouse_position_x`
 - `mouse_position_y`
 - `mouse_pos_percent_x`
@@ -112,6 +114,8 @@ Every variable that can be used inside of [advanced trigger conditions or condit
 - `focused_window_height`
 - `hovered_floating_menu_identifier`
 - `visible_floating_menu_identifiers`
+- `hovered_app_bundle_identifier`
+- `hovered_app_name`
 - `fullscreen_active`
 - `active_screen_resolutions`
 - `missioncontrol_active`
@@ -120,6 +124,7 @@ Every variable that can be used inside of [advanced trigger conditions or condit
 - `battery_level`
 - `active_space`
 - `darkmode_active`
+- `ignore_builtin_trackpad_active` (state of the macOS "Ignore built-in trackpad when mouse or wireless trackpad is present" accessibility setting)
 - `current_minute`
 - `current_hour`
 - `current_day`
@@ -147,10 +152,40 @@ And these are available via the Conditional Activation Groups:
 - `currentlyPressedStreamDeckButtonIdentifiers`
 - `hovered_floating_menu_identifier`
 - `visible_floating_menu_identifiers`
+- `hovered_app_bundle_identifier` (bundle id of the app whose window is under the mouse cursor)
+- `hovered_app_name` (name of that app)
 - `BTTCurrentlyPlayingApp`
 - `BTTCurrentlyPlaying`
 - `mouseBehindNotch`
 - `currentlyBlockingKeyboard`
+
+### Hovered app
+
+`hovered_app_bundle_identifier` / `hovered_app_name` report the application owning the
+frontmost ordinary window under the mouse cursor. They are empty while the cursor is
+over the desktop or the menu bar, and while no condition uses them.
+
+Hovering an icon in the Dock reports that app, even when it isn't running — the same
+app `hovered_dock_app_bundleidentifier` would report. Dock items that aren't apps
+(folders, the Trash, minimized windows) report their name with an empty bundle id.
+
+Observation only runs while at least one activated conditional activation group
+actually references one of these two variables — if you don't use them, nothing is
+sampled and there is no cost. In trigger conditions they are resolved on demand, so
+using them there starts no background observation either.
+
+Because a hovered app changes far more often than the active app does, the value only
+updates once the cursor has settled on one app for a moment. These hidden defaults can
+be used to tune the behavior:
+
+| Default | Meaning |
+|---------|---------|
+| `BTTHoveredAppCheckInterval` | How often the cursor position is sampled (default `0.1` seconds) |
+| `BTTHoveredAppDwellTime` | How long one app must stay hovered before the value changes (default `0.15` seconds). Total update latency is roughly this plus one check interval — lower both for a snappier response, raise `BTTHoveredAppDwellTime` if fast cursor sweeps trigger groups you didn't intend |
+| `BTTHoveredAppMaxWindowLayer` | Highest window layer considered (default `0` = ordinary app windows only). Set to `20` to also match the Dock as a whole, `24` to also match the menu bar |
+| `BTTHoveredAppIncludeDockItems` | Set to `0` to stop resolving individual Dock icons (default on) |
+| `BTTHoveredAppExcludeOwnWindows` | Set to `1` so BetterTouchTool's own windows never count as the hovered app |
+| `BTTAlwaysObserveHoveredApp` | Set to `1` to keep the variables updated even when no condition uses them (for scripts) |
 
 Some other variables that might be available depending on the context:
 

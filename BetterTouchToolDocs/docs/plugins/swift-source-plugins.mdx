@@ -215,7 +215,8 @@ See [Trigger Plugins](/docs/plugins/trigger) for the full protocol reference, li
 // BTT-Plugin-Type: Launcher
 // BTT-Plugin-Icon: sparkles.rectangle.stack
 
-import Cocoa
+import AppKit
+import SwiftUI
 
 class DemoLauncherPlugin: NSObject, BTTLauncherPluginInterface {
     weak var delegate: (any BTTLauncherPluginDelegate)?
@@ -245,7 +246,21 @@ class DemoLauncherPlugin: NSObject, BTTLauncherPluginInterface {
 
 final class DemoLauncherSurface: NSObject, BTTLauncherPluginSurfaceInterface {
     func makeLauncherSurfaceView() -> NSView {
-        NSTextField(labelWithString: "Hello from a launcher surface")
+        NSHostingView(rootView: DemoLauncherSurfaceView())
+    }
+}
+
+struct DemoLauncherSurfaceView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Hello from a launcher surface", systemImage: "sparkles.rectangle.stack")
+                .font(.title3.weight(.semibold))
+
+            Text("This view is rendered with SwiftUI and hosted inside the BetterTouchTool Launcher.")
+                .foregroundStyle(.secondary)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 ```

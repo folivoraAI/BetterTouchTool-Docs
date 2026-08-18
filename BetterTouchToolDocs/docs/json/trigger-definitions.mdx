@@ -306,6 +306,23 @@ Every trigger must have these required fields:
 | `BTTTriggerName` | String | The unique name for this trigger (used to call it from other triggers/scripts) |
 | `BTTNamedTriggerAIDescription` | String | Description for AI/h@llo.ai (what this trigger does) |
 | `BTTNamedTriggerAIAllow` | Number | Allow h@llo.ai to use this trigger (0/1) |
+| `BTTCustomContextMenuItemConfig` | Object | Variable declarations (see below) |
+
+A named trigger can declare up to two variables, independently of `BTTNamedTriggerAIAllow`. They are
+declared in the `BTTCustomContextMenuItemConfig` object and work like function parameters: they are only
+set when a caller (the "Trigger Named Trigger" action, `trigger_named` via AppleScript / web server, App Intents, AI) provides a value, and they are always temporary (never persisted).
+
+| `BTTCustomContextMenuItemConfig` key | Type | Description |
+|----------|------|-------------|
+| `BTTNamedTriggerAIRequiresVariables` | Bool | Whether this named trigger uses variables. If absent, variables count as declared whenever a variable name is set |
+| `BTTNamedTriggerAIVar1Name` | String | Name of the first variable |
+| `BTTNamedTriggerAIVar1Type` | Number | 0 (default) = set as a text variable, 1 = set as a number variable (string values passed via `trigger_named` are converted to numbers) |
+| `BTTNamedTriggerAIVar1Options` | String | Newline separated list of suggested values for the first variable (shown as autocomplete when calling this trigger) |
+| `BTTNamedTriggerAIVar1Description` | String | What the first variable is for |
+| `BTTNamedTriggerAIVar2Name` | String | Name of the second variable |
+| `BTTNamedTriggerAIVar2Type` | Number | 0 (default) = set as a text variable, 1 = set as a number variable (string values passed via `trigger_named` are converted to numbers) |
+| `BTTNamedTriggerAIVar2Options` | String | Newline separated list of suggested values for the second variable (shown as autocomplete when calling this trigger) |
+| `BTTNamedTriggerAIVar2Description` | String | What the second variable is for |
 
 ```json
 {
@@ -314,6 +331,12 @@ Every trigger must have these required fields:
   "BTTTriggerName": "my_custom_trigger",
   "BTTNamedTriggerAIDescription": "Trigger for opening Safari",
   "BTTNamedTriggerAIAllow": 1,
+  "BTTCustomContextMenuItemConfig": {
+    "BTTNamedTriggerAIRequiresVariables": true,
+    "BTTNamedTriggerAIVar1Name": "mode",
+    "BTTNamedTriggerAIVar1Options": "dark\nlight",
+    "BTTNamedTriggerAIVar1Description": "Which appearance to switch to"
+  },
   "BTTActionsToExecute": [{
     "BTTPredefinedActionType": 49
   }]
@@ -370,7 +393,7 @@ The trigger should have a Launcher Config with `BTTLauncherShowInLauncher` set t
 }
 ```
 
-Note: `604` (Switch to Application) and `779` (App Did Change) do not use `BTTAdditionalConfiguration` - they trigger based on the app assignment scope (which app group the trigger is in).
+Note: `604` (Switch to Application) and `779` (App Did Change) do not use `BTTAdditionalConfiguration` — they trigger based on the app assignment scope (which app group the trigger is in).
 
 #### Window Events
 - `784` - Focused Window Did Change
@@ -394,7 +417,7 @@ These triggers have no additional configuration. They fire based on the app scop
 - `824` - Spotlight Did Show
 - `825` - Spotlight Did Hide
 
-These are simple event triggers with no configuration - just assign actions.
+These are simple event triggers with no configuration — just assign actions.
 
 ```json
 {
@@ -415,7 +438,7 @@ These are simple event triggers with no configuration - just assign actions.
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `BTTAdditionalConfiguration` | String | Battery percentage threshold (e.g. `"20"` for 20%) - for 706/707 only |
+| `BTTAdditionalConfiguration` | String | Battery percentage threshold (e.g. `"20"` for 20%) — for 706/707 only |
 
 ```json
 {
@@ -601,12 +624,62 @@ These are configured via `BTTTriggerConfig` with Touch Bar-style properties for 
 }
 ```
 
+#### OSC Message Received
+- `850` - OSC Message Received
+
+Fires when an Open Sound Control (OSC) message is received by BetterTouchTool's built-in OSC receiver. The receiver must be enabled in BetterTouchTool's settings (Variables & Scripting > OSC), where the listen address (default `127.0.0.1`) and port (default `8000`) are configured.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTGestureConfig` | String | OSC address filter (e.g. `/btt/fader1`). Also accepts a regular expression that must match the whole incoming address (e.g. `/btt/fader.*`). Leave empty to trigger for any incoming OSC address. |
+
+**Variables available when triggered:** `BTTOSCAddress`, `BTTOSCArgsJSON`, `BTTOSCArg0`, `BTTOSCArg0Type`, `BTTOSCPath0`, `BTTOSCSourceHost`, `BTTOSCReceiveCounter` (and related indexed `BTTOSCArgN` / `BTTOSCArgNType` / `BTTOSCPathN` variables).
+
+```json
+{
+  "BTTTriggerType": 850,
+  "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
+  "BTTGestureConfig": "/btt/fader1",
+  "BTTActionsToExecute": [{
+    "BTTPredefinedActionType": 172,
+    "BTTNotificationText": "Received OSC message!"
+  }]
+}
+```
+
+#### Left-Click Dock App Icon
+- `851` - Left-Click Dock App Icon
+
+Fires when an application icon in the macOS Dock is left-clicked. By default the original Dock click is consumed, so the configured actions fully replace the normal Dock behavior. Only application icons are matched — folders, minimized windows and the Trash are ignored.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTGestureConfig` | String | File URL of a specific app to match (e.g. `file:///Applications/Safari.app/`). If omitted, the trigger uses the app from the section it is assigned to, or matches every application icon in the Dock when assigned to "All Apps". |
+| `BTTNumber1` | Number | Also pass the original click through to the Dock (0/1). Default 0 = the click is consumed and only the configured actions run. |
+
+**Variables available when triggered:** `hovered_dock_app_name`, `hovered_dock_app_path`, `hovered_dock_app_bundleidentifier`
+
+For activate/restore/minimize behavior, combine this trigger with the predefined action "Dock App Click: Activate / Restore / Minimize".
+
+```json
+{
+  "BTTTriggerType": 851,
+  "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
+  "BTTGestureConfig": "file:///Applications/Safari.app/",
+  "BTTNumber1": 0,
+  "BTTActionsToExecute": [{
+    "BTTPredefinedActionType": 172,
+    "BTTNotificationText": "Safari Dock icon clicked!"
+  }]
+}
+```
+
 #### File Did Change
 - `807` - File Did Change
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `BTTAdditionalConfiguration` | String | File/folder paths to watch (separate multiple paths with `;;`) |
+| `BTTGenericActionConfig` | String | File/folder paths to watch (separate multiple paths with `;;`). `~` is expanded. |
 | `BTTFileChangeType` | Number | What type of change to watch for (see values below) |
 
 **BTTFileChangeType values:**
@@ -621,13 +694,37 @@ These are configured via `BTTTriggerConfig` with Touch Bar-style properties for 
 - `8` - File Modified
 - `9` - File Moved Out Of Folder
 
+Watching a directory also reports changes in its subdirectories. `.DS_Store` and editor scratch
+files (vim swap files, `*~` backups, emacs lock/autosave files) are ignored so that a single save
+does not produce several triggers.
+
 **Variables available when triggered:** `BTTLastChangedFileOrFolder`, `BTTLastChangedFileOrFolderChangedType`
+
+:::warning
+`BTTLastChangedFileOrFolderChangedType` is **0-based** and is therefore always **one lower** than the
+`BTTFileChangeType` value used to configure the trigger. It reports `-1` if the change type could not
+be determined.
+
+| Variable value | Meaning | Matching `BTTFileChangeType` |
+|---|---|---|
+| `0` | Directory Created | `1` |
+| `1` | Directory Removed | `2` |
+| `2` | Directory Renamed | `3` |
+| `3` | Directory Modified | `4` |
+| `4` | File Created | `5` |
+| `5` | File Removed | `6` |
+| `6` | File Renamed / Moved Into Folder | `7` |
+| `7` | File Modified | `8` |
+| `8` | File Moved Out Of Folder | `9` |
+
+This off-by-one is kept for backwards compatibility with existing scripts and conditions.
+:::
 
 ```json
 {
   "BTTTriggerType": 807,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
-  "BTTAdditionalConfiguration": "/Users/me/Documents;;/Users/me/Desktop",
+  "BTTGenericActionConfig": "/Users/me/Documents;;/Users/me/Desktop",
   "BTTFileChangeType": 8,
   "BTTActionsToExecute": [{
     "BTTPredefinedActionType": 172,
@@ -759,7 +856,7 @@ Accelerometer triggers use the built-in Bosch BMI286 IMU on Apple Silicon MacBoo
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `BTTRepeatDelay` | Number | Magnitude threshold in g - fires when combined per-sample delta across all axes exceeds this value |
+| `BTTRepeatDelay` | Number | Magnitude threshold in g — fires when combined per-sample delta across all axes exceeds this value |
 
 ```json
 {
@@ -869,7 +966,7 @@ Plugin-specific configuration values (defined by the plugin's `configurationForm
 
 #### Other
 - `675` - Dock Icon (no config)
-- `791` - Finder Context Menu Extension (no config - provides variables `BTTFinderContextMenuTargetPath`, `BTTFinderContextMenuSelectedItemPaths`)
+- `791` - Finder Context Menu Extension (no config — provides variables `BTTFinderContextMenuTargetPath`, `BTTFinderContextMenuSelectedItemPaths`)
 - `819` - Input Text Received (no config)
 - `826` - Logitech Craft Crown (configured via BTT UI)
 
@@ -923,16 +1020,16 @@ The time configuration is stored in `BTTAdditionalConfiguration` as a JSON strin
 |----------|------|-------------|
 | `BTTShortcutKeyCode` | Number | macOS virtual key code |
 | `BTTShortcutModifierKeys` | Number | Modifier key flags (see Modifier Keys section) |
-| `BTTTriggerOnDown` | Number | Trigger on key down (1) or key up (0). **Default: 1** - always set to 1 unless key-up triggering is explicitly needed |
+| `BTTTriggerOnDown` | Number | Trigger on key down (1) or key up (0). **Default: 1** — always set to 1 unless key-up triggering is explicitly needed |
 | `BTTLayoutIndependentChar` | String | Layout-independent character (the character the key produces, e.g. `"a"`, `"s"`) |
 | `BTTAutoAdaptToKeyboardLayout` | Number | Auto-adapt to keyboard layout (0/1) |
 | `BTTShortcutAdvancedModifierKeys` | String | Advanced modifier key combination as string (same value as `BTTShortcutModifierKeys` but as string, e.g. `"1179658"`) |
 | `BTTAdditionalConfiguration` | String | Additional modifier configuration as string (typically same value as `BTTShortcutAdvancedModifierKeys`) |
-| `BTTShortcutKeyboardType` | Number | Keyboard type identifier (internal keyboard ID, e.g. `-2052004921`). Optional - omit to match any keyboard |
+| `BTTShortcutKeyboardType` | Number | Keyboard type identifier (internal keyboard ID, e.g. `-2052004921`). Optional — omit to match any keyboard |
 | `BTTShortcutScope` | Number | Where shortcut is active |
 | `BTTKeyboardShortcutMinTime` | Number | Minimum hold time in seconds |
 | `BTTKeyboardShortcutMaxTime` | Number | Maximum hold time in seconds |
-| `BTTKeyboardShortcutPerformDefaultOnAdvancedConditionMismatch` | Boolean | If true and this trigger has advanced conditions that evaluate to false, BetterTouchTool will pass the original keyboard event through so the frontmost app can handle it normally. Only applies to the standard action category - triggers with key long-press, release, or other keyboard action categories will still be swallowed. Default: false |
+| `BTTKeyboardShortcutPerformDefaultOnAdvancedConditionMismatch` | Boolean | If true and this trigger has advanced conditions that evaluate to false, BetterTouchTool will pass the original keyboard event through so the frontmost app can handle it normally. Only applies to the standard action category — triggers with key long-press, release, or other keyboard action categories will still be swallowed. Default: false |
 
 ```json
 {
@@ -969,6 +1066,37 @@ The time configuration is stored in `BTTAdditionalConfiguration` as a JSON strin
 | Escape | 53 | F1-F12 | 122-111 |
 | Left Arrow | 123 | Right Arrow | 124 |
 | Down Arrow | 125 | Up Arrow | 126 |
+
+#### Keyboard Device Configuration Triggers
+
+These special keyboard-class triggers configure a whole external keyboard instead of reacting to a single shortcut:
+
+- `1340` - Logitech Keyboard Configuration (configured via BTT UI)
+- `1346` - Work Louder Keyboard Configuration
+
+The Work Louder configuration makes the keys of a Work Louder keyboard / macro pad (Codex Micro, XYZ, Creator Micro V2, Nomad E, Knob, ...) report to BTT. On QMK based models BTT rewrites the keyboard's on-device layout (other device settings are preserved, the original layout is backed up on the device); on the Codex Micro the OpenAI firmware already reports every key press, so BTT listens passively and never modifies the layout. Once applied, press a key on the Work Louder keyboard while recording a normal Keyboard Shortcut trigger to assign actions to it (keys are recorded as "Work Louder N"; Codex Micro: agent keys 0-5, action keys 6-12, encoder left/right/click 13/14/15). Works without the Work Louder app running — BTT re-applies the configuration automatically whenever the device connects (USB or Bluetooth). Note: the Codex Micro can NOT be used while the ChatGPT / Codex desktop app has it open (that app claims the device exclusively). Supports one optional action category: "Action Executed After Keyboard Initialization" (executed after each successful apply, e.g. to set LED colors via predefined action 626).
+
+The Work Louder configuration is stored as a JSON object in `BTTAdditionalDataJSON`:
+
+| Property (inside BTTAdditionalDataJSON) | Type | Description |
+|----------|------|-------------|
+| `BTTWorkLouderDeviceName` | String | Display name of the keyboard to configure. Empty/omitted = any connected Work Louder keyboard |
+| `BTTWorkLouderDivertAllKeys` | Boolean | Send all keys to BTT (recommended for macro pads). Default: true |
+| `BTTWorkLouderRecordedKeys` | Array of Number | Key indices to divert when `BTTWorkLouderDivertAllKeys` is false (recorded via the BTT UI) |
+| `BTTWorkLouderKeyColor` | String | Optional LED color for diverted keys as hex string, e.g. `"#FF3300"` |
+| `BTTWorkLouderExcludedApps` | Array | Apps where the keyboard keeps its default behavior. Each entry: `{"bundleId": "...", "name": "...", "process": "...", "path": "..."}` |
+
+```json
+{
+  "BTTTriggerType": 1346,
+  "BTTTriggerClass": "BTTTriggerTypeKeyboardShortcut",
+  "BTTAdditionalDataJSON": {
+    "BTTWorkLouderDeviceName": "",
+    "BTTWorkLouderDivertAllKeys": true,
+    "BTTWorkLouderKeyColor": "#FF3300"
+  }
+}
+```
 
 ### 5. Key Sequences / Typed Words
 
@@ -1007,10 +1135,10 @@ Drawings use trigger type `620`.
 **BTTTriggerClass**: `"BTTTriggerTypeMouse"`
 
 Normal mouse triggers use button numbers for trigger type IDs. The formula is:
-- Single click: `1000 + buttonNumber` (button 0=left, 1=right, 2=middle, 3-23=extra buttons)
+- Single click: `1000 + buttonNumber` (button 0=left, 1=right, 2=middle, 3-99=extra buttons)
 - Double click: `1100 + buttonNumber`
 - Triple click: `1200 + buttonNumber`
-- Quadruple click: `1300 + buttonNumber`
+- Quadruple click: `1300 + buttonNumber` (buttons 0-23 and 47-99 only — `1324`-`1346` are used by unrelated trigger types)
 - Scroll: `996`=scroll down, `997`=scroll up, `998`=scroll left, `999`=scroll right
 
 #### Common Mouse Buttons
@@ -1027,6 +1155,17 @@ Normal mouse triggers use button numbers for trigger type IDs. The formula is:
 - `1100` - Left Double Click
 - `1101` - Right Double Click
 - `1102` - Middle Double Click
+
+#### Logitech Thumb Wheel Touch (Button 50)
+
+Button number `50` is reserved for the capacitive thumb wheel touch sensor of supported Logitech mice (the MX Master line - MX Master 3, 3S and 4 report the required touch capability). These triggers only fire while "Allow Thumb Wheel Touch As A Button" is enabled in that mouse's Logitech configuration. Resting a finger on the wheel then acts like holding a mouse button (so long press and drag gestures work), a quick touch is a tap:
+
+- `1050` - Thumb Wheel Touch
+- `1150` - Thumb Wheel Double Tap
+- `1250` - Thumb Wheel Triple Tap
+- `1350` - Thumb Wheel Quadruple Tap
+
+While this is enabled BTT takes over the thumb wheel, so its horizontal scrolling is synthesized by BTT instead of by the mouse itself.
 
 ```json
 {
@@ -1523,8 +1662,40 @@ Notch Bar items share all the Touch Bar BTTTriggerConfig properties (BTTTouchBar
 - `830` - Weather Widget
 - `835` - Custom Widget
 - `836` - Drawer Widget
+- `860` - Knob Item
 
 Floating menus use `BTTMenuConfig` for detailed layout and style properties. See the Floating Menu reference tool for full documentation.
+
+#### Knob Item (860)
+
+A rotary knob item. On screen it rotates via scrolling or click-dragging; on a macro pad it maps to a physical dial/encoder (experimental — the menu is bound to a pad via `BTTMenuMacroPadSerial` in its `BTTMenuConfig`, independent of `BTTMenuAvailability`; availability 6 = "Macro Pad Only" additionally hides the menu from normal on-screen display). Rotation and press events reuse the crown/dial action category keys:
+
+| JSON Key | Description |
+|----------|-------------|
+| `BTTActionsToExecute` | Knob tap / click |
+| `BTTActionCategoryCrownRotateLeftRatchet` | Rotate left (one detent) |
+| `BTTActionCategoryCrownRotateRightRatchet` | Rotate right (one detent) |
+| `BTTActionCategoryCrownRotateLeftSmooth` | Rotate left while the knob is held down (shown as "Actions Executed On Rotate Left (While Pressed)") |
+| `BTTActionCategoryCrownRotateRightSmooth` | Rotate right while the knob is held down (shown as "Actions Executed On Rotate Right (While Pressed)") |
+| `BTTActionCategoryCrownPressDown` | Knob press down |
+| `BTTActionCategoryCrownPressUp` | Knob press up |
+
+Knob behavior is configured via `BTTMenuConfig`: `BTTMenuItemKnobMode` (0/omitted = endless rotation, 1 = fixed range), `BTTMenuItemKnobMinValue` / `BTTMenuItemKnobMaxValue` / `BTTMenuItemKnobStepValue` (fixed-range value settings, step defaults to 1) and `BTTMenuItemKnobHideValue` (1 = hide the numeric value display in the knob center). On a macro pad encoder the "Smooth" categories are the press-and-turn layer: turning while the encoder is held fires `…RotateLeftSmooth` / `…RotateRightSmooth` instead of the Ratchet ones, and the press is then consumed (the plain tap actions in `BTTActionsToExecute` do not run on release). This requires firmware that reports encoder releases; otherwise the press is treated as a plain tap. See the Floating Menu reference tool for full documentation.
+
+#### Macro Pad Strip Swipes (menu / submenu level)
+
+Menus (767) and submenus (774) that drive a macro pad with an LCD touch strip (Stream Deck+, Mirabox/AJAZZ) can carry actions for strip swipes. They are assigned to the container, not to an item, because the strip is shared by everything on it:
+
+| JSON Key | Description |
+|----------|-------------|
+| `BTTActionCategorySwipeLeft` | Swipe left on the touch strip |
+| `BTTActionCategorySwipeRight` | Swipe right on the touch strip |
+
+A direction with actions assigned does NOT page the pad's keys anymore — the actions replace paging for that direction. Directions without actions keep the default swipe-to-page behavior, and paging always stays reachable through the automatic prev/next chevrons, navigation items, and the "Macro Pad: Next / Previous Page" predefined actions. While a submenu is open on the pad, the swipe actions of that submenu apply.
+
+#### Per-Item Triggers (`BTTMenuItemTriggers`)
+
+Menu items (773) and submenus (774) can carry child triggers (keyboard shortcut, key sequence, trackpad, magic mouse or normal mouse triggers) that execute the item like a click. They are stored in the item's `BTTMenuItemTriggers` array and marked with `BTTActionCategory: 50`. `BTTMenuTriggerScope` controls when they are active: 0/omitted = while the menu is focused or hovered (default), 1 = only focused, 2 = only hovered, 4 = always while visible. They usually carry predefined action 603 ("Trigger Specific Floating Menu Item"), which executes the parent item's assigned actions. Menus (767) themselves can also carry trigger children of any supported type with `BTTMenuTriggerScope` 8 (always active, even while hidden) and predefined action 388/386/387 (Toggle/Show/Hide Floating Menu) - a global shortcut for the menu. The variable `focused_floating_menu_identifier` (alongside `hovered_floating_menu_identifier` and `visible_floating_menu_identifiers`) is available for advanced conditions.
 
 ### 13. MIDI
 
@@ -1689,7 +1860,7 @@ Advanced conditions use `BTTTriggerConditionsData` with base64 encoded predicate
 {
   "BTTTriggerType": 807,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
-  "BTTAdditionalConfiguration": "/Users/me/Downloads",
+  "BTTGenericActionConfig": "/Users/me/Downloads",
   "BTTFileChangeType": 5,
   "BTTActionsToExecute": [{
     "BTTPredefinedActionType": 172,
@@ -1732,6 +1903,7 @@ Actions are placed in `BTTActionsToExecute` by default (standard action category
 
 | JSON Key | Description |
 |----------|-------------|
+| `BTTActionCategoryDoubleClick` | Actions on double click of a floating menu item. Delays that item's standard actions by the system double click interval - items without double click actions are unaffected |
 | `BTTActionCategoryHyperKeyRelease` | Actions on Hyper Key release |
 | `BTTActionCategoryChangeToFalse` | Actions when a toggle state changes to false |
 | `BTTActionCategoryAppear` | Actions when item appears |
@@ -1754,6 +1926,25 @@ Actions are placed in `BTTActionsToExecute` by default (standard action category
 | `BTTActionCategoryAppIsRunning` | Actions when app is running |
 | `BTTActionCategoryAppIsNotRunning` | Actions when app is not running |
 | `BTTActionCategoryKeyReleaseAfterAllModifiersReleased` | Actions on key release after all modifiers released |
+| `BTTActionCategorySwipeLeft` | Actions on swipe left on a macro pad's LCD touch strip (floating menus / submenus only) |
+| `BTTActionCategorySwipeRight` | Actions on swipe right on a macro pad's LCD touch strip (floating menus / submenus only) |
+| `BTTActionCategoryValueChanged` | Actions on every value change of a value-producing item (slider / knob), throttled |
+| `BTTActionCategoryValueChangeEnd` | Actions once when the value change ends (slider released) |
+
+### Value Categories
+
+Sliders (775) and knobs (860) report their **exact value** to the actions they fire. Actions
+under these categories can bind their numeric fields to that value via
+`BTTActionValueBindings` (see the Actions reference) — no scripting required.
+
+| JSON Key | Description |
+|----------|-------------|
+| `BTTActionCategoryValueChanged` | Fires continuously while the value changes. Rate is governed by `BTTMenuItemValueUpdateMode` / `BTTMenuItemValueUpdateThrottleHz` in the item's `BTTMenuConfig`. |
+| `BTTActionCategoryValueChangeEnd` | Fires once when the interaction ends. Always fires, independent of the update mode. |
+
+`BTTMenuItemValueUpdateMode`: 0/omitted = continuously while changing (default), 1 = only
+when the change ends, 2 = both. `BTTMenuItemValueUpdateThrottleHz` caps continuous updates
+(default 30). Knobs additionally publish their value under the rotate categories.
 
 ### Drag Direction Categories
 
@@ -1779,6 +1970,19 @@ Actions are placed in `BTTActionsToExecute` by default (standard action category
 | `BTTActionCategoryLogitechCrownRotateRightCont` | Continuous Crown rotate right |
 | `BTTActionCategoryLogitechCrownClick` | Actions on Crown click |
 | `BTTActionCategoryLogitechCrownRelease` | Actions on Crown release |
+
+### Logitech Dialpad Dial Categories
+
+Used on the **Logitech Mouse Configuration** trigger of an MX Creative Dialpad, alongside its
+dial settings. Dial 1 is the "Vertical Dial" (small wheel), dial 2 the "Big Dial" (large flat
+dial). A dial only fires these while its mode is set to "Trigger Actions" — otherwise it scrolls.
+
+| JSON Key | Description |
+|----------|-------------|
+| `BTTActionCategoryLogitechDial1RotateLeft` | Actions on Vertical Dial rotate left |
+| `BTTActionCategoryLogitechDial1RotateRight` | Actions on Vertical Dial rotate right |
+| `BTTActionCategoryLogitechDial2RotateLeft` | Actions on Big Dial rotate left |
+| `BTTActionCategoryLogitechDial2RotateRight` | Actions on Big Dial rotate right |
 
 ### Example: Stream Deck Button with Multiple Action Categories
 ```json
@@ -1841,15 +2045,15 @@ Any trigger can optionally include a `BTTLauncherConfig` object to control how i
 
 Mode 3 (`launcherResultAlwaysVisible`) keeps the item visible in the launcher results even when the typed prompt does not match. This is useful for items that want to react to the current prompt text via the `BTTLauncherPrompt` variable.
 
-Mode 4 (`launcherResultKeywordOnly`) hides the item until the current prompt starts with one of its assigned launcher keywords (see `BTTLauncherKeywords`).
+Mode 4 (`launcherResultKeywordOnly`) hides the item until the current prompt starts with one of its assigned launcher keywords (see `BTTLauncherKeywords`). A keyword is normally followed by a space (`gc apple.com`); keywords ending in a symbol character (e.g. `>` or `gh:`) may have the input attached directly (`>open safari`).
 
 Mode 5 (`launcherResultPromptMatchesOnly`) hides the item until the current prompt matches it.
 
 The launcher also exposes the current prompt through these variables:
 
 - `BTTLauncherPrompt` — the full current prompt text.
-- `BTTLauncherPromptKeyword` — the first whitespace-separated word of the prompt (useful when combined with display mode 4).
-- `BTTLauncherPromptInputWithoutKeyword` — the remainder of the prompt after the first word.
+- `BTTLauncherPromptKeyword` — the matched launcher keyword of the activated item; if none of its keywords matches, the first whitespace-separated word of the prompt (useful when combined with display mode 4).
+- `BTTLauncherPromptInputWithoutKeyword` — the remainder of the prompt after the keyword.
 
 ```json
 {
@@ -1872,9 +2076,9 @@ The launcher also exposes the current prompt through these variables:
 
 1. Always include both `BTTTriggerType` and `BTTTriggerClass`
 2. Use `BTTTriggerConfig` for Touch Bar, Stream Deck, Notch Bar, and Menu Bar Icon properties
-3. Use `BTTAdditionalConfiguration` for most other trigger-specific settings (app paths, variable names, file paths, battery %)
-4. Specific keys override `BTTAdditionalConfiguration`: `BTTWifiName`, `BTTDistributedNotificationName`, `BTTInputSourceName`, `BTTDidOpenURLAdress`, `BTTTriggerName`, `BTTMachineSerialNumber`, `BTTUSBDeviceName`
-5. Actions go in `BTTActionsToExecute` for standard actions; use dedicated action category keys (e.g. `BTTActionCategoryLongPress`, `BTTActionCategoryTouchRelease`) for additional event-based action groups - see the [Action Categories](#action-categories) section above for all available keys
+3. Use `BTTAdditionalConfiguration` for most other trigger-specific settings (app paths, variable names, battery %)
+4. Specific keys override `BTTAdditionalConfiguration`: `BTTWifiName`, `BTTDistributedNotificationName`, `BTTInputSourceName`, `BTTDidOpenURLAdress`, `BTTTriggerName`, `BTTMachineSerialNumber`, `BTTUSBDeviceName`, `BTTGenericActionConfig` (watched file/folder paths of the File Did Change trigger)
+5. Actions go in `BTTActionsToExecute` for standard actions; use dedicated action category keys (e.g. `BTTActionCategoryLongPress`, `BTTActionCategoryTouchRelease`) for additional event-based action groups — see the [Action Categories](#action-categories) section above for all available keys
 6. Test your JSON with BTT's import feature before deploying
 7. Use UUIDs to update existing triggers
 8. Omit optional fields to use defaults

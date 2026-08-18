@@ -33,7 +33,33 @@ Example:
 }
 ```
 
-After adding a server, expose its tools through a skill or through the assistant's advanced tool configuration. Prefer creating a small custom skill for MCP tools you use often.
+Stdio, HTTP, and SSE transports are supported. For HTTP/SSE servers, set `"type": "http"` or `"type": "sse"` and a `"url"` instead of a command.
+
+## Automatic Skills
+
+Every configured MCP server automatically becomes its own skill, named after the server (for example **shell (MCP)**) in the **MCP Servers** category of the skill manager. No manual setup is needed:
+
+- The skill grants access to **all tools the server provides**, including tools the server adds later.
+- The server's tool definitions are added to the assistant's context, and any usage instructions the server publishes are included in the system prompt.
+- Like any skill, it can be set to **Active**, **Optional**, or **Off** per assistant.
+
+By default, MCP server skills are also offered to all assistants as **optional skills**: the assistant can request one mid-conversation when a task needs it, and it is only loaded after you approve the request. To turn this off:
+
+```bash
+defaults write com.hegenberg.BetterTouchTool BTTAIDisableAutoMCPOptionalSkills -bool true
+```
+
+### Customizing An MCP Skill
+
+Auto-generated MCP skills can be edited like any other skill (for example to restrict the tool list or add instructions). Once you save an edited copy, your version takes precedence and is no longer regenerated.
+
+In custom skills, MCP tools can be selected individually, or via the server wildcard entry (for example `shell.*`), which covers all current and future tools of that server.
+
+## Changing The Configuration & Checking Status
+
+The MCP tab in the assistant configuration shows the live connection status of every configured server below the configuration editor — including connection errors and whether the saved file contains invalid JSON. Use **Apply Configuration & Check Status** to save the configuration, reconnect the servers, and refresh the status display without restarting BTT.
+
+Configuration file changes made outside of BTT are picked up on restart.
 
 ## Other Supported Locations
 
@@ -46,6 +72,13 @@ BTT can also read MCP configuration from:
 ```
 
 Pick one location and keep it consistent.
+
+## Troubleshooting
+
+- **Check the status display first:** the MCP tab shows per-server status (connected + tool count, connecting, or the exact failure reason) and which config file each server was loaded from.
+- **Server name collisions:** tool names are exposed as `ai.server_name.tool_name` (dashes become underscores). Avoid server names that collide with built-in tools, e.g. don't name a server `sequential-thinking`.
+- **Command not found:** BTT launches stdio servers outside a login shell, so commands like `npx` or `uvx` may need their full path (e.g. `/opt/homebrew/bin/uvx`).
+- The skill for a configured server appears even while the server is still connecting or failed to launch; its tools become available once the connection succeeds.
 
 ## BTT As An MCP Server
 

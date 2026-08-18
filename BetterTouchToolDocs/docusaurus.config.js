@@ -44,6 +44,24 @@ const config = {
     ],
   ],
 
+  plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        // Most category landing pages are slugged to ".../overview", which
+        // leaves the bare category URL (e.g. /docs/stream-deck/) without a
+        // page — the server then answers 403. Emit a redirect page at the
+        // bare URL for every ".../overview" doc.
+        createRedirects(existingPath) {
+          if (existingPath.endsWith('/overview')) {
+            return [existingPath.slice(0, -'/overview'.length)];
+          }
+          return undefined;
+        },
+      },
+    ],
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({

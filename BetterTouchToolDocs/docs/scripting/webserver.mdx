@@ -28,7 +28,36 @@ If you want the server to serve files, you can put them in this directory (doesn
 ~/Library/Application Support/BetterTouchTool/BTTWebServer/
 
 
+## Request format
+
+Every scripting function is available as `/<function_name>/` (see the list below and the parameter
+descriptions on the [Java Script](/docs/scripting/java-script) page – the parameter names are identical).
+
+* **GET** with query parameters: `http://127.0.0.1:12345/trigger_named/?trigger_name=Foo&shared_secret=…`
+* **POST** (BTT 6.735+) with an `application/json` body – recommended for large payloads such as `add_new_trigger`,
+  `update_trigger` or `trigger_action`:
+  ```bash
+  curl -X POST http://127.0.0.1:12345/trigger_action/ \
+       -H 'Content-Type: application/json' \
+       -H 'X-BTT-Shared-Secret: v3rY_$ecre7' \
+       -d '{"json": {"BTTPredefinedActionType": 254, "BTTAdditionalActionData": {"BTTActionHUDTitle": "Hello"}}}'
+  ```
+  `application/x-www-form-urlencoded` bodies work as well. Body parameters override query parameters.
+* The shared secret can be passed as `shared_secret` parameter, as `X-BTT-Shared-Secret` header or as
+  `Authorization: Bearer <secret>` header (headers: BTT 6.735+).
+* Replies: plain text for string results, `application/json` when the function returns an object / array
+  (e.g. `get_triggers`, `get_info`). Unknown functions fall through to the static file server (404), a wrong
+  secret returns 403, an invalid JSON body 400.
+* `/get_info/` (BTT 6.735+) returns version, build and the list of available functions – use it to feature-detect.
+
+There is an official npm package that wraps all of this with TypeScript types, action/trigger builders and a CLI:
+[`bettertouchtool`](https://www.npmjs.com/package/bettertouchtool) (`npm i bettertouchtool`). It also talks to
+the [unix socket server](/docs/scripting/cli) and works inside BTT's own JavaScript engine.
+
 ## HTTP Endpoints
+
+### Meta
+- `/get_info/` - Version, build and available functions (BTT 6.735+)
 
 ### Badge Management
 - `/get_dock_badge_for/` - Gets dock badge information
@@ -87,9 +116,17 @@ If you want the server to serve files, you can put them in this directory (doesn
 
 ### Clipboard Operations
 - `/get_clipboard_content/` - Gets clipboard content
+- `/get_items_from_clipboard_manager/` - Retrieves items from the clipboard manager
+- `/paste_clipboard_manager_items_with_uuids/` - Pastes specific clipboard manager items
 - `/get_selection/` - Gets current selection
 - `/set_clipboard_content/` - Sets clipboard content
 - `/set_clipboard_contents/` - Sets clipboard contents (duplicate endpoint)
+
+### Other
+- `/display_notification/` - Shows a notification
+- `/is_app_running/` - Checks whether an app is running
+- `/delete_triggers/` - Deletes triggers matching a filter (same parameters as `/get_triggers/`)
+- `/show_simple_json_format_menu/` - Shows a Simple JSON Format menu
 
 ### Preset Management
 - `/export_preset/` - Exports a preset
@@ -102,10 +139,10 @@ If you want the server to serve files, you can put them in this directory (doesn
 
 ## Security Notes
 
-- All endpoints require authentication via shared secret stored in keychain
-- The shared secret must be included in the path
+- If a shared secret is configured, all endpoints require it (parameter `shared_secret`, header `X-BTT-Shared-Secret` or `Authorization: Bearer …`)
 - Requests without proper authentication return HTTP 403 error
 - Server can be configured to use SSL/TLS encryption
+- Only expose the server on your network interface if you really need to; the default 127.0.0.1 is local only
 
 
 # Some Examples

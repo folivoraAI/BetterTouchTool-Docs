@@ -1,0 +1,110 @@
+---
+title: "Node.js / TypeScript Library"
+sidebar_position: 6.5
+slug: "/docs/scripting/node-js-library"
+---
+# The `bettertouchtool` npm package
+
+[`bettertouchtool`](https://www.npmjs.com/package/bettertouchtool) is the official, typed JavaScript /
+TypeScript client for BetterTouchTool's scripting API. It wraps every scripting function described in this
+section (`trigger_named`, `trigger_action`, variables, clipboard, floating menus, widgets, presets, …) with
+typed methods, ships builders for actions and triggers, and includes a small `btt` command line tool.
+
+Source & issues: [github.com/folivoraAI/bettertouchtool-js](https://github.com/folivoraAI/bettertouchtool-js)
+(MIT, AI generated & maintained by folivora.AI).
+
+```bash
+npm install bettertouchtool
+```
+
+## Where it runs
+
+| Environment | Transport used | Setup in BTT |
+|---|---|---|
+| Node.js (≥ 18) on the same Mac | Unix socket (`/tmp/com.hegenberg.BetterTouchTool.sock`) | Settings → Scripting BTT → Command Line → *Enable Socket Server* |
+| Node.js, browsers, other devices | [Webserver](/docs/scripting/webserver) (HTTP, GET or POST) | Settings → Scripting BTT → Webserver |
+| Inside BTT itself (Run Real JavaScript, WebViews, floating HTML menus, script widgets) | in-process `callBTT()` | nothing |
+
+`new Btt()` picks the best available transport automatically (in-process → socket → http); `Btt.socket()`,
+`Btt.http({ port, sharedSecret })` and `Btt.inProcess()` force one.
+
+## Examples
+
+```js
+import { Btt, actions, triggers } from "bettertouchtool";
+
+const btt = Btt.http({ port: 64472, sharedSecret: "my-secret" });   // or Btt.socket()
+
+// scripting functions as typed methods
+await btt.triggerNamed("My Named Trigger");
+const app = await btt.getStringVariable("BTTActiveAppBundleIdentifier");
+await btt.vars.set("my_counter", 5, { persistent: true });
+const clip = await btt.getClipboardContent();
+
+// run any predefined action
+await btt.triggerAction(actions.showHUD("Hello", { detail: app, duration: 2 }));
+await btt.triggerAction(actions.sendShortcut("cmd+shift+4"));
+
+// several actions in one round trip
+await btt.chain().launchApp("com.apple.Safari").delay(0.5).sendShortcut("cmd+t").pasteText("folivora.ai").run();
+
+// create triggers from code
+const handle = await btt.addNewTrigger(
+  triggers.keyboardShortcut("cmd+shift+k", [actions.showHUD("⌘⇧K pressed")], { description: "created from Node" }),
+);
+await handle.invoke();
+await handle.delete();
+
+// anything else: raw scripting call (parameter names as documented in this section)
+await btt.call("update_menu_item", { item_uuid: "…", json: { BTTMenuItemText: "hi" } });
+```
+
+`ActionType` contains all `BTTPredefinedActionType` ids by name (`ActionType.SHOW_HUD === 254`), and
+`import { actionCatalog } from "bettertouchtool/catalog"` gives you the complete
+[action](/docs/actions/action-definitions) and [trigger](/docs/json/trigger-definitions) reference data with
+documented parameters (`actionCatalog.search("floating menu")`).
+
+## Using npm packages inside BetterTouchTool
+
+BTT's [Real JavaScript](/docs/scripting/java-script) engine has no `require`/`import`. To use this package
+(or any other npm module that does not depend on Node/browser APIs) inside BTT, bundle your script into a
+single file and load it from a *Run Real JavaScript* action:
+
+```bash
+npx esbuild my-script.js --bundle --format=iife --platform=browser --outfile=~/Library/Application\ Support/BetterTouchTool/my-script.js
+```
+
+```js
+// my-script.js – runs inside BTT, no configuration needed
+import { Btt, actions } from "bettertouchtool";
+(async () => {
+  const btt = Btt.inProcess();
+  const sel = await btt.getSelection();
+  await btt.triggerAction(actions.showHUD(`Selected ${sel.length} characters`));
+  returnToBTT(sel.toUpperCase());
+})();
+```
+
+```js
+// Run Real JavaScript action
+async function main() {
+  eval(readFile("~/Library/Application Support/BetterTouchTool/my-script.js"));
+  return "started";
+}
+```
+
+## Command line
+
+```bash
+npx bettertouchtool help
+btt trigger-named "My Trigger"
+btt get-var BTTActiveAppBundleIdentifier
+btt hud "Hello" --detail "from the shell"
+btt triggers list --type BTTTriggerTypeKeyboardShortcut
+btt actions search hud
+btt call trigger_action json='{"BTTPredefinedActionType":254,"BTTAdditionalActionData":{"BTTActionHUDTitle":"hi"}}'
+```
+
+Connection flags `--socket`, `--url`, `--port`, `--secret` (or env `BTT_SOCKET`, `BTT_URL`, `BTT_PORT`,
+`BTT_SECRET`); by default it uses the socket when available. This complements the built-in
+[`bttcli`](/docs/scripting/cli) tool that ships with BTT.

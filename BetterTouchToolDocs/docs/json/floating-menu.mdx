@@ -38,7 +38,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - **767** - Menu (top level)
 - **773** - Standard Item (button with actions)
 - **774** - Submenu (contains nested items)
-- **775** - Slider
+- **775** - Slider (range configurable; reports its exact value to its actions)
 - **776** - Text Field (value queryable via scripts)
 - **777** - Back Button (for submenus)
 - **778** - WebView (displays HTML from §Text)
@@ -47,6 +47,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - **802** - Column Breaker
 - **810** - Text Area (value queryable via scripts)
 - **811** - Floating Menu Reference
+- **860** - Knob Item (rotary knob; rotates via scroll / click-drag on screen, maps to a physical encoder on a macro pad)
 
 ## Menu Properties
 
@@ -57,7 +58,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `$Name`: Display name
 - `$Config`: Configuration object
 - `§s`: Array of menu items
-- `$Availability`: 0=everywhere, 1=mac, 2=ios, 3=iphone, 4=ipad
+- `$Availability`: 0=everywhere, 1=mac, 2=ios, 3=iphone, 4=ipad, 5=embedded, 6=macro pad only (menu is hidden from normal on-screen display and only drives its bound macro pad; the pad binding itself is set via `$MacroPadSerial` and works with any availability — see the Macro Pad section)
 - `©Order`: Display order
 - `©LastUpdatedAt`: Timestamp
 - `©AppBundleIdentifier`: App-specific bundle ID
@@ -116,6 +117,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `$WindowLevelManual`: Custom level when $WindowLevel=-1
 - `$WindowResizable`: 1 to allow resizing
 - `$TitleBarStyle`: 0=noTitleBar, 1=standard, 2=overlayContent, 3=transparent
+- `$CloseButtonReleasesMemory`: 1 = the red title bar close button fully closes the menu and releases its content (including cached web views) from memory instead of only hiding it. Overrides `$KeepCached` and keep-active-in-background; the menu and its web content are recreated the next time it is shown. Only relevant while a title bar is shown (`$TitleBarStyle` != 0)
 - `$ClickThroughEmptyParts`: 1 to click through empty areas
 - `$ClickThroughEverywhere`: 1 to click through everywhere
 - `$ShowDockIconWhileVisible`: 1 to show dock icon
@@ -155,6 +157,9 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `§CloseOnClick`: 1 to close menu on item click (default 1)
 - `§ShowHoverEffect`: 1 to show hover effect (default 1)
 - `§ShowIcon`: 1 to show the item icon (default 1)
+- `§RepeatRate`: repeat-while-held — while the item is held down (on-screen press/touch or macro pad key), its standard actions refire every `§RepeatRate` seconds. 0/omitted = no repeat. While repeating is enabled, the item's long-press actions are disabled
+- `§RepeatDelay`: initial delay in seconds before the repeat starts (default 0.5)
+- Double click: an item can hold separate actions in the `©ActionCategoryDoubleClick` category (59). Assigning anything there delays that item's standard (single click) actions by the system double click interval — only then can a single click be told apart from the first half of a double click. Items without double click actions are unaffected and keep firing immediately
 
 ### Alternate Mode
 - `$AlternateModeActive`: 1 to activate alternate mode
@@ -246,7 +251,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 
 #### Icons/Images
 - `§IconType`: Same as §BackgroundType
-- `§IconPosition`: 0=left, 1=top, 2=right, 3=bottom, 4=center, 5=none
+- `§IconPosition`: 0=left, 1=top legacy, 2=right, 3=bottom legacy, 4=center, 5=none, 6=top centered, 7=bottom centered (defaults to 0=left)
 - `§Image`: Base64 image data
 - `§IconPresetPath`: Preset icon path
 - `§ResizeImage`: 0=fit, 1=none, 2=fixed, 3=fitNew
@@ -285,6 +290,15 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `§PizzaSliceBorderColor`: Wedge border
 - `§PizzaSliceBorderWidth`: Border width
 - Dark mode variants with `Dark` suffix (`§PizzaSliceBackgroundColorDark`, `§PizzaSliceBorderColorDark`, `§PizzaSliceBorderWidthDark`)
+
+#### Submenu Display (on submenu items, ©TriggerType 774)
+- `§SubmenuDisplayMode`: 0=drill-in, children replace the menu content (default); 1=fan-out, children expand as a concentric arc outside the main ring. Fan-out only applies to menus with `$LayoutDirection` 8 (circular); other layouts fall back to drill-in.
+- `§SubmenuOpenOn`: What opens a fan-out submenu: 0=click (default), 1=hover, 2=click & hover
+- `§SubmenuHoverOpenDelay`: Seconds the item must stay hovered before the fan opens (default 0.15)
+- `§SubmenuHoverCloseDelay`: Grace period in seconds after the pointer leaves the item slice/arc before the fan closes (default 0.25)
+- `§SubmenuRingGap`: Gap in px between the ring and the fan-out children (default 6)
+- `§SubmenuMaxArcSpan`: Maximum arc span in degrees; children shrink to fit (default 160)
+- `§SubmenuShowConnector`: 1 (default) draws a connector slice between the item and its children, styled via the item's pizza slice colors. Only shown when pizza slice highlighting is enabled (`$HighlightPizzaSlice` ≥ 1, an item-level value overrides the menu-level one) — the connector visually extends the slice highlight
 
 #### Interaction
 - `§Focused`: 1 for initial focus
@@ -330,6 +344,30 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `$WidgetTrackpadInertialCursor`: 1 to enable inertial cursor
 - `$WidgetTrackpadBigCursor`: 1 to enable big cursor
 
+#### Macro Pad (Experimental)
+A menu can drive a physical macro pad (e.g. Stream Deck hardware). The binding is independent of `$Availability` — any menu can be shown on screen normally AND drive a pad at the same time; set `$Availability` to 6 (macro pad only) to additionally hide it from normal on-screen display. Select the device via:
+- `$MacroPadSerial` (menu-level $Config): lowercase serial number of the macro pad this menu drives, or `model:<key>` to bind any connected device of that model (shareable in presets since it doesn't reference a specific unit; e.g. `model:elgato-stream-deck-plus`, Mirabox uses `model:mirabox-<vid>-<pid>` hex keys, Loupedeck uses names like `model:loupedeck-live` / `model:razer-stream-controller`; Stream Decks reached through BTT's Stream Deck plugin instead of direct HID get their own keys with a `-plugin-mode` suffix, e.g. `model:elgato-stream-deck-plus-plugin-mode`, because plugin mode cannot tell the 15-key hardware generations apart), or `family:<key>` to bind any connected device of a whole brand: `family:elgato` (every directly connected Stream Deck — e.g. one menu driving both a Stream Deck + and a Stream Deck Neo), `family:elgato-plugin-mode`, `family:mirabox` (Mirabox/AJAZZ Stream Dock), `family:loupedeck` (Loupedeck and the Razer Stream Controller rebadges). A family binding is what makes ONE menu definition usable across models with different surfaces: items the bound device cannot show are simply dropped (strip items on a pad without a touch strip, dial items on a pad without encoders, items beyond the key count flow onto further pages). More specific always wins for the same device: serial > `model:` > `family:`. Empty/omitted = not bound to a pad
+- `$MacroPadIsDefault` (menu-level $Config): 1 = this is the menu the pad shows at startup when several menus are bound to the same device (which is normal — that is how ©PredefinedActionType 618 switches between them). Without it the winner is whichever menu comes first in the list, so mark one when you have more than one. App-specific menus still take precedence over global ones regardless of this flag
+
+Items of a macro-pad-bound menu support these additional properties:
+- `§HardwarePlacement`: hardware surface the item is placed on: 0=automatic (default: knob items → dials AND additionally mirrored onto the LCD strip so the dials stay self-documenting, everything else → LCD keys), 1=LCD keys, 2=dials/knobs only (opt out of the strip mirroring, leaving the strip entirely to explicitly placed items), 3=LCD strip, 4=plain buttons without a display (Loupedeck's round RGB buttons, the AKP03/M18 plain buttons; these cannot be reached by the ordinary key flow on devices that reserve them, and the item's colour is shown on the button's LED where the hardware has one). Ordering within a surface follows the normal item order. Explicitly placed strip items and mirrored knob items are not mutually exclusive — the strip shows all of them together, laid out left to right using each item's own size/margins (so e.g. four mirrored knob gauges plus a few extra strip items work)
+- `§MacroPadNavigation`: turns an ordinary item into a macro pad navigation control, so paging/back can be styled like any other item instead of using the generated chevrons: 0/omitted=normal item, 1=previous page, 2=next page, 3=back (leave submenu). Such an item is taken out of the normal key flow and occupies the reserved navigation slot, is shown only while that navigation is actually possible (no "previous" on the first page), and pressing it navigates instead of running its actions. If no item declares 3, a Back Button item (©TriggerType 777) in the menu is used as the back control automatically
+- Row Breaker items (`©TriggerType` 801) act as key-grid layout markers on a macro pad: the item after the breaker starts on the next row of the key grid, so items can be grouped without padding the gaps with dummy items. A breaker does nothing when it is leading, when the next free key already starts a row, when it directly follows another breaker, or when nothing follows it on the same page — so one used purely to separate sections in the on-screen menu (e.g. the keys from the knob items) has no effect on the device. Column Breakers are ignored, as is everything on a transport that does not report a grid width (Stream Deck plugin mode)
+- The repeat-while-held properties `§RepeatRate`/`§RepeatDelay` (see Interaction) work for macro pad keys too
+- LCD strip swipes are bindable on the CONTAINER, not per item (the strip is shared by everything on it): a menu (©TriggerType 767) or submenu (774) can hold actions in `©ActionCategorySwipeLeft` (51) / `©ActionCategorySwipeRight` (52) for a swipe on the touch strip of the pad it drives. A direction that has actions assigned no longer pages the pad's keys — the actions replace paging for that direction; directions without actions keep the default swipe-to-page. Paging always stays reachable via the generated chevrons, `§MacroPadNavigation` items and actions 621/622. While a submenu is open on the pad, that submenu's swipe actions apply. Swipe paging follows the on-screen controls: swipe RIGHT = next page, matching the direction the ">>" chevron and the next-page key point. `defaults write com.hegenberg.BetterTouchTool BTTMacroPadSwipeLeftIsNextPage -bool YES` switches to the content-follows-finger mapping instead (swipe left = next, like flicking a page away). Assigned swipe actions are unaffected and always follow the physical direction
+- Stream Decks driven through BTT's Stream Deck plugin (instead of direct HID) only expose the keys and dials on which the BetterTouchTool tile was placed in Elgato's software, so the pad's usable key count changes when the user switches Elgato profile or page. Dials and the touch strip (`§HardwarePlacement` 2 / 3) additionally require Stream Deck software 6.6 or later; there each dial owns an independent 200x100 touch strip segment, which BTT composes into (and slices back out of) one strip canvas
+
+Pads driven by a floating menu can also be navigated programmatically from any trigger or item action (these replace the old Stream Deck group actions):
+- `©PredefinedActionType` 472 (Open Floating Submenu) and 445 (Close Floating Submenu) apply to macro pads as well as to on-screen menus. Their action config accepts `"BTTMenuActionMacroPadDevice"`: a macro pad serial number (or `model:<key>` / `family:<key>`) limiting the action to that pad; empty/omitted = every pad currently driven by a floating menu. 472 resolves its target anywhere in the menu tree, so a pad can jump straight into a nested submenu
+- `©PredefinedActionType` 618 (Macro Pad: Show Menu) retargets a pad at a different floating menu: `"BTTGenericActionConfig"` = name (`$ElementIdentifier`, `$Name` as fallback) or UUID of the menu to show, empty = return the pad to whatever `$MacroPadSerial` binds it to; `"BTTGenericActionConfig2"` = optional pad serial as above (this is how one trigger targets one specific pad while leaving other pads alone). An override set by name SURVIVES application switches and is re-resolved each time, so an app-specific menu with that same name automatically takes over while that app is in front and the override returns to the global menu afterwards; an override given as a UUID stays pinned to exactly that menu. The override is cleared by running 618 with an empty menu name, or dropped automatically if its target menu is deleted or renamed
+- `©PredefinedActionType` 621 / 622 (Macro Pad: Next Page / Previous Page) page the pad, clamped to the available pages. `"BTTGenericActionConfig2"` = optional pad serial as above
+
+#### Knob Items (©TriggerType 860)
+Knob items rotate via scroll / click-drag on screen and map to physical encoders on a macro pad. Rotation & press actions use the crown/dial action categories (rotate left/right ratchet, rotate left/right smooth = "while pressed", press down/up, standard tap on click). On a macro pad encoder, turning while the knob is held fires the smooth categories instead of the ratchet ones and consumes the press (no tap action on release). Configuration:
+- `§KnobMode`: 0=endless rotation (default), 1=fixed range (value clamped between min and max)
+- `§KnobMinValue`/`§KnobMaxValue`: value range for fixed-range knobs (defaults 0 / 100)
+- `§KnobStepValue`: value change per detent (default 1)
+- `§KnobHideValue`: 1 to hide the numeric value shown at the center of fixed-range knobs (default = shown)
 
 #### Miscellaneous
 - `$UseStyleForSubmenu`: 1 to inherit parent style
@@ -339,6 +377,30 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `§Extras`: Extra data (future use)
 - `©AnimateUUID`: Animation trigger UUID
 - `©LastChangeUUID`: Last change UUID
+
+#### Value-Producing Items (Slider 775 / Knob 860)
+
+Sliders and knobs report their exact value to the actions they fire, so actions can bind
+numeric fields to it (`BTTActionValueBindings`, see the Actions documentation) without any
+scripting.
+
+Slider range — defaults reproduce the fixed 0…1 range sliders had before it was configurable:
+- `§SliderMinValue`: minimum (default 0)
+- `§SliderMaxValue`: maximum (default 1)
+- `§SliderStepValue`: step, 0/omitted = continuous
+- `§SliderDefaultValue`: starting value (default = minimum)
+
+Knob range (fixed-range mode only, `§KnobMode` = 1):
+- `§KnobMinValue` (default 0), `§KnobMaxValue` (default 100), `§KnobStepValue` (default 1)
+
+Update rate, for both item types:
+- `§ValueUpdateMode`: 0/omitted = run Value Changed actions continuously while changing, 1 = only when the change ends, 2 = both
+- `§ValueUpdateThrottleHz`: cap for continuous updates (default 30)
+
+The matching action categories are `©ActionCategoryValueChanged` and
+`©ActionCategoryValueChangeEnd`. Value Change Ended always fires when the interaction ends,
+independent of the update mode. Slider values are intentionally **not** persisted across
+restarts; knob values are.
 
 ## Actions (`§Actions`)
 ```json
@@ -350,9 +412,34 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 }]
 ```
 
+## Item Triggers (`§Triggers`)
+
+Standard items (773) and submenu items (774) can have triggers (keyboard shortcuts, key sequences, trackpad gestures, mouse buttons) attached that execute the item like a click - only while the owning menu is focused/hovered/visible. They live in the item's `§Triggers` array (sibling of `§Actions`). Each entry is a regular trigger definition marked with `©ActionCategory` 50, plus:
+
+- `©MenuTriggerScope`: when the trigger is active. 0 or omitted = while the menu is focused OR hovered (default), 1 = only while focused, 2 = only while hovered, 4 = always while the menu is visible (caution: shortcuts without modifier keys then block that key in all apps while the menu shows), 8 = always active even while the menu is hidden (used for menu-level show/hide shortcuts).
+- `©PredefinedActionType` 603 ("Trigger Specific Floating Menu Item"): with no further config the trigger executes its parent item's assigned actions. Any other action can be assigned instead.
+
+```json
+"§Triggers": [{
+  "©TriggerClass": "©TriggerTypeKeyboardShortcut",
+  "©ActionCategory": 50,
+  "©MenuTriggerScope": 0,
+  "©ShortcutKeyCode": 11,
+  "©ShortcutModifierKeys": 0,
+  "©PredefinedActionType": 603
+}]
+```
+
+Menus (767) can also carry such trigger children themselves (any supported trigger type): a trigger with `©ActionCategory` 50, `©MenuTriggerScope` 8 and `©PredefinedActionType` 388 (Toggle Floating Menu; 386 = Show, 387 = Hide) whose action config contains `{"BTTMenuActionMenuID": "<menu uuid>"}` acts as a global shortcut that shows/hides the menu. The Hide action (387) additionally accepts `"BTTMenuActionReleaseFromMemory": 1` in that config: the targeted menu is then closed and its content (including cached web views) released from memory instead of just hidden — same behavior as `$CloseButtonReleasesMemory`, and it likewise overrides `$KeepCached`.
+
+Related display keys:
+- `§AssignedShortcutLabel` ($Config of the item): derived display string of the assigned keyboard shortcut (read-only, maintained by BTT's configuration UI)
+- `§ShowShortcutHint`: 1 = render the assigned shortcut as a small hint label at the item's trailing edge
+- `$ShowItemShortcutHints` (menu-level $Config): 1 = show hint labels for all items that have assigned shortcuts
+
 ## Default Values
 
-Properties listed below can be **omitted** from `$Config` when their value matches the default - the runtime will behave identically whether the key is present-with-default or absent. This keeps exported JSON minimal.
+Properties listed below can be **omitted** from `$Config` when their value matches the default — the runtime will behave identically whether the key is present-with-default or absent. This keeps exported JSON minimal.
 
 ### Defaults = 0
 `§MarginLeft`, `§MarginRight`, `§MarginTop`, `§MarginBottom`,
@@ -374,13 +461,16 @@ Properties listed below can be **omitted** from `$Config` when their value match
 `$FrameWidthHovered`, `$FrameHeightHovered`,
 `$ScriptAlwaysRunOnFirstLoad`, `$ScriptAlwaysRunOnAppear`, `$ModifierKeys`,
 `$WidgetNowPlayingHideCover`, `$WidgetNowPlayingHideWhenNoPlayer`, `$WidgetNowPlayingHideWhenPaused`,
-`$WidgetWeatherLayout`, `$WidgetWeatherUnit`, `$WidgetWeatherHideWhenNoData`
+`$WidgetWeatherLayout`, `$WidgetWeatherUnit`, `$WidgetWeatherHideWhenNoData`,
+`§HardwarePlacement`, `§MacroPadNavigation`, `§KnobMode`, `§KnobHideValue`, `§RepeatRate`,
+`$CloseButtonReleasesMemory`
 
 ### Defaults = 1
 `$TextMinimumScaleFactor`, `$OpacityActive`, `$OpacityInactive`,
 `§VisibleWhileActive`, `§VisibleWhileInactive`,
 `§ShowHoverEffect`, `§ShowIcon`, `§CloseOnClick`,
-`$AllowScrolling`, `$CloseOnOutsideClick`, `$WidgetWeatherAutoLocation`
+`$AllowScrolling`, `$CloseOnOutsideClick`, `$WidgetWeatherAutoLocation`,
+`§KnobStepValue`
 
 ### Defaults = 2
 `§ScrollDeltaNormalMouse`

@@ -87,8 +87,9 @@ Use `query` for result filtering, `frontmostBundleIdentifier` for app-aware rows
 | `trailingHint` | Compact hint such as `Open` or `↩` |
 | `primaryActionIdentifier` | Action ID to run when the row is activated |
 | `surfaceIdentifier` | Surface ID to open native launcher UI |
+| `launcherGroup` | Existing launcher group ID or title where this row should appear |
 | `sortOrder` | Ordering hint |
-| `searchMatchPriority` | Search ranking hint |
+| `searchMatchPriority` | Optional match-strength score for the current query. Higher is better, useful range 0–100: ≥ 90 ranks like an exact title match, ≥ 60 like a prefix match, ≥ 30 like a substring match, lower values like a fuzzy match. A score > 0 also marks the result as matching the current query, so it stays visible even when BTT's own text matching (title/subtitle/keywords) would not find it — useful when the plugin does its own matching. Ranking uses the better of the score bucket and BTT's own match strength; if BTT cannot confirm any text match, the result ranks like a fuzzy match regardless of the score. Only set a score for results actually matched against `context.query`. Leave nil (or ≤ 0) for automatic matching and ranking |
 | `launcherDisplayMode` | Optional per-result display mode as an `NSNumber` using `BTTLauncherPluginDisplayMode` raw values |
 | `opensChildrenByDefault` | Whether activation should drill into children first |
 | `dynamicChildrenIdentifier` | Marker used to load this result's children only when the user opens the result |
@@ -102,6 +103,7 @@ Typical patterns:
 - For expensive or large browse lists, set `dynamicChildrenIdentifier` and implement a child-loading method.
 - For a row that opens native UI, set `surfaceIdentifier` and implement `launcherSurface(...)`.
 - For row-specific shortcuts and actions, attach `commands`.
+- To place a row in a launcher folder/group, set `launcherGroup` to an existing group ID or display title. If it is omitted, BTT falls back to the plugin entry's configured group.
 
 ## Saved Plugin Instances
 
@@ -109,7 +111,9 @@ Saved instances are for plugins that expose one main creator item and then creat
 
 The plugin is the extension. A `BTTLauncherPluginInstance` is one saved configured item owned by that extension.
 
-The `BetterTouchToolPlugins/BTTQuickLinkLauncherPlugin/QuickLinkLauncherPlugin.swift` sample shows this pattern end to end.
+Saved instances are scoped to the active launcher ID plus the plugin identifier. Preset export includes saved plugin instances for launcher IDs referenced by that preset's Show/Toggle Launcher actions, and preset import restores them for the same launcher IDs. The default launcher ID is shared; use explicit launcher IDs for separate saved-instance sets.
+
+The [Quick Links sample](https://github.com/folivoraAI/BetterTouchToolPlugins/blob/master/plugins/official/launcher-quick-links/QuickLinkLauncherPlugin.swift) shows this pattern end to end.
 
 ### `BTTLauncherPluginInstance`
 
@@ -123,8 +127,9 @@ The `BetterTouchToolPlugins/BTTQuickLinkLauncherPlugin/QuickLinkLauncherPlugin.s
 | `trailingHint` | Compact row hint |
 | `primaryActionIdentifier` | Default action for the saved item |
 | `surfaceIdentifier` | Default surface for the saved item |
+| `launcherGroup` | Existing launcher group ID or title for the saved item |
 | `sortOrder` | Ordering hint |
-| `searchMatchPriority` | Search ranking hint |
+| `searchMatchPriority` | Optional match-strength score, higher is better (0–100); same semantics as on `BTTLauncherPluginResult` |
 | `launcherDisplayMode` | Optional per-instance display mode |
 | `configuration` | Property-list-safe per-instance values |
 | `isEnabled` | Whether the saved instance should appear |
@@ -311,8 +316,11 @@ Use `BTTLauncherPluginCommand` to provide item-specific commands. Commands appea
 - `subtitle`
 - `systemImageName`
 - `shortcut`
+- `surfaceIdentifier`
 - `closesLauncherOnSuccess`
 - `destructive`
+
+Set `surfaceIdentifier` on a command when choosing the command should open a launcher-hosted plugin surface for the same item. This is useful for item-specific configuration commands like Edit. When `surfaceIdentifier` is set, BetterTouchTool opens `launcherSurface(forItemIdentifier:surfaceIdentifier:context:)` and does not call `performAction(...)` for that command.
 
 `BTTLauncherPluginShortcut` properties:
 
@@ -337,7 +345,7 @@ For most launcher-native workflows, it is better to keep `closeLauncher = false`
 
 ## Launcher Surfaces
 
-Use a surface when the plugin should show richer native UI inside the launcher.
+Use a surface when the plugin should show richer native UI inside the launcher. For SwiftUI surfaces, return an `NSHostingView` from `makeLauncherSurfaceView()`.
 
 ### Surface Methods
 
@@ -371,6 +379,7 @@ The `delegate` property (type `BTTLauncherPluginDelegate`) provides:
 | `executeNamedTrigger(_:)` | Execute a named BTT trigger |
 | `requestLauncherResultsRefresh()` | Ask the launcher to rebuild the plugin's results |
 | `replaceVariables(in:extraVariables:)` | Resolve BTT placeholders in a string, optionally adding plugin-specific variables |
+| `launcherGroups(launcherID:)` | Return existing launcher groups as dictionaries for building plugin UI pickers |
 | `launcherPluginInstances(forPluginIdentifier:launcherID:)` | Read saved instances |
 | `saveLauncherPluginInstance(_:pluginIdentifier:launcherID:)` | Create or update a saved instance |
 | `deleteLauncherPluginInstance(_:pluginIdentifier:launcherID:)` | Delete a saved instance |
@@ -383,6 +392,8 @@ let resolved = delegate?.replaceVariables(
     extraVariables: ["argument": "cats"]
 )
 ```
+
+Use `launcherGroups(launcherID:)` when a configuration surface wants to show a group picker. Each dictionary contains `id`, `title`, `systemImageName`, and `isUserCreated`. Save the selected `id` or title into `BTTLauncherPluginInstance.launcherGroup`, or set it directly on `BTTLauncherPluginResult.launcherGroup`.
 
 Inside a launcher surface, the delegate also conforms to `BTTLauncherPluginSurfaceDelegate`:
 
@@ -400,6 +411,7 @@ Inside a launcher surface, the delegate also conforms to `BTTLauncherPluginSurfa
 // BTT-Plugin-Icon: sparkles.rectangle.stack
 
 import AppKit
+import SwiftUI
 
 class DemoLauncherPlugin: NSObject, BTTLauncherPluginInterface {
     weak var delegate: (any BTTLauncherPluginDelegate)?
@@ -429,16 +441,28 @@ class DemoLauncherPlugin: NSObject, BTTLauncherPluginInterface {
 
 final class DemoLauncherSurface: NSObject, BTTLauncherPluginSurfaceInterface {
     func makeLauncherSurfaceView() -> NSView {
-        let label = NSTextField(labelWithString: "Hello from a launcher surface")
-        label.font = .systemFont(ofSize: 22, weight: .medium)
-        return label
+        NSHostingView(rootView: DemoLauncherSurfaceView())
+    }
+}
+
+struct DemoLauncherSurfaceView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Hello from a launcher surface", systemImage: "sparkles.rectangle.stack")
+                .font(.title3.weight(.semibold))
+
+            Text("This view is rendered with SwiftUI and hosted inside the BetterTouchTool Launcher.")
+                .foregroundStyle(.secondary)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 ```
 
 See the sample launcher plugin in the BetterTouchTool plugins repository for a fuller example with child items, commands, keyboard shortcuts, variables, refresh requests, and a pinned native launcher panel:
 
-https://github.com/folivoraAI/BetterTouchToolPlugins/blob/master/BTTSampleLauncherPlugin/SampleLauncherPlugin.swift
+https://github.com/folivoraAI/BetterTouchToolPlugins/blob/master/plugins/official/launcher-sample/SampleLauncherPlugin.swift
 
 ## Xcode Bundle Setup
 

@@ -1,0 +1,110 @@
+---
+title: "Keys, Knobs and Displays"
+sidebar_position: 3
+slug: "/docs/macro-pads/surfaces"
+---
+# Keys, Knobs and Displays
+
+Each item has a **Placement** setting in its **Macro Pad** section, which decides
+which part of the device it uses. The section is only shown once the enclosing menu
+is bound to a pad.
+
+## Placement
+
+- **Automatic** — knob items go to the dials and are also mirrored onto the LCD
+  strip; everything else goes to the keys.
+- **LCD Keys** — always a key.
+- **Dials / Knobs** — bound to a dial only, *not* mirrored onto the strip. Use this
+  when you want the strip entirely to yourself.
+- **LCD Strip** — placed on the strip, in addition to any mirrored knobs.
+- **Buttons Without Display** — placed on the pad's plain physical buttons, such as
+  the 8 round buttons of a Loupedeck. See below.
+
+## Size and position
+
+Items are rendered at the size you set (**Item Size**), with their **margins**
+included. On the LCD strip items are packed left to right: the second item starts
+exactly where the first ends, so sizes and margins alone decide the layout.
+
+There is no automatic scaling — what you set is what the device shows. An item
+wider than its key will extend past it, which you can use deliberately for
+edge-to-edge artwork.
+
+## Row breakers
+
+A **Row Breaker** item makes the next item start on a new row of the key grid. Use it
+to group keys without padding the gaps with empty dummy items.
+
+It only ever affects items that come after it, which means it quietly does nothing in
+the cases where you wouldn't want it to:
+
+- at the very end of your key items — so a breaker you added purely to separate the
+  keys from the knob items in the on-screen menu changes nothing on the device;
+- at the very start;
+- when the next free key already begins a row;
+- directly after another breaker, so you never get a surprise blank row.
+
+Column Breakers have no equivalent on a fixed key grid and are ignored. Row breakers
+are also ignored on Stream Decks driven through the Stream Deck plugin, since there
+is no physical grid in that mode.
+
+## Knobs
+
+Add a **Knob** item and place it on the dials. Knob items have their own action
+categories:
+
+- Actions Executed On Rotate Left / Right
+- Actions Executed On Rotate Left / Right (While Pressed) — hold the knob down
+  while turning for a second layer
+- Actions Executed On Knob Tap / Click, and on knob press down / up
+
+A knob can show a value as a gauge (fixed range) or as an endless dial, and its
+gauge follows the physical knob live when it's shown on a strip.
+
+Note that pressing and turning at the same time is treated as one gesture: the tap
+action does not also fire.
+
+## Buttons and knobs without a display
+
+Some pads have plain buttons or knobs with no screen. They work exactly like other
+items — they simply can't show anything.
+
+To put an item on one, set its placement to **Buttons Without Display**. Items with
+that placement fill the pad's display-less buttons in the normal item order, so the
+order of those items decides which physical button each one gets.
+
+On **Loupedeck and Razer Stream Controller** devices the 8 round buttons have a
+colour LED rather than a display, so an item placed on one lights it in that item's
+own colour. It's not a picture, but it is visual feedback.
+
+On pads with only a few plain buttons (such as the AKP03 and M18), those buttons also
+still pick up ordinary items automatically once the keys with displays are full — the
+placement above simply lets you target them on purpose instead.
+
+## Side strips
+
+Some devices have narrow display strips beside the keys instead of one wide strip
+below them — the AKP153 has one down the side, Loupedeck devices have one on each
+side. Place items on them with the **LCD Strip** placement. Items fill the strips in
+item order, top to bottom; on Loupedeck the left strip fills before the right one.
+
+Unlike a wide touch strip, side strips are laid out in fixed segments that line up
+with the key rows next to them.
+
+## Paging
+
+If a menu has more key items than the device has keys, the last two keys that have a
+display become previous/next page controls, and they only appear when there is
+somewhere to go.
+
+To style paging yourself, add an item and set **Macro Pad Navigation** to
+*Previous Page*, *Next Page* or *Back*. Such an item is styled like any other item
+and replaces the default chevron. A **Back Button** item is used automatically as
+the back control inside submenus.
+
+On devices with a touch strip you can also swipe left and right to change pages.
+
+## Submenus
+
+A submenu item opens on the device, and a back control returns from it — the same
+structure you use in an on-screen menu.

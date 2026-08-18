@@ -20,7 +20,7 @@ By default configured BetterTouchTool triggers are set to "Don't Include In Laun
 The trigger will always show at the Launcher while no prompt / search is entered. If something is entered, it will only show if the search matches the defined title.
 
 * **Only Show If Keyword Matches**
-The trigger will now show by default at the top level. It will however show up if the entered search / prompt matches the assigned keyword
+The trigger will now show by default at the top level. It will however show up if the entered search / prompt matches the assigned keyword. A keyword is normally followed by a space (e.g. `gc apple.com`); keywords that end in a symbol character (e.g. `>` or `gh:`) can have the input attached directly, like `>open safari`.
 
 * **Only Show If Prompt Matches**
 The trigger will now show by default at the top level. It will however show up if the entered search / prompt matches the defined title.
@@ -36,10 +36,12 @@ The trigger will always show regardless of whether the prompt is empty or not an
 Once a configured trigger is called from the launcher it has these three variables available:
 
 - `BTTLauncherPrompt` — the full current prompt text.
-- `BTTLauncherPromptKeyword` — the first whitespace-separated word of the prompt
-- `BTTLauncherPromptInputWithoutKeyword` — the remainder of the prompt after the first word.
+- `BTTLauncherPromptKeyword` — the matched launcher keyword of the activated trigger; if none of its keywords matches, the first whitespace-separated word of the prompt
+- `BTTLauncherPromptInputWithoutKeyword` — the remainder of the prompt after the keyword.
 
 So for example you might want to open a URL with Google Chrome. You could assign the keyword "gc" to a trigger and make it "Only Show If Keyword Matches". Now when you'd type "gc https://apple.com" the url will be available via variable BTTLauncherPromptInputWithoutKeyword
+
+Symbol keywords work without the space: assign the keyword `>` to a trigger that runs a terminal command and type `>open "Safari"` — the trigger matches immediately and `BTTLauncherPromptInputWithoutKeyword` contains `open "Safari"`.
 
 ![alt text](../../static/media/use_existing_triggers2026-04-29T19:06:00.333Z.png)
 ![alt text](../../static/media/use_existing_triggers2026-04-29T19:06:27.097Z.png)

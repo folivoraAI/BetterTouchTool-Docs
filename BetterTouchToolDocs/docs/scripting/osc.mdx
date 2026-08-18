@@ -1,0 +1,148 @@
+---
+title: "OSC"
+sidebar_position: 7.5
+slug: "/docs/scripting/osc"
+---
+
+# OSC
+
+OSC support requires BetterTouchTool version **6.603 or later**.
+
+OSC (Open Sound Control) is a lightweight message protocol often used by audio, video, lighting, show-control and automation tools. BetterTouchTool can receive OSC messages and use them to trigger actions. BTT can also send OSC messages as an action.
+
+This is useful for setups such as:
+
+- controlling BTT from a DAW, lighting desk, media server or Bitfocus Companion
+- building custom control surfaces with Floating Menus or BTT Mobile
+- updating BTT variables from external hardware or network tools
+- sending feedback from BTT to another OSC-capable app
+
+## Enabling the OSC Receiver
+
+The OSC receiver is **off by default**.
+
+To enable it:
+
+1. Open BetterTouchTool settings.
+2. Go to **Variables & Scripting**.
+3. Select **OSC**.
+4. Enable **OSC Receiver**.
+5. Configure the listen address and port.
+
+The default endpoint is:
+
+```text
+127.0.0.1:8000
+```
+
+`127.0.0.1` only accepts messages sent from the same Mac. Use this for local testing and local control surfaces. If you want other devices on your network to send OSC messages to BTT, use a reachable interface address or `0.0.0.0`.
+
+Only bind to a network-visible address on networks you trust.
+
+## Triggering BTT Actions From OSC
+
+After enabling the receiver, create an OSC trigger:
+
+1. Add a new trigger in the **Other Triggers** section.
+2. Choose **OSC Message Received**.
+3. Optionally enter an **OSC Address Filter**, for example `/track/1/mute`.
+4. Assign any BTT actions to the trigger.
+
+Leave the OSC address filter empty to run the trigger for every incoming OSC message.
+
+Before the trigger actions run, BTT deserializes the OSC message into temporary variables. You can use these variables in actions, scripts, conditional activation groups and Floating Menus.
+
+## Incoming OSC Variables
+
+| Variable | Description |
+| --- | --- |
+| `BTTOSCAddress` | The OSC address, for example `/track/1/volume`. |
+| `BTTOSCSourceHost` | The host that sent the message. |
+| `BTTOSCSourcePort` | The UDP source port of the sender. |
+| `BTTOSCArgsJSON` | A JSON array containing all arguments as typed objects. |
+| `BTTOSCArgTypes` | Comma-separated OSC type tags, for example `f,s,i`. |
+| `BTTOSCArgCount` | Number of arguments in the message. |
+| `BTTOSCTimestamp` | Time at which BTT received the message. |
+| `BTTOSCReceiveCounter` | Incremented for every received message. Useful for forcing UI updates. |
+| `BTTOSCArg0`, `BTTOSCArg1`, ... | Individual argument values. |
+| `BTTOSCArg0Type`, `BTTOSCArg1Type`, ... | OSC type tag for the matching argument. |
+| `BTTOSCPath0`, `BTTOSCPath1`, ... | Individual OSC address path components. |
+| `BTTOSCPathCount` | Number of OSC address path components. |
+
+For a message like:
+
+```text
+/track/1/volume 0.75
+```
+
+BTT would make variables available like:
+
+```text
+BTTOSCAddress = /track/1/volume
+BTTOSCPath0 = track
+BTTOSCPath1 = 1
+BTTOSCPath2 = volume
+BTTOSCArg0 = 0.75
+BTTOSCArg0Type = f
+```
+
+`BTTOSCArgsJSON` stores the full argument list:
+
+```json
+[
+  { "type": "f", "value": 0.75 }
+]
+```
+
+## Sending OSC Messages
+
+BTT can send OSC messages using the predefined action **Send OSC Message**.
+
+Configure:
+
+- **Host**: destination host, for example `127.0.0.1`
+- **Port**: destination UDP port, for example `8000`
+- **OSC Address**: OSC path, for example `/btt/button/pressed`
+- **Arguments JSON**: JSON array of values to send
+
+The arguments field accepts plain JSON values:
+
+```json
+["hello", 1, 0.75, true]
+```
+
+You can also use typed objects to force a specific OSC type:
+
+```json
+[
+  { "type": "s", "value": "play" },
+  { "type": "i", "value": 1 },
+  { "type": "f", "value": 0.75 }
+]
+```
+
+Common type tags:
+
+| Type | Meaning |
+| --- | --- |
+| `i` | 32-bit integer |
+| `h` | 64-bit integer |
+| `f` | 32-bit float |
+| `d` | 64-bit double |
+| `s` | string |
+| `b` | blob; pass the value as a base64 string |
+| `T` / `F` | true / false |
+| `N` | nil |
+
+BTT variables can be used in the host, port, address and argument fields, so you can build dynamic OSC output from Floating Menus, scripts, trigger context or incoming OSC messages.
+
+## Floating Menus And BTT Mobile
+
+Floating Menus can be used as OSC control surfaces:
+
+1. Create menu items, buttons, sliders or toggles.
+2. Assign **Send OSC Message** actions to them.
+3. Use variables in the OSC address or arguments if the outgoing message should depend on the menu state.
+4. Add **OSC Message Received** triggers to update BTT variables when external tools send feedback.
+
+Because Floating Menus can be shown in the BTT Mobile app, the same setup can also be used as a mobile OSC control surface.

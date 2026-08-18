@@ -594,9 +594,12 @@ Example:
 
 Parameters:
 * **BTTPredefinedActionType**: 264
-* **BTTShortcutToSend**: Key codes as comma-separated string. Format: modifier key codes (sorted highest to lowest), then standard key code
-* **BTTShortcutModifierKeys**: Modifier keys as integer (alternative to including in BTTShortcutToSend)
+* **BTTShortcutToSend**: Key codes as comma-separated string. Format: modifier key codes (sorted highest to lowest), then standard key code. Import also accepts common human-readable strings like `"cmd+shift+s"`, `"⌘⇧S"`, or `"command option d"` and converts them to key-code format.
+* **BTTShortcutModifierKeys**: Not used for shortcut actions. Include modifiers directly in `BTTShortcutToSend`.
 * **BTTShortcutUpDown**: Optional - "onlyDown" to send only key down event, "onlyUp" to send only key up event
+* **BTTAdditionalActionData**: JSON object (optional)
+  - `BTTActionSendKeyboardShortcutIncludeCurrentModifiers`: boolean - include currently pressed modifier keys when sending the shortcut
+  - `BTTActionSendKeyboardShortcutLowLevel`: boolean - send the keyboard shortcut at the lowest possible system level (HID event tap instead of session event tap). Useful when the shortcut is not recognized by certain apps at the default level
 
 Example:
 ```json
@@ -681,7 +684,7 @@ To only send the key down event:
 
 Parameters:
 * **BTTPredefinedActionType**: 128
-* **BTTShortcutToSend**: Key codes as comma-separated string (same format as Send Keyboard Shortcut)
+* **BTTShortcutToSend**: Key codes as comma-separated string (same format as Send Keyboard Shortcut). Import also accepts common human-readable strings like `"cmd+s"` and converts them to key-code format.
 * **BTTShortcutApp**: Bundle identifier or path of the target app, or `"active app"` to target the currently active/frontmost app, or `"app under mouse cursor"` to target the app under the mouse cursor
 * **BTTShortcutSwitchToAppFirst**: 1 to switch to app first, 0 otherwise
 * **BTTShortcutAppUnderCursor**: Set to `"app under mouse cursor"` for app-under-cursor mode, or `"active app"` for active-app mode (optional)
@@ -711,7 +714,7 @@ Example (send to active/frontmost app):
 > Simulates pressing function keys.
 
 Parameters vary by key:
-* **BTTPredefinedActionType**:
+* **BTTPredefinedActionType**: 
   - F1: 33
   - F2: 34
   - F3: 35
@@ -746,7 +749,7 @@ Example:
 
 ### Modifier Key Actions
 
-> Simulates pressing and releasing modifier keys.
+> Simulates pressing and releasing modifier keys. By default these use real macOS modifier state. For apps that react to the flagsChanged event stream rather than real held modifier state, optional compatibility options can be configured via `BTTAdditionalActionData`.
 
 Parameters vary by modifier:
 * **BTTPredefinedActionType**:
@@ -768,11 +771,71 @@ Parameters vary by modifier:
   - Right Option Up: 442
   - Right Command Down: 443
   - Right Command Up: 444
+* **BTTAdditionalActionData**: JSON string (optional) with compatibility options
+  - `BTTModifierActionBehavior`: int - 0=Real Modifier State (default), 1=Visible Modifier Events Only, 2=Visible Events Then Real State, 3=Real State Then Visible Events
+  - `BTTModifierActionEventTap`: int - 0=HID Event Tap (default), 1=Session Event Tap (only relevant when behavior is not 0)
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 186
+}
+```
+
+Example (with visible modifier events compatibility):
+```json
+{
+  "BTTPredefinedActionType": 186,
+  "BTTAdditionalActionData": "{\"BTTModifierActionBehavior\":1,\"BTTModifierActionEventTap\":0}"
+}
+```
+
+### Set / Press / Release Selected Modifier Keys
+
+> Manages multiple modifier keys at once with configurable mode and behavior. Supports pressing, releasing, or setting an exact combination of modifier keys including left/right variants.
+
+Parameters:
+* **BTTPredefinedActionType**: 597
+* **BTTAdditionalActionData**: JSON string with modifier key configuration
+  - `BTTModifierActionFlags`: int - bitmask of modifier keys to manage. Uses device-specific flags for left/right distinction:
+    - Left Shift: 0x0002 (NX_DEVICELSHIFTKEYMASK)
+    - Right Shift: 0x0004 (NX_DEVICERSHIFTKEYMASK)
+    - Left Control: 0x0001 (NX_DEVICELCTLKEYMASK)
+    - Right Control: 0x2000 (NX_DEVICERCTLKEYMASK)
+    - Left Option: 0x0020 (NX_DEVICELALTKEYMASK)
+    - Right Option: 0x0040 (NX_DEVICERALTKEYMASK)
+    - Left Command: 0x0008 (NX_DEVICELCMDKEYMASK)
+    - Right Command: 0x0010 (NX_DEVICERCMDKEYMASK)
+    - Fn: 0x800000 (kCGEventFlagMaskSecondaryFn / NSFunctionKeyMask)
+    - Generic Shift: 0x20000 (NSShiftKeyMask)
+    - Generic Control: 0x40000 (NSControlKeyMask)
+    - Generic Option: 0x80000 (NSAlternateKeyMask)
+    - Generic Command: 0x100000 (NSCommandKeyMask)
+  - `BTTModifierActionMode`: int - 0=Press Selected, 1=Release Selected, 2=Set Exactly (releases all non-selected, presses selected)
+  - `BTTModifierActionBehavior`: int - 0=Real Modifier State (default/recommended), 1=Visible Modifier Events Only, 2=Visible Events Then Real State, 3=Real State Then Visible Events
+  - `BTTModifierActionEventTap`: int - 0=HID Event Tap (default), 1=Session Event Tap (only relevant when behavior is not 0)
+
+Example (press left Command + left Shift):
+```json
+{
+  "BTTPredefinedActionType": 597,
+  "BTTAdditionalActionData": "{\"BTTModifierActionFlags\":10,\"BTTModifierActionMode\":0,\"BTTModifierActionBehavior\":0,\"BTTModifierActionEventTap\":0}"
+}
+```
+
+Example (release all modifier keys using Set Exactly with empty selection):
+```json
+{
+  "BTTPredefinedActionType": 597,
+  "BTTAdditionalActionData": "{\"BTTModifierActionFlags\":0,\"BTTModifierActionMode\":2,\"BTTModifierActionBehavior\":0,\"BTTModifierActionEventTap\":0}"
+}
+```
+
+Example (set exactly left Option using visible events):
+```json
+{
+  "BTTPredefinedActionType": 597,
+  "BTTAdditionalActionData": "{\"BTTModifierActionFlags\":32,\"BTTModifierActionMode\":2,\"BTTModifierActionBehavior\":1,\"BTTModifierActionEventTap\":0}"
 }
 ```
 
@@ -1163,35 +1226,44 @@ Example:
 
 ### Start/Stop Moving Windows
 
-> Enables window moving mode with modifier keys.
+> Makes the window under the cursor follow the mouse until moving is stopped.
 
 Parameters:
 * **BTTPredefinedActionType**:
   - Start Moving: 69
   - Stop Moving: 70
   - Toggle Moving: 74
+* **BTTGenericActionConfig2** (Start Moving only, optional): controls when moving stops automatically.
+  - `stop:auto` (recommended default): picks based on the trigger — touch gestures (trackpad/Magic Mouse/Siri Remote) keep moving while fingers stay on the device and stop when the last finger is lifted; triggers with modifier keys stop when the modifiers are released; everything else stops on the next click or an explicit Stop/Toggle action.
+  - `stop:fingersLifted`: stop when all fingers are lifted off the trackpad/mouse. If the trigger fired after the fingers already left the device, the move continues until the next touch ends (or a click).
+  - `stop:modifiersReleased`: stop when the trigger's modifier keys are released.
+  - `stop:explicit`: stop only on the next physical click or via a Stop/Toggle Moving action.
+  - omitted / `0` / `1`: legacy behavior of older BTT versions (`1` = never stop automatically).
 
 Example:
 ```json
 {
-  "BTTPredefinedActionType": 69
+  "BTTPredefinedActionType": 69,
+  "BTTGenericActionConfig2": "stop:auto"
 }
 ```
 
 ### Start/Stop Resizing Windows
 
-> Enables window resizing mode with modifier keys.
+> Resizes the window under the cursor with mouse movement until resizing is stopped.
 
 Parameters:
 * **BTTPredefinedActionType**:
   - Start Resizing: 71
   - Stop Resizing: 72
   - Toggle Resizing: 73
+* **BTTGenericActionConfig2** (Start Resizing only, optional): same stop policies as "Start Moving Windows" (`stop:auto`, `stop:fingersLifted`, `stop:modifiersReleased`, `stop:explicit`).
 
 Example:
 ```json
 {
-  "BTTPredefinedActionType": 71
+  "BTTPredefinedActionType": 71,
+  "BTTGenericActionConfig2": "stop:auto"
 }
 ```
 
@@ -1362,6 +1434,7 @@ Parameters:
   - `BTTWindowSwitcherMousePos`: number - Position mode (0=mouse centered left, 1=mouse left to first item, 2=mouse left to second item, 3=centered on screen with mouse, 4=centered on screen with focused window, 5=custom position)
   - `BTTWindowSwitcherSort`: number - Sort order (0=last used grouped by desktop, 2=alphabetically app+window name, 3=alphabetically app+window name, 4=last used all desktops mixed)
   - `BTTWindowSwitcherInitialFocus`: number - Initial focus (0=search field, 1=window list)
+  - `BTTWindowSwitcherHideSearchField`: boolean - Hide the search field (the window list always keeps the focus)
   - `BTTWindowSwitcherFocus`: number - Selected item (0=currently active window, 1=second window in list)
   - `BTTWindowSwitcherExcludeSpecific`: boolean - Enable exclude specific apps/windows
   - `BTTWindowSwitcherExclude`: string - Exclusion filter text
@@ -1810,13 +1883,14 @@ Example:
 
 ### Quit Specific Application
 
-> Quits a specific application. Supports standard quit and force quit.
+> Quits a specific application. Supports standard quit, force quit, and an optional fallback force quit after a timeout.
 
 Parameters:
 * **BTTPredefinedActionType**: 592
 * **BTTAppToQuit**: Bundle identifier or path of the app to quit
 * **BTTQuitAppConfig**: JSON string with quit configuration (optional)
   - `BTTQuitAppForceQuit`: boolean - if true, force quits the app without allowing it to save changes
+  - `BTTQuitAppForceQuitTimeout`: number - if greater than 0 and `BTTQuitAppForceQuit` is false, BTT first requests a normal quit and force quits the same still-running app instance after the timeout in seconds
 
 Example:
 ```json
@@ -1832,6 +1906,15 @@ Example with force quit:
   "BTTPredefinedActionType": 592,
   "BTTAppToQuit": "com.apple.Safari",
   "BTTQuitAppConfig": "{\"BTTQuitAppForceQuit\":true}"
+}
+```
+
+Example with fallback force quit timeout:
+```json
+{
+  "BTTPredefinedActionType": 592,
+  "BTTAppToQuit": "com.apple.Safari",
+  "BTTQuitAppConfig": "{\"BTTQuitAppForceQuit\":false,\"BTTQuitAppForceQuitTimeout\":5}"
 }
 ```
 
@@ -2026,15 +2109,37 @@ Example:
 
 ### Create New File in Finder
 
-> Creates a new file in the current Finder location.
+> Creates a new file in the current Finder location and can immediately reveal and open it.
 
 Parameters:
 * **BTTPredefinedActionType**: 85
+* **BTTAdditionalActionData**: JSON object with configuration (all keys optional)
+  - `BTTCreateNewFileTarget`: string - Where to create the file: `finder` (target of the frontmost Finder window, desktop if none - default), `finderSelection` (folder selected in Finder, falls back to `finder`), `custom` (fixed folder)
+  - `BTTCreateNewFileCustomFolder`: string - Folder path, used when target is `custom` (supports ~ and placeholders)
+  - `BTTCreateNewFileNameMode`: string - `ask` (show a name dialog, prefilled with the name below - default) or `fixed` (create without asking)
+  - `BTTCreateNewFileName`: string - File name / suggested file name (default `newfile.txt`). Supports BTT variables (`{variableName}`) and date placeholders (`{date:yyyy-MM-dd}`). A `/` creates the file in a (new) subfolder.
+  - `BTTCreateNewFileContent`: string - Initial file contents, same placeholder support (default empty)
+  - `BTTCreateNewFileConflictMode`: string - If the file already exists: `unique` (create `name 2.txt` - default), `openExisting` (keep the existing file untouched), `overwrite`
+  - `BTTCreateNewFileRevealInFinder`: boolean - Select the new file in Finder (default true)
+  - `BTTCreateNewFileOpenAfterCreation`: boolean - Open the new file (default true)
+  - `BTTCreateNewFileOpenWithApp`: string - App path or bundle identifier to open the file with (default: the system default app)
+  - `BTTCreateNewFileSaveToVariable`: string - Name of a BTT variable that receives the created file path
+
+The action returns the path of the created file, so following actions can use it.
 
 Example:
 ```json
 {
-  "BTTPredefinedActionType": 85
+  "BTTPredefinedActionType": 85,
+  "BTTAdditionalActionData": {
+    "BTTCreateNewFileTarget": "finder",
+    "BTTCreateNewFileNameMode": "fixed",
+    "BTTCreateNewFileName": "Notes {date:yyyy-MM-dd}.md",
+    "BTTCreateNewFileContent": "# Notes\n",
+    "BTTCreateNewFileConflictMode": "openExisting",
+    "BTTCreateNewFileRevealInFinder": true,
+    "BTTCreateNewFileOpenAfterCreation": true
+  }
 }
 ```
 
@@ -2051,6 +2156,20 @@ Example:
 {
   "BTTPredefinedActionType": 157,
   "BTTLaunchPath": "/Applications/TextEdit.app"
+}
+```
+
+### Compress Currently Selected Finder File
+
+> Compresses the currently selected file or folder in Finder into a .zip archive placed next to it (a number is appended to the archive name if it already exists).
+
+Parameters:
+* **BTTPredefinedActionType**: 604
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 604
 }
 ```
 
@@ -2240,6 +2359,34 @@ Example:
   "BTTAdditionalActionData": {
     "BTTAudioDeviceName": "MacBook Pro Microphone",
     "BTTAudioDeviceUID": "BuiltInMicrophoneDevice"
+  }
+}
+```
+
+### Toggle Mute Microphone (Audio Input)
+
+> Toggles the mute state of the microphone (audio input device). Optionally also sets the input volume to 0 when muting and restores it when unmuting. Can apply to all connected input devices or just the default input device.
+
+Parameters:
+* **BTTPredefinedActionType**: 585
+* **BTTAdditionalActionData**: JSON object (optional)
+  - `BTTMicMuteAlsoSetVolume`: boolean - also set input volume to 0 when muting and restore when unmuting
+  - `BTTMicMuteApplyToAllInputDevices`: boolean - apply to all connected input devices instead of only the current default input device
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 585
+}
+```
+
+Example (also set volume, apply to all input devices):
+```json
+{
+  "BTTPredefinedActionType": 585,
+  "BTTAdditionalActionData": {
+    "BTTMicMuteAlsoSetVolume": true,
+    "BTTMicMuteApplyToAllInputDevices": true
   }
 }
 ```
@@ -2882,30 +3029,21 @@ Example:
 }
 ```
 
-### Take Screenshot (Configurable)
+### Change Formatting of Clipboard Content
 
-> Takes a screenshot with advanced configuration options.
+> Changes the text formatting of the current clipboard/pasteboard content. Uses exactly the same `BTTActionChangeTextFormatting*` configuration keys as "Change Formatting of Selected Text" (action 494) — see that action for the full key list.
 
 Parameters:
 * **BTTPredefinedActionType**: 495
-* **BTTAdditionalActionData**: JSON object with screenshot configuration
-  - `BTTActionScreenCaptureConfigurableMode`: number - Capture mode (0=selection, 1=window, 2=fullscreen)
-  - `BTTActionScreenCaptureConfigurableShowSelection`: boolean - Show selection UI
-  - `BTTActionScreenCaptureConfigurableRecordVideo`: boolean - Record video instead of screenshot
-  - `BTTActionScreenCaptureConfigurableShowDesktopIcons`: boolean - Include desktop icons
-  - `BTTActionScreenCaptureConfigurableCopyToClipboard`: boolean - Copy to clipboard
-  - `BTTActionScreenCaptureConfigurableOpenWith`: string - App bundle ID to open screenshot with
-  - `BTTActionScreenCaptureConfigurableVariableName`: string - Variable name to store file path
+* **BTTAdditionalActionData**: JSON object with formatting configuration (same keys as action 494)
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 495,
   "BTTAdditionalActionData": {
-    "BTTActionScreenCaptureConfigurableMode": 0,
-    "BTTActionScreenCaptureConfigurableShowSelection": true,
-    "BTTActionScreenCaptureConfigurableCopyToClipboard": true,
-    "BTTActionScreenCaptureConfigurableVariableName": "screenshot_path"
+    "BTTActionChangeTextFormattingSetFontSize": true,
+    "BTTActionChangeTextFormattingFontSizeFix": 14
   }
 }
 ```
@@ -3014,22 +3152,21 @@ Example:
 
 ### Set Clipboard Contents
 
-> Sets clipboard to specific text or formatted content.
+> Sets the clipboard to specific text or formatted content.
 
 Parameters:
 * **BTTPredefinedActionType**: 529
 * **BTTAdditionalActionData**: JSON object with clipboard configuration
-  - `BTTActionSetClipboardContentsString`: string - Plain text to set
-  - `BTTActionSetClipboardContentsAttributedString`: string - Rich text/attributed string
-  - `BTTActionSetClipboardContentsFormat`: number - Content format (0=plain text, 1=rich text)
+  - `BTTActionSetClipboardContentsAttributedString`: string - The content to set. Plain text can be provided directly; rich text uses BTT's attributed-string encoding (created via the BTT UI).
+  - `BTTActionSetClipboardContentsFormat`: string - Content format selector ("0" = plain text, "1" = rich text)
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 529,
   "BTTAdditionalActionData": {
-    "BTTActionSetClipboardContentsString": "Text to copy",
-    "BTTActionSetClipboardContentsFormat": 0
+    "BTTActionSetClipboardContentsAttributedString": "Text to copy",
+    "BTTActionSetClipboardContentsFormat": "0"
   }
 }
 ```
@@ -3451,61 +3588,39 @@ Example:
 
 Parameters:
 * **BTTPredefinedActionType**: 384
-* **BTTChatGPTPrompt**: Transformation prompt (stored in launchPath)
 * **BTTAdditionalActionData**: JSON object with configuration - same keys as Transform Clipboard with ChatGPT
-  - `BTTChatGPTModelSelection`: Model to use ("gpt-4o-mini", "custom") - default: "gpt-4o-mini"
-  - `BTTChatGPTModel`: Custom model identifier (when using "custom" selection)
-  - `BTTChatGPTTransformerSystemPrompt`: System prompt for the AI
-  - `BTTChatGPTTransformerUserPrompt`: User prompt template
-  - `BTTChatGPTTransformerExampleInput`: Example input for testing
-  - `BTTChatGPTNumberOfClipboardItemsToInclude`: number - Include clipboard history items
-  - `BTTChatGPTClipboardItemSeparator`: string - Separator for clipboard items
-  - `BTTChatGPTReplaceSelection`: boolean - Replace selected text with result
-  - `BTTChatGPTInsertAsTyping`: boolean - Type out the response instead of pasting
-  - `BTTChatGPTUsePrimaryLanguageModel`: boolean - Use primary language model
-  - `BTTChatGPTScreenshotOption`: number - Screenshot option (0=none, 1=interactive, 2=focused window)
-  - `BTTChatGPTAddTimeDate`: boolean - Include timestamp in prompt
-  - `BTTChatGPTTokenCountOption`: number - Token counting mode
-  - `BTTChatGPTAddNotchBarContent`: boolean - Include notch bar content
-  - `BTTChatGPTAddMenuBarContent`: boolean - Include menu bar content
-  - `BTTChatGPTAddHistoryModeDescription`: boolean - Include history mode description
-  - `BTTChatGPTOpenAIKey`: string - OpenAI API key (stored securely)
-  - `BTTChatGPTSystemPrompt`: string - System prompt (alternative to BTTChatGPTTransformerSystemPrompt)
-  - `BTTChatGPTUserPrompt`: string - User prompt (alternative to BTTChatGPTTransformerUserPrompt)
-  - `BTTChatGPTModelToUse`: string - Model to use (alternative to BTTChatGPTModel)
-  - `BTTChatGPTNumberOfRecentChatMessages`: number - Include recent chat messages
-  - `BTTChatGPTCustomURL`: string - Custom URL (alternative to BTTChatGPTTransformerCustomURL)
-  - `BTTChatGPTPassPreviousMessages`: boolean - Pass previous messages in conversation
-  - `BTTChatGPTNumberOfHistoryItems`: Number of previous requests to include
-  - `BTTChatGPTTransformerShowMiniHUD`: boolean - show mini HUD while waiting
-  - `BTTChatGPTTransformerAskWhatToDo`: boolean - always ask what to do
-  - `BTTChatGPTTransformerCustomURL`: Custom API endpoint URL
-  - `BTTChatGPTKeepSelectedText`: boolean - keep text selected
-  - `BTTChatGPTAppendSelectedText`: boolean - append selected text to prompt
-  - `BTTChatGPTImageFilePath`: Path to image file to attach
-  - `BTTChatGPTImageType`: Image source type (0=clipboard, 1=file)
-  - `BTTChatGPTAppendImage`: boolean - attach image to request
-  - `BTTChatGPTUseStreaming`: boolean - stream response - default: true
-  - `BTTChatGPTCopyResponseToClipboard`: boolean - copy result to clipboard
-  - `BTTChatGPTCopyResponseToVariable`: boolean - save result to variable
-  - `BTTChatGPTCopyResponseToVariableName`: Variable name to store result
-  - `BTTActionPasteFormat`: Paste format options
-  - `BTTActionPasteInputFormat`: Input format for processing
-  - `BTTChatGPTAPIKey`: OpenAI API key (stored securely)
-  - `BTTChatGPTTransformerExtraParameters`: string - Extra JSON parameters to pass to the API (e.g., temperature, max_tokens)
+  - `BTTChatGPTTransformerSystemPrompt`: string - System prompt for the AI
+  - `BTTChatGPTTransformerUserPrompt`: string - User prompt template
+  - `BTTChatGPTTransformerExampleInput`: string - Example input for testing
+  - `BTTChatGPTModelSelection`: string - Model to use ("custom" enables the custom model fields)
+  - `BTTChatGPTModel`: string - Custom model identifier (only used when BTTChatGPTModelSelection is "custom")
+  - `BTTChatGPTTransformerCustomURL`: string - Custom API endpoint URL
+  - `BTTChatGPTTransformerExtraParameters`: string - Extra JSON parameters to pass to the API, e.g. temperature (only used when BTTChatGPTModelSelection is "custom")
+  - `BTTChatGPTNumberOfHistoryItems`: number - Number of previous requests to include
+  - `BTTChatGPTTransformerShowMiniHUD`: boolean - Show a mini HUD while waiting
+  - `BTTChatGPTTransformerAskWhatToDo`: boolean - Always ask what to do
+  - `BTTChatGPTKeepSelectedText`: boolean - Keep the text selected
+  - `BTTChatGPTAppendSelectedText`: boolean - Append the selected text to the prompt
+  - `BTTChatGPTAppendImage`: boolean - Attach an image to the request
+  - `BTTChatGPTImageType`: number - Image source type (only used when BTTChatGPTAppendImage is true)
+  - `BTTChatGPTImageFilePath`: string - Path to the image file to attach (only used when BTTChatGPTAppendImage is true and BTTChatGPTImageType is 1)
+  - `BTTChatGPTUseStreaming`: boolean - Stream the response
+  - `BTTChatGPTCopyResponseToClipboard`: boolean - Copy the result to the clipboard
+  - `BTTChatGPTCopyResponseToVariable`: boolean - Save the result to a variable
+  - `BTTChatGPTCopyResponseToVariableName`: string - Variable name to store the result (only used when BTTChatGPTCopyResponseToVariable is true)
+  - `BTTActionPasteFormat`: string - Paste format options
+  - `BTTActionPasteInputFormat`: string - Input format for processing
+* The OpenAI/compatible API key is stored in the macOS Keychain (configured through the BTT UI), not in the trigger JSON.
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 384,
-  "BTTChatGPTPrompt": "Fix grammar and spelling",
   "BTTAdditionalActionData": {
-    "BTTChatGPTModelSelection": "gpt-4o-mini",
     "BTTChatGPTTransformerSystemPrompt": "You are a professional editor.",
+    "BTTChatGPTTransformerUserPrompt": "Fix grammar and spelling.",
     "BTTChatGPTCopyResponseToClipboard": true,
-    "BTTChatGPTUseStreaming": true,
-    "BTTChatGPTReplaceSelection": true,
-    "BTTChatGPTScreenshotOption": 0
+    "BTTChatGPTUseStreaming": true
   }
 }
 ```
@@ -3777,7 +3892,7 @@ Parameters:
 
 ### Run Core JavaScript
 
-> Executes Core JavaScript code (BTT's built-in JS engine with async/await support).
+> Executes Core JavaScript code (BTT's built-in JS engine with async/await support). Set `BTTScriptFunctionToCall` in BTTAdditionalActionData to the name of the (async) function BTT should call; its return value is the action result (returned by trigger_named / trigger_action). Without it the script is only evaluated and must call `returnToBTT(value)` itself.
 
 Parameters:
 * **BTTPredefinedActionType**: 281
@@ -3798,6 +3913,49 @@ Example:
     "BTTScriptLocation": 0,
     "BTTAppleScriptRunInBackground": true,
     "BTTAppleScriptString": "let result = await callBTT('trigger_named', {trigger_name: 'MyTrigger'}); returnToBTT(result);"
+  }
+}
+```
+
+### Run JavaScript in Browser
+
+> Evaluates JavaScript directly in the active tab of a web browser and returns the result. Uses the BetterTouchTool Safari/Chrome browser extension when available. If no matching extension is active, BTT falls back to browser scripting for Safari and Chromium based browsers. Use an async IIFE if you need `await`. Only Safari and Chromium based browsers are supported.
+
+Parameters:
+* **BTTPredefinedActionType**: 600
+* **BTTLaunchPath**: The JavaScript to evaluate in the active browser tab (default: `document.title`)
+* **BTTAdditionalActionData**: JSON object with configuration (optional)
+  - `BTTActionRunJavaScriptInBrowserTarget`: string - Which browser to target. Use `"focusedBrowser"` (default) to run in the currently focused browser, or a specific browser bundle identifier. Supported bundle identifiers:
+    - `"com.apple.Safari"` - Safari
+    - `"com.google.Chrome"` - Google Chrome
+    - `"com.google.Chrome.beta"` - Google Chrome Beta
+    - `"com.google.Chrome.dev"` - Google Chrome Dev
+    - `"com.google.Chrome.canary"` - Google Chrome Canary
+    - `"com.microsoft.edgemac"` - Microsoft Edge
+    - `"com.brave.Browser"` - Brave Browser
+    - `"com.vivaldi.Vivaldi"` - Vivaldi
+    - `"company.thebrowser.Browser"` - Arc
+    - `"com.operasoftware.Opera"` - Opera
+    - `"org.chromium.Chromium"` - Chromium
+
+Example (run in the currently focused browser):
+```json
+{
+  "BTTPredefinedActionType": 600,
+  "BTTLaunchPath": "document.title",
+  "BTTAdditionalActionData": {
+    "BTTActionRunJavaScriptInBrowserTarget": "focusedBrowser"
+  }
+}
+```
+
+Example (target Google Chrome specifically, with an async IIFE):
+```json
+{
+  "BTTPredefinedActionType": 600,
+  "BTTLaunchPath": "(async () => { const r = await fetch('https://example.com'); return r.status; })()",
+  "BTTAdditionalActionData": {
+    "BTTActionRunJavaScriptInBrowserTarget": "com.google.Chrome"
   }
 }
 ```
@@ -3841,14 +3999,14 @@ Example:
 Parameters:
 * **BTTPredefinedActionType**: 206
 * **BTTShellTaskActionScript**: Script content
-* **BTTShellTaskActionConfig**: Shell configuration (optional)
+* **BTTShellTaskActionConfig**: `launchPath:::parameters:::-:::environmentVars` string, e.g. `"/bin/bash:::-c:::-:::"` (REQUIRED - the action does nothing without it; env vars optional, format `KEY=value` newline separated)
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 206,
   "BTTShellTaskActionScript": "#!/bin/bash\necho 'Hello World'",
-  "BTTShellTaskActionConfig": "/bin/bash"
+  "BTTShellTaskActionConfig": "/bin/bash:::-c:::-:::"
 }
 ```
 
@@ -4049,17 +4207,21 @@ Example:
 
 ### Trigger Named Trigger
 
-> Executes a named trigger by name.
+> Executes a named trigger by name. If the named trigger declares variables, values for them can be passed along.
 
 Parameters:
 * **BTTPredefinedActionType**: 248
 * **BTTNamedTriggerToTrigger**: Trigger name
+* **BTTAdditionalActionData**: Optional object with one `BTTActionTriggerNamedTriggerVar_<variableName>` entry per variable declared by the target named trigger. The values are set as BTT variables right before the named trigger runs and may contain `{variableName}` placeholders. Entries for variables the target named trigger does not declare, and entries with an empty value, are ignored. Values are always written here as strings; a variable the named trigger declares with `BTTNamedTriggerAIVar<n>Type` 1 is stored as a number variable instead of a text variable.
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 248,
-  "BTTNamedTriggerToTrigger": "My Custom Action"
+  "BTTNamedTriggerToTrigger": "My Custom Action",
+  "BTTAdditionalActionData": {
+    "BTTActionTriggerNamedTriggerVar_mode": "dark"
+  }
 }
 ```
 
@@ -4501,17 +4663,18 @@ Example (return to previous profile):
 }
 ```
 
-### Stream Deck Brightness Control
+### Macro Pad: Change / Set Brightness
 
-> Controls Stream Deck brightness.
+> Changes (relative) or sets (absolute) the brightness of connected macro pad devices. These actions are hardware-agnostic: they drive Elgato Stream Deck devices as well as the Mirabox / AJAZZ "Stream Dock" family (AKP03, AKP05E, AKP153, M18 and rebadges) and Loupedeck / Razer Stream Controller devices. The action IDs are unchanged - only the displayed names were updated from "Stream Deck: Change/Set Brightness" to "Macro Pad: Change/Set Brightness". Non-Elgato macro pads require macOS 13.0 or later.
 
 Parameters:
 * **BTTPredefinedActionType**:
   - Change Brightness: 343
   - Set Brightness: 344
-* **BTTGenericActionConfig**: Brightness value (0-100 for set, +/- for change)
+* **BTTGenericActionConfig**: Brightness value (0-100 for set, +/- delta for change)
+* **BTTGenericActionConfig2**: Optional device filter. Empty = all connected devices. Accepts a device serial number, `model:<modelKey>` to target every device of one model, or `family:<familyKey>` to target a whole brand (`elgato`, `elgato-plugin-mode`, `mirabox`, `loupedeck`) - the same syntax the floating menu macro pad bindings use. The `model:` / `family:` forms select non-Elgato pads (Mirabox / AJAZZ, Loupedeck); Elgato Stream Decks are matched by serial number for this action.
 
-Example:
+Example (set all connected devices to 75%):
 ```json
 {
   "BTTPredefinedActionType": 344,
@@ -4519,20 +4682,38 @@ Example:
 }
 ```
 
-### Stream Deck Power Control
+Example (dim one specific device by 10%):
+```json
+{
+  "BTTPredefinedActionType": 343,
+  "BTTGenericActionConfig": "-10",
+  "BTTGenericActionConfig2": "AL12K1A00567"
+}
+```
 
-> Controls Stream Deck power state.
+### Macro Pad: Turn Off / Turn On / Toggle
+
+> Turns connected macro pad devices off or on, or toggles them. Like the brightness actions these are hardware-agnostic and cover Elgato Stream Deck devices as well as the Mirabox / AJAZZ "Stream Dock" family and Loupedeck / Razer Stream Controller devices. The action IDs are unchanged - only the displayed names were updated from "Turn Stream Deck Off/On" and "Toggle Stream Deck On/Off" to "Macro Pad: Turn Off / Turn On / Toggle On/Off". On Mirabox/AJAZZ and Loupedeck hardware there is no separate power switch: "off" sets the panel brightness to 0 and "on" restores the brightness that was used before. Non-Elgato macro pads require macOS 13.0 or later.
 
 Parameters:
 * **BTTPredefinedActionType**:
   - Turn Off: 347
   - Turn On: 348
   - Toggle On/Off: 349
+* **BTTGenericActionConfig**: Optional device filter. Empty = all connected devices. Accepts a device serial number, `model:<modelKey>` to target every device of one model, or `family:<familyKey>` to target a whole brand (`elgato`, `elgato-plugin-mode`, `mirabox`, `loupedeck`). The `model:` / `family:` forms select non-Elgato pads (Mirabox / AJAZZ, Loupedeck); Elgato Stream Decks are matched by serial number for this action.
 
-Example:
+Example (toggle all connected devices):
 ```json
 {
   "BTTPredefinedActionType": 349
+}
+```
+
+Example (turn off one specific device):
+```json
+{
+  "BTTPredefinedActionType": 347,
+  "BTTGenericActionConfig": "AL12K1A00567"
 }
 ```
 
@@ -4608,7 +4789,7 @@ Example:
 Parameters:
 * **BTTPredefinedActionType**: 386
 * **BTTAdditionalActionData**: JSON object with menu configuration
-  - `BTTMenuActionMenuID`: Menu UUID or identifier (primary way to specify the menu)
+  - `BTTMenuActionMenuID`: Menu UUID or identifier (primary way to specify the menu). Can be omitted when this action is a menu-level trigger child of a floating menu (`BTTActionCategory` 50) - it then targets its owning menu
   - `BTTMenuActionMenuName`: Menu name (alternative to UUID, for display/lookup)
   - `BTTMenuActionActivateKeyboardFocus`: Keyboard focus mode (0 = do NOT steal keyboard focus, 1 = activate window & steal keyboard focus, 2 = steal keyboard focus without activating window)
   - `BTTMenuActionHideOnModifierRelease`: boolean - hide the menu after releasing all pressed modifier keys
@@ -4639,10 +4820,11 @@ Example:
 Parameters:
 * **BTTPredefinedActionType**: 387
 * **BTTAdditionalActionData**: JSON object with menu configuration
-  - `BTTMenuActionMenuID`: Menu UUID or identifier
+  - `BTTMenuActionMenuID`: Menu UUID or identifier. Can be omitted when this action is a menu-level trigger child of a floating menu (`BTTActionCategory` 50) - it then targets its owning menu
   - `BTTMenuActionMenuName`: Menu name (alternative to UUID)
   - `BTTMenuActionTriggerHoveredOnHide`: boolean - trigger hovered item when menu is being hidden
   - `BTTMenuActionCloseSubmenuOnHide`: boolean - close submenus when menu is being hidden
+  - `BTTMenuActionReleaseFromMemory`: boolean - close the menu and release its content (including cached web views) from memory instead of only hiding it. Overrides the menu's "Keep Menu In Cache" / "Keep Active In Background" settings - the menu and its web content are recreated the next time it is shown
 
 Example:
 ```json
@@ -4651,7 +4833,8 @@ Example:
   "BTTAdditionalActionData": {
     "BTTMenuActionMenuName": "QuickActions",
     "BTTMenuActionTriggerHoveredOnHide": 0,
-    "BTTMenuActionCloseSubmenuOnHide": 0
+    "BTTMenuActionCloseSubmenuOnHide": 0,
+    "BTTMenuActionReleaseFromMemory": 0
   }
 }
 ```
@@ -4663,7 +4846,7 @@ Example:
 Parameters:
 * **BTTPredefinedActionType**: 388
 * **BTTAdditionalActionData**: JSON object with menu configuration
-  - `BTTMenuActionMenuID`: Menu UUID or identifier
+  - `BTTMenuActionMenuID`: Menu UUID or identifier. Can be omitted when this action is a menu-level trigger child of a floating menu (`BTTActionCategory` 50) - it then targets its owning menu
   - `BTTMenuActionMenuName`: Menu name (alternative to UUID)
   - `BTTMenuActionActivateKeyboardFocus`: Keyboard focus mode (0 = don't steal, 1 = activate window & steal, 2 = steal without activating)
   - `BTTMenuActionHideOnModifierRelease`: boolean - hide after releasing all pressed modifier keys
@@ -4685,7 +4868,7 @@ Example:
 
 ### Open Floating Menu Submenu
 
-> Opens a submenu in floating menu. You can specify the target either by item UUID, or by menu name + item name.
+> Opens a submenu in floating menu. You can specify the target either by item UUID, or by menu name + item name. It also enters that submenu on macro pads driven by a floating menu (macOS 13.0+); the optional `BTTMenuActionMacroPadDevice` key limits this to one pad (empty = all such pads, otherwise a device serial number, `model:<modelKey>` for every device of one model, or `family:<familyKey>` for a whole brand - `elgato`, `elgato-plugin-mode`, `mirabox`, `loupedeck`).
 
 Parameters:
 * **BTTPredefinedActionType**: 472
@@ -4707,7 +4890,7 @@ Example:
 
 ### Close Floating Menu Submenu
 
-> Closes current floating menu submenu. You can optionally provide the parent menu name or UUID. If no identifier is provided, all open submenus will be closed.
+> Closes current floating menu submenu. You can optionally provide the parent menu name or UUID. If no identifier is provided, all open submenus will be closed. It also leaves the current submenu on macro pads driven by a floating menu (macOS 13.0+); the optional `BTTMenuActionMacroPadDevice` key limits this to one pad (empty = all such pads, otherwise a device serial number, `model:<modelKey>` for every device of one model, or `family:<familyKey>` for a whole brand - `elgato`, `elgato-plugin-mode`, `mirabox`, `loupedeck`).
 
 Parameters:
 * **BTTPredefinedActionType**: 445
@@ -4874,6 +5057,26 @@ Example:
 }
 ```
 
+### Trigger Specific Floating Menu Item
+
+> Executes a floating menu item exactly like clicking it (runs the item's assigned actions). This is the default action of per-item floating menu triggers (`BTTActionCategory` 50) - assigned to such a trigger without further configuration it executes the trigger's parent menu item.
+
+Parameters:
+* **BTTPredefinedActionType**: 603
+* **BTTAdditionalActionData**: JSON object (optional)
+  - `BTTItemUUIDToTrigger`: UUID of the floating menu item to execute. If omitted, the parent menu item of the trigger this action is attached to is executed.
+  - `BTTItemActionCategoryToTrigger`: Action category to execute on the item (optional, default 0 = the item's standard click actions).
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 603,
+  "BTTAdditionalActionData": {
+    "BTTItemUUIDToTrigger": "12345678-1234-1234-1234-123456789012"
+  }
+}
+```
+
 ### Floating Menu Hover/Unhover
 
 > Controls hover state of a floating menu item.
@@ -4903,14 +5106,19 @@ Example:
 Parameters:
 * **BTTPredefinedActionType**: 447
 * **BTTAdditionalActionData**: JSON object
-  - `BTTMenuActionMenuID`: Menu UUID or identifier
+  - `BTTMenuActionMenuItemUUID`: Item UUID. BTT variable placeholders are expanded at execution time, which allows reusable named triggers to target different items.
+  - `BTTMenuActionMenuName` and `BTTMenuActionMenuItemName`: Alternative name-based target when no item UUID is supplied. Placeholders are expanded here as well.
+  - `BTTMenuPersistChanges`: Whether to write the updated properties back to the saved item. Keep this disabled for temporary state styling.
+  - Any string property value may contain BTT variable placeholders; arrays and nested objects are resolved recursively.
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 447,
   "BTTAdditionalActionData": {
-    "BTTMenuActionMenuID": "12345678-1234-1234-1234-123456789012"
+    "BTTMenuActionMenuItemUUID": "{item_uuid}",
+    "BTTMenuPersistChanges": false,
+    "BTTMenuItemBackgroundColor": "{status_color}"
   }
 }
 ```
@@ -5032,10 +5240,14 @@ Example:
 
 Parameters:
 * **BTTPredefinedActionType**: 329
-* **BTTGenericActionConfig**: The name of the for loop
+* **BTTGenericActionConfig**: The name of the for loop (used by "Cancel Repeat" and as the variable name that holds the current iteration index)
 * **BTTAdditionalActionData**: Contains further action configuration object
   - `BTTActionForLoopRepeat`: Number of times the for loop should repeat (number)
-  - `BTTActionForLoopRepeatVariable`: If the number of repeats is controlled by a BTT variable, you can specify the variable here
+  - `BTTActionForLoopRepeatVariable`: If the number of repeats is controlled by a BTT variable, you can specify the variable here (the variable's value is read when the loop starts and takes precedence over `BTTActionForLoopRepeat`)
+
+**Notes**:
+- A repeat count of 0 (or a missing / invalid count) does not run the loop body at all; execution continues after the matching "End / Stop Repeat".
+- Loops can be nested. Every "Start Repeat" needs a matching "End / Stop Repeat" on the same level.
 
 Example:
 ```json
@@ -5064,25 +5276,25 @@ Example:
 
 ### Break
 
-> Can only be used between "Start Repeat" and "End/Stop Repeat". Behaves like a standard break e.g. in JavaScript.
+> Can only be used between "Start Repeat" and "End/Stop Repeat". Behaves like a standard break e.g. in JavaScript: the rest of the current iteration is skipped, the loop ends and execution continues after the matching "End / Stop Repeat". With nested loops it breaks the innermost loop the Break action is placed in.
 
 Parameters:
-* **BTTPredefinedActionType**: 332
+* **BTTPredefinedActionType**: 331
 
 Example:
 ```json
 {
-  "BTTPredefinedActionType": 332
+  "BTTPredefinedActionType": 331
 }
 ```
 
 ### Cancel Repeat
 
-> This will cancel the specified repeat loop (if it is running).
+> This will cancel the specified repeat loop (if it is running). Like "Break", the rest of the current iteration of that loop is skipped and the sequence continues after the loop's "End / Stop Repeat". Can also be used from a different trigger / action sequence than the loop itself.
 
 Parameters:
 * **BTTPredefinedActionType**: 424
-* **BTTGenericActionConfig**: The name of the repeat / loop that shall be canceled.
+* **BTTGenericActionConfig**: The name of the repeat / loop that shall be canceled (the `BTTGenericActionConfig` of the "Start Repeat" action).
 
 Example:
 ```json
@@ -5095,6 +5307,8 @@ Example:
 ### IF Condition
 
 > Starts conditional block based on variable.
+
+**How If blocks work** (applies to all IF actions: 330, 431, 405, 428): the actions after the IF up to the matching "ELSE" (or "END IF" if there is no else) run when the condition is true, the actions between "ELSE" and "END IF" run when it is false. Afterwards the sequence continues after the matching "END IF". If blocks can be nested and can be placed inside repeat loops. Every IF needs a matching "END IF" on the same level, otherwise the sequence stops after the If block. Only the first "ELSE" on a level is honoured; the actions after a second "ELSE" on the same level never run.
 
 Parameters:
 * **BTTPredefinedActionType**: 330
@@ -5112,33 +5326,27 @@ Example:
 
 ### IF JavaScript True
 
-> Conditional based on JavaScript evaluation.
+> Conditional based on JavaScript evaluation (BTT's built-in Core JavaScript engine, same as "Run Core JavaScript"). The script is evaluated asynchronously; the If block continues once the script has delivered its result. Booleans and the strings "true" / "false" are accepted, anything else counts as false.
 
 Parameters:
 * **BTTPredefinedActionType**: 431
-* **BTTRealJavaScriptString**: JavaScript that returns boolean
+* **BTTAdditionalActionData**: Object with:
+  * **BTTAppleScriptString**: The JavaScript code
+  * **BTTScriptFunctionToCall**: Name of the (async) function in the script that BTT calls; its return value is the condition result. If omitted, the script itself must hand the result back via `returnToBTT(true)` / `returnToBTT(false)`.
+  * **BTTScriptType**: 3
+  * **BTTActionJSRunInSeparateContext**: true to run in a separate JS context instead of the shared global one (optional)
+
+**Note**: There is no "IF AppleScript True" action (type 432 exists internally but was never implemented and is not selectable). To use an AppleScript condition, run the AppleScript from within this JavaScript action (e.g. via `runAppleScript`) and return its result.
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 431,
-  "BTTRealJavaScriptString": "return window.innerWidth > 1024;"
-}
-```
-
-### IF AppleScript True
-
-> Conditional based on AppleScript evaluation.
-
-Parameters:
-* **BTTPredefinedActionType**: 432
-* **BTTInlineAppleScript**: AppleScript that returns boolean
-
-Example:
-```json
-{
-  "BTTPredefinedActionType": 432,
-  "BTTInlineAppleScript": "tell application \"System Events\" to return (name of first process whose frontmost is true) is \"Safari\""
+  "BTTAdditionalActionData": {
+    "BTTScriptType": 3,
+    "BTTScriptFunctionToCall": "someJavaScriptFunction",
+    "BTTAppleScriptString": "async function someJavaScriptFunction() {\n  let clipboard = await callBTT('get_clipboard_content', {});\n  return clipboard.length > 0;\n}"
+  }
 }
 ```
 
@@ -5177,7 +5385,7 @@ Example:
 
 ### ELSE
 
-> Else clause for IF conditions.
+> Else clause for IF conditions. Optional; only the first ELSE on a level is honoured (actions after a second ELSE on the same level never run).
 
 Parameters:
 * **BTTPredefinedActionType**: 333
@@ -5191,15 +5399,15 @@ Example:
 
 ### END IF
 
-> Ends conditional block.
+> Ends conditional block. Required for every IF action.
 
 Parameters:
-* **BTTPredefinedActionType**: 331
+* **BTTPredefinedActionType**: 334
 
 Example:
 ```json
 {
-  "BTTPredefinedActionType": 331
+  "BTTPredefinedActionType": 334
 }
 ```
 
@@ -5871,17 +6079,61 @@ Example:
 
 ### Send MIDI Command
 
-> Sends MIDI command to device.
+> Sends a MIDI command to a connected MIDI device / endpoint.
 
 Parameters:
 * **BTTPredefinedActionType**: 462
-* **BTTGenericActionConfig**: MIDI command data
+* **BTTAdditionalActionData**: JSON object with the MIDI command configuration
+
+BTTAdditionalActionData properties:
+* **BTTMidiCommandType**: Command type: `159` (Note On), `143` (Note Off), `175` (Polyphonic Key Pressure), `191` (Control Change), `207` (Program Change), `239` (Pitch Wheel Change)
+* **BTTMidiCommandNote**: Note number (0-127, Note On / Note Off / Polyphonic Key Pressure)
+* **BTTMidiCommandControllerNumber**: Controller number (0-127, Control Change only)
+* **BTTMidiCommandProgramNumber**: Program number (0-127, Program Change only)
+* **BTTMidiCommandValue**: Controller value (0-127, Control Change only)
+* **BTTMidiCommandPitchChange**: Pitch wheel value (0-16383, 8192 = centered, Pitch Wheel Change only). Pitch wheel actions saved before this field existed keep working; their 7-bit BTTMidiCommandValue is interpreted as the most significant byte.
+* **BTTMidiCommandVelocity**: Velocity (0-127, Note On / Note Off)
+* **BTTMidiCommandPressure**: Pressure (0-127, Polyphonic Key Pressure only)
+* **BTTMidiCommandChannel**: MIDI channel (0-15)
+* **BTTMidiCommandEndpoint**: Identifier of the MIDI endpoint to send to
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 462,
-  "BTTGenericActionConfig": "{\"channel\":1,\"note\":60,\"velocity\":127}"
+  "BTTAdditionalActionData": {
+    "BTTMidiCommandType": 239,
+    "BTTMidiCommandPitchChange": 8192,
+    "BTTMidiCommandChannel": 0,
+    "BTTMidiCommandEndpoint": "IAC Driver Bus 1"
+  }
+}
+```
+
+### Send OSC Message
+
+> Sends an Open Sound Control (OSC) message to a UDP host/port. Arguments are provided as a JSON array.
+
+Parameters:
+* **BTTPredefinedActionType**: 602
+* **BTTAdditionalActionData**: JSON object with the OSC message configuration
+
+BTTAdditionalActionData properties:
+* **BTTActionOSCHost**: Destination host (default `127.0.0.1`)
+* **BTTActionOSCPort**: Destination UDP port (default `8000`, range 1-65535)
+* **BTTActionOSCAddress**: OSC address pattern (default `/btt/test`)
+* **BTTActionOSCArgumentsJSON**: JSON array of arguments. Values can be plain strings/numbers/booleans or typed objects like `{"type":"f","value":0.75}`, `{"type":"i","value":1}`, `{"type":"s","value":"go"}`. BTT variables can be used in all fields.
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 602,
+  "BTTAdditionalActionData": {
+    "BTTActionOSCHost": "127.0.0.1",
+    "BTTActionOSCPort": 8000,
+    "BTTActionOSCAddress": "/btt/fader1",
+    "BTTActionOSCArgumentsJSON": "[{\"type\":\"f\",\"value\":0.75}]"
+  }
 }
 ```
 
@@ -6544,19 +6796,38 @@ Example:
 
 ### Change Slider Value
 
-> Changes slider value in active window.
+> Changes the value of a slider with the given name in the active window/dialog, either
+> relatively (default) or absolutely.
 
 Parameters:
 * **BTTPredefinedActionType**: 521
-* **BTTGenericActionConfig**: Slider identifier
-* **BTTGenericActionConfig2**: New value
+* **BTTGenericActionConfig**: Slider identifier (its accessibility title)
+* **BTTGenericActionConfig2**: Amount in percent. Relative mode adds it to the current value (negative moves down); absolute mode treats it as a percentage of the slider's own minimum-to-maximum range.
+* **BTTAdditionalActionData**: JSON object (optional)
+  - `BTTActionSliderValueAbsolute`: boolean - `true` sets the slider to the value, `false`/absent changes it by the value (the historical behaviour)
 
-Example:
+Absolute mode is what allows `BTTGenericActionConfig2` to be driven by an action value
+binding, so a floating menu slider or MIDI fader can control an app's slider directly.
+
+Example (relative, the default):
 ```json
 {
   "BTTPredefinedActionType": 521,
   "BTTGenericActionConfig": "Volume",
   "BTTGenericActionConfig2": "75"
+}
+```
+
+Example (absolute, driven by a trigger's value):
+```json
+{
+  "BTTPredefinedActionType": 521,
+  "BTTGenericActionConfig": "Volume",
+  "BTTGenericActionConfig2": "50",
+  "BTTAdditionalActionData": { "BTTActionSliderValueAbsolute": true },
+  "BTTActionValueBindings": {
+    "additionalActionString": { "source": "normalized", "outMin": 0, "outMax": 100 }
+  }
 }
 ```
 
@@ -6574,6 +6845,36 @@ Parameters:
   - `BTTActionAXPath`: string - Accessibility path to the UI element
   - `BTTActionAXPathOnlySearchInFocusedWindow`: boolean - Only search within the focused window
   - `BTTActionAXBringToFront`: boolean - Bring the target app to front before interacting
+  - `BTTVariableName`: string - Variable to write to, for the `AXSaveDescriptionToVariable` / `AXSaveValueToVariable` action types
+  - `BTTActionAXValue`: string - Value to write, for the `AXSetValue` action type
+
+Built-in action types (`BTTActionInteractWithUIElementAction`, stored in
+`gesture.additionalActionString`). Any other value is performed as a raw AX action name
+(e.g. `AXPress`):
+- `AXMoveMouseToCenter` (default) - move the cursor to the element
+- `AXSaveDescriptionToVariable` - write the element's full description (JSON) to `BTTVariableName`
+- `AXSaveValueToVariable` - write the element's `AXValue` to `BTTVariableName`
+- `AXSetValue` - **set** the element's `AXValue` to `BTTActionAXValue`
+
+`AXSetValue` converts to whatever type the element already holds (number, boolean or
+string), so it drives sliders, steppers, checkboxes and text fields. `BTTActionAXValue`
+supports variables, and can be driven by an action value binding — making this the general
+way to control any app's UI from a slider, knob or MIDI fader.
+
+Example (set a slider from the trigger's value):
+```json
+{
+  "BTTPredefinedActionType": 522,
+  "BTTActionInteractWithUIElementAction": "AXSetValue",
+  "BTTAdditionalActionData": {
+    "BTTActionAXPath": "Application{\"Music\"} -> AXWindow -> AXSlider",
+    "BTTActionAXValue": "0.5"
+  },
+  "BTTActionValueBindings": {
+    "BTTActionAXValue": { "source": "normalized", "outMin": 0, "outMax": 1 }
+  }
+}
+```
 
 Example:
 ```json
@@ -6758,24 +7059,44 @@ Example:
 
 ### Start Dictation / Speech Recognition
 
-> Starts recognizing and transcribing speech using macOS speech recognition.
+> Starts recognizing and transcribing speech using macOS speech recognition. Requires macOS 26+ and microphone permission. All settings live in `actionData`.
 
 Parameters:
 * **BTTPredefinedActionType**: 576
+* **BTTSpeechRecognitionLocale**: Recognition language, e.g. `"en-US"` (optional, empty = system default)
+* **BTTSpeechRecognitionOutputAction**: What to do with the text — 0 = nothing, 1 = paste, 2 = copy, 3 = set variable, 4 = type, 5 = paste & copy (optional, default 1)
+* **BTTSpeechRecognitionVariableName**: Variable to receive the text when output action is 3 (optional)
+* **BTTSpeechRecognitionPersistVariable**: Keep that variable across restarts (optional)
+* **BTTSpeechRecognitionVocabulary**: Custom words & names, one per line (commas also split). Biases the recognizer toward these. One or two words each, max 100 (optional)
+* **BTTSpeechRecognitionReplacements**: Spelling corrections applied to the finished text, one `recognized => corrected` rule per line. Case-insensitive, matched on word boundaries (optional)
+* **BTTSpeechRecognitionShowWindow**: Show the recording window (optional, default true)
+* **BTTSpeechRecognitionLiveTranscription**: Show text while speaking (optional, default true)
+* **BTTSpeechRecognitionMaxDuration**: Max recording length in seconds, 0 = unlimited (optional, default 300)
+* **BTTSpeechRecognitionSilenceTimeout**: Stop after this many seconds of silence, 0 = off (optional)
+* **BTTSpeechRecognitionStopOnModifierRelease**: Stop once all modifier keys held at start are released (optional)
+* **BTTSpeechRecognitionPlayStartSound**: Play a sound when recording starts (optional)
+* **BTTSpeechRecognitionPlayStopSound**: Play a sound when recording stops (optional)
+* **BTTSpeechRecognitionInputDevice**: UID of the audio input device to use (optional)
 
 Example:
 ```json
 {
-  "BTTPredefinedActionType": 576
+  "BTTPredefinedActionType": 576,
+  "BTTSpeechRecognitionLocale": "en-US",
+  "BTTSpeechRecognitionOutputAction": 1,
+  "BTTSpeechRecognitionVocabulary": "Folivora\nBetterTouchTool\nHegenberg",
+  "BTTSpeechRecognitionReplacements": "better touch tool => BetterTouchTool"
 }
 ```
 
 ### Stop Dictation & Paste or Copy
 
-> Stops speech recognition and pastes or copies the transcribed text.
+> Stops speech recognition and pastes or copies the transcribed text. Vocabulary and replacements are taken from the action that started the recognition.
 
 Parameters:
 * **BTTPredefinedActionType**: 577
+* **BTTSpeechRecognitionOutputAction**: Overrides the start action's output action (optional)
+* **BTTSpeechRecognitionVariableName**: Overrides the start action's variable name (optional)
 
 Example:
 ```json
@@ -6831,6 +7152,7 @@ Parameters:
   - `BTTActionSearchableListIconBackgroundColor`: string - Icon background color (hex)
   - `BTTActionSearchableListInputBehavior`: number - Input behavior mode
   - `BTTActionSearchableListPosition`: number - List position on screen
+  - `BTTActionSearchableListCloseBehavior`: number - When the list should close. 0 = close on action or outside click (default), 1 = close after list action, 2 = close on outside click, 3 = keep open until Esc press. A pin button is shown on the list and temporarily keeps it open until Esc; while kept open, selecting an item first restores focus to the previously active window
   - `BTTActionEmbeddedFloatingMenuIdentifier`: string - UUID of a floating menu to embed in the list
   - `BTTActionShowWithSimpleJSONFormatScriptSettings`: object - Script settings for retrieving list content dynamically (AppleScript/Shell Script)
 * **BTTActionCustomScriptSettingsJSON**: JSON object with script configuration for dynamic content (optional, stored separately)
@@ -6960,17 +7282,75 @@ Example:
 
 ### Haptic Feedback
 
-> Triggers haptic feedback on trackpad.
+> Triggers haptic feedback on trackpad. Supports built-in patterns and custom haptic presets.
 
 Parameters:
 * **BTTPredefinedActionType**: 255
-* **BTTHapticFeedbackAction**: Pattern type (1-22)
+* **BTTHapticFeedbackAction**: number or string - Built-in pattern ID (number) or custom preset reference (string starting with `"custom:"`)
+* **BTTHapticFeedbackActionData** (optional): object - Custom preset configuration data (embedded for export portability)
 
-Example:
+Built-in pattern values:
+- `0`: No Feedback
+- `16`: Very Light Feedback
+- `1`: Light Feedback
+- `2`: Strong Feedback
+- `3`: Light Then Strong Feedback
+- `4`: Double Strong Feedback
+- `5`: Double Light Feedback
+- `6`: Spring Light Feedback
+- `7`: Spring Strong Feedback
+- `8`: Triple Strong Feedback
+- `9`: Triple Light Feedback
+- `10`: Light 2 Feedback
+- `12`: BTT Default Normal Click
+- `13`: BTT Default Force Click
+- `14`: BTT SILENT Normal Click
+- `15`: BTT SILENT Force Click
+
+Example (built-in pattern):
 ```json
 {
   "BTTPredefinedActionType": 255,
   "BTTHapticFeedbackAction": 1
+}
+```
+
+Example (custom preset):
+```json
+{
+  "BTTPredefinedActionType": 255,
+  "BTTHapticFeedbackAction": "custom:PRESET-UUID-HERE",
+  "BTTHapticFeedbackActionData": {
+    "identifier": "PRESET-UUID-HERE",
+    "name": "My Custom Feedback",
+    "configuration": {
+      "ActuationID": 6,
+      "BaseWaveform": {
+        "Amplitude": 17,
+        "DurationMS": 20,
+        "Type": "Gaussian"
+      },
+      "BaseMultipliers": {
+        "Light": 1.4,
+        "Medium": 1.0,
+        "Firm": 1.3
+      },
+      "Tones": [
+        {
+          "Amplitude": 0.004,
+          "DelayMS": 1,
+          "DurationMS": 1.8,
+          "FrequencykHz": 0.93,
+          "Type": "Square"
+        }
+      ],
+      "ToneMultipliers": {
+        "Light": 0.2,
+        "Medium": 0.4,
+        "Firm": 0.4
+      }
+    }
+  }
 }
 ```
 
@@ -6990,37 +7370,17 @@ Example:
 
 ### Show Cheat Sheet
 
-> Shows keyboard shortcut cheat sheet.
+> Shows the cheat sheet (an overview of the triggers configured in BTT). Which triggers are included is configured via a trigger-selection dictionary; the cheat sheet's visual appearance is configured in the BTT preferences, not per action.
 
 Parameters:
 * **BTTPredefinedActionType**: 354
-* **BTTAdditionalActionData**: JSON object with cheat sheet configuration
-  - `BTTActionCheatSheetTitleTextColor`: string - Title text color (hex)
-  - `BTTActionCheatSheetDescriptionTextColor`: string - Description text color (hex)
-  - `BTTActionCheatSheetBackground`: string - Background color (hex)
-  - `BTTActionCheatSheetBackgroundAlpha`: number - Background transparency (0-1)
-  - `BTTActionCheatSheetItemsPerColumn`: number - Number of items per column
-  - `BTTActionCheatSheetItemHeight`: number - Height of each item
-  - `BTTActionCheatSheetWindowCornerRadius`: number - Window corner radius
-  - `BTTActionCheatSheetWindowWidth`: number - Window width
-  - `BTTActionCheatSheetWindowPadding`: number - Window padding
-  - `BTTActionCheatSheetItemBackground`: string - Item background color (hex)
-  - `BTTActionCheatSheetItemBorderColor`: string - Item border color (hex)
-  - `BTTActionCheatSheetShowIcon`: boolean - Show app icons
-  - `BTTActionCheatSheetShowActiveAppOnly`: boolean - Show only active app shortcuts
+* **BTTAdditionalActionData**: JSON object (optional)
+  - `BTTCheatSheetTriggerConfig`: object - structured trigger-selection configuration describing which trigger types/sections to include. This dictionary is normally created via the trigger selector UI; omit it to show the default selection.
 
 Example:
 ```json
 {
-  "BTTPredefinedActionType": 354,
-  "BTTAdditionalActionData": {
-    "BTTActionCheatSheetBackground": "#000000",
-    "BTTActionCheatSheetBackgroundAlpha": 0.9,
-    "BTTActionCheatSheetTitleTextColor": "#FFFFFF",
-    "BTTActionCheatSheetDescriptionTextColor": "#CCCCCC",
-    "BTTActionCheatSheetItemsPerColumn": 10,
-    "BTTActionCheatSheetShowIcon": true
-  }
+  "BTTPredefinedActionType": 354
 }
 ```
 
@@ -7082,18 +7442,16 @@ Example:
 
 Parameters:
 * **BTTPredefinedActionType**: 420
-* **BTTGenericActionConfig**: Input source ID
+* **BTTGenericActionConfig**: Input source ID (historical mirror of the value below; kept in sync automatically)
 * **BTTAdditionalActionData**: JSON object with configuration (optional)
-  - `BTTActionChangeInputSourceID`: Input source identifier
-  - Other `BTTActionChangeInputSource*` keys for additional settings
+  - `BTTActionChangeInputSource`: string - Input source identifier (e.g. "com.apple.keylayout.US")
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 420,
-  "BTTGenericActionConfig": "com.apple.keylayout.US",
   "BTTAdditionalActionData": {
-    "BTTActionChangeInputSourceID": "com.apple.keylayout.US"
+    "BTTActionChangeInputSource": "com.apple.keylayout.US"
   }
 }
 ```
@@ -7231,7 +7589,7 @@ Example:
 
 ### JSON Action Plugin
 
-> Executes a JSON-based action plugin (.bttjsonplugin). JSON plugins are simple JSON files that define actions with configurable form fields and placeholder substitution. They do not require compiled code - just a .bttjsonplugin file placed in the BetterTouchTool Plugins folder.
+> Executes a JSON-based action plugin (.bttjsonplugin). JSON plugins are simple JSON files that define actions with configurable form fields and placeholder substitution. They do not require compiled code — just a .bttjsonplugin file placed in the BetterTouchTool Plugins folder.
 
 Parameters:
 * **BTTPredefinedActionType**: 588
@@ -7337,12 +7695,15 @@ Example:
 Parameters:
 * **BTTPredefinedActionType**: 525
 * **BTTAdditionalActionData**: JSON object with AI assistant configuration
+  - `BTTAIForceExpandedOnOpen`: boolean - Open directly in the expanded chat window instead of the compact spotlight
 
 Example:
 ```json
 {
   "BTTPredefinedActionType": 525,
-  "BTTAdditionalActionData": {}
+  "BTTAdditionalActionData": {
+    "BTTAIForceExpandedOnOpen": true
+  }
 }
 ```
 
@@ -7419,6 +7780,238 @@ Example:
     "BTTAIUserMessage": "Summarize the clipboard contents",
     "BTTAIShowProgressIndicator": false,
     "BTTAIBackgroundReuseConversation": false
+  }
+}
+```
+
+### Codex Controller Actions
+
+> Overview of the Codex Controller action family (605-614). BetterTouchTool uses a Codex app-server for task discovery, creates new tasks through the ChatGPT/Codex desktop composer, and forwards existing-task operations to the desktop app so both surfaces stay on the same live task. All actions require macOS 13.0 or later.
+
+Shared behavior:
+- All configuration lives in `BTTAdditionalActionData`.
+- BTT variables can be used in all text fields - they are resolved before the operation runs.
+- **Target Task** (`BTTActionCodexTarget`): `active` (default), or `slot:1` through `slot:6`. Use `custom` together with `BTTActionCodexThreadID` only when a fixed thread ID is required.
+- **Result Variable** (`BTTActionCodexResultVariable`): name of the BTT variable that receives the JSON result of the operation. Defaults to `BTTLastCodexControllerResult`. The JSON result contains a `success` field.
+- Live Codex data is additionally exposed through the `BTT_CodexController…` variables and `BTT_CodexControllerSnapshot`.
+- Refresh reads the most recent non-archived desktop/app-server, CLI, and VS Code tasks from the shared Codex thread store; sub-agent threads are excluded from the six menu slots.
+- Start, Send, Stop, Approve, and Decline require the ChatGPT/Codex desktop app to be running. Start and Send open the target task automatically when the app does not already own its live stream.
+- Start Task with a prompt requires BetterTouchTool's macOS Accessibility permission so BTT can focus and submit the native Codex composer.
+- BTT prefers the Codex app-server bundled with ChatGPT so its desktop coordination protocol stays version-aligned. Set the `BTTCodexCLIPath` user default only when an explicit CLI override is required.
+- Desktop synchronization uses ChatGPT's local renderer-coordination protocol. That protocol is currently private and version-dependent, so a future ChatGPT update may require a corresponding BetterTouchTool update.
+
+Floating Menu building blocks:
+- Run **Refresh Tasks** before showing the menu, or from a small refresh item.
+- Create up to six task items. Item N displays `{BTT_CodexControllerThreadNTitle}` and triggers **Agent Key** with Target Task set to Task Slot N. One tap selects the task without activating Codex; a second tap within the macOS double-click interval brings Codex to the front.
+- Set **Visible Only If Variable Is True** to `BTT_CodexControllerThreadNAvailable` (without braces) to hide empty slots. Use `BTT_CodexControllerThreadNIsActive` in visibility or content scripting when the selected slot needs distinct styling.
+- Set Open, Stop, Send, Fork, Approve, and Decline menu items to **Active Task**. Selecting an Agent Key changes which task those shared controls affect.
+- `BTT_CodexControllerThreadNVisualStatus` is normalized to `off`, `idle`, `thinking`, `complete`, `input`, or `error`. The controller intentionally publishes no colors or menu-property JSON; appearance is owned by the user's named style triggers.
+- `BTT_CodexControllerAppearanceRevision` changes after the six semantic status and selection variables have been updated. A single **Variable Value Did Change** trigger can monitor it and apply user-editable named style triggers to all six items. Put **Update Floating Menu Item Properties** (447) in each style trigger, declare an `item_uuid` variable, and target `{item_uuid}` with **Persist Changes** disabled.
+- Other per-slot data is available as `BTT_CodexControllerThreadNStatus`, `BTT_CodexControllerThreadNContextPercent`, `BTT_CodexControllerThreadNNeedsApproval`, `BTT_CodexControllerThreadNIsWorking`, `BTT_CodexControllerThreadNCanStop`, and `BTT_CodexControllerThreadNLastMessage`. `BTT_CodexControllerActiveSlot` is 1-6, or 0 when no slot is active.
+- The selected task is mirrored through `BTT_CodexControllerActiveAvailable`, `BTT_CodexControllerActiveTitle`, `BTT_CodexControllerActiveStatus`, `BTT_CodexControllerActiveContextPercent`, `BTT_CodexControllerActiveNeedsApproval`, `BTT_CodexControllerActiveIsWorking`, `BTT_CodexControllerActiveCanStop`, and `BTT_CodexControllerActiveLastMessage`. These are convenient for shared status, Stop, and approval controls. Use `ActiveCanStop`, not merely `ActiveIsWorking`, for the Stop item's visibility.
+- The selected task also exposes `BTT_CodexControllerActiveVisualStatus`.
+
+### Codex Controller - Start Task
+
+> Starts a new Codex task.
+
+Parameters:
+* **BTTPredefinedActionType**: 605
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionCodexPrompt`: string - The initial task / prompt. With a prompt, BTT opens Codex's native new-task composer and submits it so the visible task owns and renders the turn. Without a prompt, the action only opens the composer; like Codex itself, no sidebar task exists until a message is submitted.
+  - `BTTActionCodexWorkingDirectory`: string - Working directory for the task
+  - `BTTActionCodexThreadName`: string (optional) - Task name
+  - `BTTActionCodexResultVariable`: string - Variable to store the JSON result in (default `BTTLastCodexControllerResult`)
+
+The new task uses the model, reasoning effort, approval policy, and other defaults currently selected in the Codex desktop composer.
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 605,
+  "BTTAdditionalActionData": {
+    "BTTActionCodexPrompt": "Fix the failing unit tests",
+    "BTTActionCodexWorkingDirectory": "/Users/me/Projects/MyApp",
+    "BTTActionCodexThreadName": "Test fixes",
+    "BTTActionCodexResultVariable": "BTTLastCodexControllerResult"
+  }
+}
+```
+
+### Codex Controller - Send Message To Task
+
+> Sends a message to an existing Codex task.
+
+Parameters:
+* **BTTPredefinedActionType**: 606
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionCodexTarget`: string - `active` (default), `slot:1` through `slot:6`, or `custom`
+  - `BTTActionCodexThreadID`: string - Only used when the target is `custom`
+  - `BTTActionCodexPrompt`: string - The message to send
+  - `BTTActionCodexModel`: string (optional) - Model to use
+  - `BTTActionCodexEffort`: string (optional) - `""`, `low`, `medium`, `high`, `xhigh`
+  - `BTTActionCodexResultVariable`: string - Variable to store the JSON result in
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 606,
+  "BTTAdditionalActionData": {
+    "BTTActionCodexPrompt": "Also update the changelog",
+    "BTTActionCodexTarget": "active"
+  }
+}
+```
+
+### Codex Controller - Stop Active Turn
+
+> Stops the currently running turn of a Codex task.
+
+Parameters:
+* **BTTPredefinedActionType**: 607
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionCodexTarget`: string - Target task; normally `active`
+  - `BTTActionCodexResultVariable`: string - Variable to store the JSON result in
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 607,
+  "BTTAdditionalActionData": { "BTTActionCodexTarget": "active" }
+}
+```
+
+### Codex Controller - Fork Task
+
+> Forks an existing Codex task into a new one.
+
+Parameters:
+* **BTTPredefinedActionType**: 608
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionCodexTarget`: string - Target task; normally `active`
+  - `BTTActionCodexThreadName`: string (optional) - Name for the forked task
+  - `BTTActionCodexModel`: string (optional) - Model to use for the forked task
+  - `BTTActionCodexResultVariable`: string - Variable to store the JSON result in
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 608,
+  "BTTAdditionalActionData": {
+    "BTTActionCodexTarget": "slot:2",
+    "BTTActionCodexThreadName": "Alternative approach"
+  }
+}
+```
+
+### Codex Controller - Open Task In Codex
+
+> Opens a task in the Codex app.
+
+Parameters:
+* **BTTPredefinedActionType**: 609
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionCodexTarget`: string - Target task; normally `active`
+  - `BTTActionCodexResultVariable`: string - Variable to store the JSON result in
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 609,
+  "BTTAdditionalActionData": {
+    "BTTActionCodexTarget": "active"
+  }
+}
+```
+
+### Codex Controller - Approve Pending Request
+
+> Approves a pending Codex approval request.
+
+Parameters:
+* **BTTPredefinedActionType**: 610
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionCodexTarget`: string - Target task; normally `active`
+  - `BTTActionCodexResultVariable`: string - Variable to store the JSON result in
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 610
+}
+```
+
+### Codex Controller - Decline Pending Request
+
+> Declines a pending Codex approval request.
+
+Parameters:
+* **BTTPredefinedActionType**: 611
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionCodexTarget`: string - Target task; normally `active`
+  - `BTTActionCodexResultVariable`: string - Variable to store the JSON result in
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 611
+}
+```
+
+### Codex Controller - Refresh Tasks
+
+> Refreshes the Codex task list / snapshot data.
+
+Parameters:
+* **BTTPredefinedActionType**: 612
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionCodexResultVariable`: string - Variable to store the JSON result in
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 612
+}
+```
+
+### Codex Controller - Set Active Task
+
+> Selects the task targeted by the shared control items in a Floating Menu and opens that task in the Codex app. It does not start a turn.
+
+Parameters:
+* **BTTPredefinedActionType**: 613
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionCodexTarget`: string - `slot:1` through `slot:6`, `active`, or `custom`
+  - `BTTActionCodexThreadID`: string - Only used when the target is `custom`
+  - `BTTActionCodexResultVariable`: string - Variable to store the JSON result in
+
+Example (select the second task item):
+```json
+{
+  "BTTPredefinedActionType": 613,
+  "BTTAdditionalActionData": {
+    "BTTActionCodexTarget": "slot:2"
+  }
+}
+```
+
+### Codex Controller - Agent Key
+
+> Reproduces a Codex Micro Agent Key as one composable action. The first tap selects and navigates to the task without activating Codex. A second tap on the same key within the macOS double-click interval opens the task and brings Codex front and center. Selecting a completed task acknowledges its green completion state and returns it to idle.
+
+Parameters:
+* **BTTPredefinedActionType**: 614
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionCodexTarget`: string - normally `slot:1` through `slot:6`; `active` and `custom` are also supported
+  - `BTTActionCodexThreadID`: string - Only used when the target is `custom`
+  - `BTTActionCodexResultVariable`: string - Variable to store the JSON result in
+
+Example (third Agent Key):
+```json
+{
+  "BTTPredefinedActionType": 614,
+  "BTTAdditionalActionData": {
+    "BTTActionCodexTarget": "slot:3"
   }
 }
 ```
@@ -7525,6 +8118,7 @@ Parameters:
 * **BTTPredefinedActionType**: 595
 * **BTTAdditionalActionData**: JSON object (optional)
   - `BTTActionLauncherID`: string (optional) - stable launcher instance identifier to hide. Leave empty to hide the currently active launcher.
+  - `BTTActionLauncherTriggerSelectedItemOnHide`: boolean (optional) - when true, hiding first activates the launcher's currently selected item (exactly like pressing ⏎) and then closes the launcher.
 
 Example:
 ```json
@@ -7550,6 +8144,7 @@ Example (hide a specific launcher instance):
 Parameters:
 * **BTTPredefinedActionType**: 596
 * **BTTAdditionalActionData**: JSON object (optional) - same launcher ID, item-actions shortcut, initial route, and positioning options as Show Launcher (see above)
+  - `BTTActionLauncherTriggerSelectedItemOnHide`: boolean (optional) - when the toggle hides an already visible launcher, activate its currently selected item first (exactly like pressing ⏎), then close.
 
 Example (default):
 ```json
@@ -7870,6 +8465,86 @@ Example:
 }
 ```
 
+### Dock App Click: Activate / Restore / Minimize
+
+> Smart Dock-icon click handling for the application under the mouse cursor. Activates the app and raises/restores its windows if it is hidden or all of its windows are minimized; otherwise it minimizes or hides it. Only works while the mouse is over an application icon in the macOS Dock (typically assigned to a Dock icon trigger or a mouse click).
+
+Parameters:
+* **BTTPredefinedActionType**: 601
+* **BTTAdditionalActionData**: JSON object with configuration (optional)
+  - `BTTDockAppClickBehavior`: string - What to do when the app is already active with visible windows. `"minimize"` (default) minimizes windows, `"hide"` hides the app, `"hideFallbackMinimize"` hides the app and falls back to minimizing if hiding fails.
+  - `BTTDockAppClickMultiWindowMode`: string - Behavior when the active app has multiple visible windows. `"frontmost"` (default) only affects the frontmost window, `"allVisible"` minimizes all visible windows, `"activateOnly"` only activates multi-window apps without minimizing.
+  - `BTTDockAppClickRestoreMode`: string - Which windows to restore when all windows are minimized. `"all"` (default) restores all minimized windows, `"frontmost"` restores only the first minimized window.
+  - `BTTDockAppClickDuplicateSuppressionMS`: number - Time window in milliseconds during which duplicate clicks on the same app are ignored (default: 700, range 0-5000).
+  - `BTTDockAppClickUseNativeMinimizeButton`: boolean - Prefer pressing the native window minimize button instead of setting the minimized attribute directly (default: true).
+  - `BTTDockAppClickFallbackToDockPress`: boolean - Fall back to a normal Dock click when the action can't determine or act on the app (default: true).
+  - `BTTDockAppClickMinimizeFullScreen`: boolean - Allow minimizing full screen windows (default: false).
+  - `BTTDockAppClickStandardWindowsOnly`: boolean - Only consider standard windows (ignore panels, dialogs, etc.) (default: true).
+
+Example:
+```json
+{
+  "BTTPredefinedActionType": 601,
+  "BTTAdditionalActionData": {
+    "BTTDockAppClickBehavior": "minimize",
+    "BTTDockAppClickMultiWindowMode": "frontmost",
+    "BTTDockAppClickRestoreMode": "all",
+    "BTTDockAppClickDuplicateSuppressionMS": 700,
+    "BTTDockAppClickUseNativeMinimizeButton": true,
+    "BTTDockAppClickFallbackToDockPress": true,
+    "BTTDockAppClickMinimizeFullScreen": false,
+    "BTTDockAppClickStandardWindowsOnly": true
+  }
+}
+```
+
+### Macro Pad: Show Menu / Next Page / Previous Page
+
+> Navigation actions for macro pads that are driven by a floating menu (Elgato Stream Deck, the Mirabox / AJAZZ "Stream Dock" family and Loupedeck / Razer Stream Controller). These replace the old "Open / Close Stream Deck Group" workflow: "Show Menu" retargets a pad at a different floating menu at runtime, the page actions move through the pages of the menu currently shown on the pad. To enter or leave a submenu on a pad, use "Open Floating Menu Submenu" (472) / "Close Floating Menu Submenu" (445) - those actions apply to macro pads too. Requires macOS 13.0 or later.
+
+Parameters:
+* **BTTPredefinedActionType**:
+  - Show Menu: 618
+  - Next Page: 621
+  - Previous Page: 622
+* **BTTGenericActionConfig** (Show Menu only): Name or UUID of the floating menu to show on the macro pad. Empty clears the override again, so the pad returns to the menu it is bound to. The override survives application switches. Given as a NAME it is re-resolved on every switch, so an app specific floating menu with that name automatically takes over while its app is in front and the global menu of that name is used again afterwards; given as a UUID it stays pinned to exactly that menu. An override whose target menu no longer exists (deleted or renamed) is dropped and the pad falls back to its own binding.
+* **BTTGenericActionConfig2**: Optional device filter. Empty = every macro pad that is driven by a floating menu. Accepts a device serial number, `model:<modelKey>` to target every device of one model, or `family:<familyKey>` to target a whole brand (`elgato`, `elgato-plugin-mode`, `mirabox`, `loupedeck`) - the same syntax the floating menu macro pad bindings use. This is how one trigger targets one specific pad while leaving other pads alone.
+
+Example (show a specific floating menu on all macro pads):
+```json
+{
+  "BTTPredefinedActionType": 618,
+  "BTTGenericActionConfig": "My Pad Menu"
+}
+```
+
+Example (previous page on one specific macro pad):
+```json
+{
+  "BTTPredefinedActionType": 622,
+  "BTTGenericActionConfig2": "AL12K1A00567"
+}
+```
+
+---
+
+### Ignore Built-In Trackpad While Mouse Present
+
+> Enables, disables or toggles the macOS setting "Ignore built-in trackpad when mouse or wireless trackpad is present" (System Settings => Accessibility => Pointer Control). The change applies immediately, no logout is necessary. This is a system wide setting, so it stays in effect until it is changed again - also after quitting BetterTouchTool. It only has an effect on Macs that have a built-in trackpad. The current state is available in the `ignore_builtin_trackpad_active` variable, which can also be used as a condition in conditional activation groups.
+
+Parameters:
+* **BTTPredefinedActionType**:
+  - Enable: 623
+  - Disable: 624
+  - Toggle: 625
+
+Example (toggle the setting):
+```json
+{
+  "BTTPredefinedActionType": 625
+}
+```
+
 ---
 
 ## Additional Notes
@@ -7898,13 +8573,13 @@ function getModifierBitmask(modifiers) {
     const modifierMap = {
         "Shift": 1 << 17,
         "Control": 1 << 18,
-        "Left Control": 1 << 0,
-        "Right Control": 1 << 13,
+        "Left Control": 1 << 0, 
+        "Right Control": 1 << 13, 
         "Option": 1 << 19,
-        "Left Option": 1 << 5,
-        "Right Option": 1 << 6,
+        "Left Option": 1 << 5, 
+        "Right Option": 1 << 6, 
         "Command": 1 << 20,
-        "Left Command": 1 << 3,
+        "Left Command": 1 << 3, 
         "Right Command": 1 << 4,
         "Function": 1 << 23
     };
@@ -7931,6 +8606,100 @@ When specific property names aren't mapped for an action, these generic fields a
 - `BTTGenericActionConfig2`: Secondary configuration (used when gesture.additionalActionString isn't specifically mapped)
 - `BTTAdditionalActionData`: Complex data as JSON or base64 (typically from gesture.actionData)
 
+### Action Value Bindings
+
+Any action can have one or more of its numeric fields driven by the **exact value of the
+trigger that fired it** — a floating menu slider or knob, an incoming MIDI CC, or a mouse
+drag — instead of by a fixed stored number. This removes the need for scripting to pass
+values through.
+
+* **BTTActionValueBindings**: JSON object mapping a field to a binding descriptor.
+
+The key is either a key inside `BTTAdditionalActionData` (e.g. `BTTMidiCommandValue`) or a
+generic-config field name — `launchPath` (`BTTGenericActionConfig`) or
+`additionalActionString` (`BTTGenericActionConfig2`).
+
+Binding descriptor properties:
+* **source**: `"value"` (raw value in the trigger's units, default), `"normalized"` (0-1), `"delta"` (change since the previous update), or `"accumulated"` (see below)
+* **inMin** / **inMax**: input range; defaults to the trigger's own range
+* **outMin** / **outMax**: output range; defaults to the field's declared minimum/maximum
+* **curve**: `"linear"` (default), `"invert"`, `"log"`, `"exp"`
+* **round**: `"none"` (default), `"int"`, `"step"`
+* **step**: step size when `round` is `"step"`
+* **clamp**: boolean, default `true` — keeps the result inside the output range
+
+Example — a floating menu slider driving MIDI CC 11:
+```json
+{
+  "BTTPredefinedActionType": 462,
+  "BTTAdditionalActionData": {
+    "BTTMidiCommandType": 191,
+    "BTTMidiCommandControllerNumber": 11,
+    "BTTMidiCommandChannel": 0
+  },
+  "BTTActionValueBindings": {
+    "BTTMidiCommandValue": {
+      "source": "value", "outMin": 0, "outMax": 127, "round": "int", "clamp": true
+    }
+  }
+}
+```
+
+Triggers that currently publish a value:
+
+| Trigger | Range | Notes |
+|---|---|---|
+| Floating menu slider | its configured min/max (default 0-1) | under the Value Changed / Value Change Ended categories |
+| Floating menu knob | its configured min/max (default 0-100) | value categories, plus the rotate categories |
+| MIDI triggers | 0-127 | any action under the trigger |
+| Mouse drag (discrete + continuous) | 0-100 | how far along the current stroke; `delta` carries the signed per-frame movement (up/right positive). Use `"accumulated"` for fader behaviour. |
+
+#### Accumulating Source (fader behaviour)
+
+`"source": "accumulated"` turns a gesture into a **virtual fader**. Instead of reading the
+trigger's position, it adds the trigger's signed movement to a position that persists
+between gestures. This is what makes "drag up = louder, drag down = quieter" work: a mouse
+drag reports distance travelled *within the current stroke*, so a plain `"value"` binding
+would jump back to the start of the range every time a new drag begins.
+
+Additional properties:
+* **fullScaleDelta**: how much raw movement sweeps the entire range. Defaults per trigger: 200 (mouse drag, in pixels — matching BetterTouchTool's usual 200px = 100%), 127 (MIDI), 100 (knob). Larger = less sensitive.
+* **accumulateStart**: where the fader sits before it is first moved, 0-1. Default `0.5`.
+* **accumulateWrap**: boolean, default `false`. `true` wraps past the ends instead of stopping at them.
+
+The position is per trigger *and* per bound field, is kept in memory only (it resets when
+BetterTouchTool restarts), and dragging down lowers the value without needing an inverted
+curve — unlike `"value"`, which is unsigned. Setting `curve` to `"invert"` therefore
+reverses the direction again; leave it `"linear"` unless you want the fader backwards.
+
+For actions whose current value can be read — **Set Volume**, **Set Brightness**, **Set
+Keyboard Brightness** and **Set Audio Input Volume** — the fader adopts the real current
+value whenever a new gesture starts, so there is no jump at all and it stays in step when
+the value is changed by other means (media keys, another app) in between.
+`accumulateStart` is only used for actions whose value cannot be read.
+
+Example — mouse drag up/down as a volume fader (assign to both the Drag Up and Drag Down
+continuous categories):
+```json
+{
+  "BTTPredefinedActionType": 373,
+  "BTTGenericActionConfig": "50",
+  "BTTActionValueBindings": {
+    "launchPath": {
+      "source": "accumulated",
+      "outMin": 0, "outMax": 100,
+      "fullScaleDelta": 400,
+      "round": "int"
+    }
+  }
+}
+```
+
+The same values are also exposed as variables for string fields and scripts:
+`BTTTriggerValue`, `BTTTriggerValueNormalized` (0-1), `BTTTriggerValuePercent` (0-100),
+`BTTTriggerValueMIDI` (0-127), `BTTTriggerValueDelta`, `BTTTriggerSourceUUID`,
+`BTTTriggerSourceIdentifier`, `BTTTriggerSourceKind`.
+
 ### Special Data Handling
 
 Some actions use special data storage:
@@ -7942,8 +8711,8 @@ Some actions use special data storage:
 ### Shortcuts and Modifiers
 
 When using keyboard shortcuts:
-- `BTTShortcutToSend`: The actual key or key combination
-- `BTTShortcutModifierKeys`: Modifier keys for general shortcuts
+- `BTTShortcutToSend`: The actual key or key combination for shortcut actions; include modifiers here
+- `BTTShortcutModifierKeys`: Modifier keys for keyboard shortcut triggers, not for shortcut actions
 - `BTTRequiredModifierKeys`: Modifier keys for non-shortcut triggers
 - `BTTShortcutUpDown`: Whether to send key up/down events
 
@@ -8010,14 +8779,21 @@ Each action assigned to a trigger has a `BTTActionCategory` integer value that d
 | 37 | `BTTActionCategoryKeyReleaseAfterLongPress` | Key release after long hold |
 | 38 | `BTTActionCategoryKeyLongPress` | Long key hold down |
 | 39 | `BTTActionCategoryFirstScroll` | First scroll only |
-| 40 | `BTTActionCategoryCrownRotateLeftSmooth` | Logitech Craft Crown rotate left (smooth) |
-| 41 | `BTTActionCategoryCrownRotateRightSmooth` | Logitech Craft Crown rotate right (smooth) |
+| 40 | `BTTActionCategoryCrownRotateLeftSmooth` | Craft Crown rotate left (smooth) / macro pad knob rotate left while pressed |
+| 41 | `BTTActionCategoryCrownRotateRightSmooth` | Craft Crown rotate right (smooth) / macro pad knob rotate right while pressed |
 | 42 | `BTTActionCategoryCrownRotateLeftRatchet` | Logitech Craft Crown rotate left (ratchet) |
 | 43 | `BTTActionCategoryCrownRotateRightRatchet` | Logitech Craft Crown rotate right (ratchet) |
 | 44 | `BTTActionCategoryCrownTap` | Logitech Craft Crown tap |
 | 45 | `BTTActionCategoryCrownPressDown` | Logitech Craft Crown press down |
 | 46 | `BTTActionCategoryCrownPressUp` | Logitech Craft Crown press up |
 | 47 | `BTTActionCategoryKeyReleaseAfterAllModifiersReleased` | Key release after all modifier keys released |
+| 49 | `BTTActionCategoryQuickFlick` | Quick flick |
+| 50 | `BTTActionCategoryMenuItemTrigger` | Per-item floating menu trigger (a real trigger attached to a floating menu item, stored in the item's `BTTMenuItemTriggers` array - not a regular action) |
+| 51 | `BTTActionCategorySwipeLeft` | Swipe left on a macro pad's LCD touch strip (assigned on the menu / submenu, not on an item) |
+| 52 | `BTTActionCategorySwipeRight` | Swipe right on a macro pad's LCD touch strip (assigned on the menu / submenu, not on an item) |
+| 53 | `BTTActionCategoryValueChanged` | A value-producing item (floating menu slider / knob) reported a new value - fires continuously while the value changes (throttled) |
+| 54 | `BTTActionCategoryValueChangeEnd` | The value change ended (slider released) - fires once, independent of the update mode |
+| 59 | `BTTActionCategoryDoubleClick` | Double click on a floating menu item. Assigning actions here delays that item's standard (single click) actions by the system double click interval - items without double click actions are unaffected |
 
 ### Categories by Trigger Type
 
@@ -8114,6 +8890,12 @@ Most trackpad, Magic Mouse, and Siri Remote gesture triggers support:
 | `BTTActionCategoryOnDrop` | 10 | Actions executed on drop |
 | `BTTActionCategoryAppear` | 8 | Actions executed on appear |
 | `BTTActionCategoryDisappear` | 9 | Actions executed on disappear |
+| `BTTActionCategorySwipeLeft` | 51 | Actions executed on swipe left on the LCD touch strip of a macro pad driven by this menu |
+| `BTTActionCategorySwipeRight` | 52 | Actions executed on swipe right on the LCD touch strip of a macro pad driven by this menu |
+
+Swipe categories are only available on the container (a menu, 767, or a submenu, 774) because the touch strip is shared by everything on it. A direction that has actions assigned no longer pages the macro pad's keys; unbound directions keep the default swipe-to-page behavior, and paging always stays available through the prev/next chevrons and the "Macro Pad: Next / Previous Page" actions.
+
+Standard menu items and submenus can additionally have **per-item triggers** attached: keyboard shortcuts, key sequences, trackpad gestures or mouse buttons that execute the item like a click while the owning menu is focused/hovered/visible. These are real triggers (not actions) stored in the item's `BTTMenuItemTriggers` array with `BTTActionCategory` 50 and an optional `BTTMenuTriggerScope` (0/omitted = while focused or hovered, 1 = only while focused, 2 = only while hovered, 4 = always while the menu is visible). They usually carry predefined action 603 ("Trigger Specific Floating Menu Item"), which executes the parent item's assigned actions.
 
 **Other floating menu items (buttons, widgets, etc.)** support:
 
@@ -8129,6 +8911,16 @@ Most trackpad, Magic Mouse, and Siri Remote gesture triggers support:
 | `BTTActionCategoryScrollRight` | 12 | Actions executed on scroll right |
 | `BTTActionCategoryScrollUp` | 13 | Actions executed on scroll up |
 | `BTTActionCategoryScrollDown` | 14 | Actions executed on scroll down |
+| `BTTActionCategoryDoubleClick` | 59 | Actions executed on double click - **assigning anything here delays this item's standard actions** by the system double click interval, since only then can a single click be told apart from the first half of a double click. Items without double click actions keep firing immediately |
+
+**Value-producing floating menu items (slider 775 / knob 860)** additionally support:
+
+| Category | Value | Description |
+|----------|-------|-------------|
+| `BTTActionCategoryValueChanged` | 53 | Actions executed on every value change, throttled |
+| `BTTActionCategoryValueChangeEnd` | 54 | Actions executed once when the value change ends |
+
+These categories carry the item's **exact value**, so actions under them can bind their numeric fields to it via `BTTActionValueBindings` (see "Action Value Bindings" above) without any scripting. The rate is governed by `BTTMenuItemValueUpdateMode` (0/omitted = continuously while changing, 1 = only when the change ends, 2 = both) and `BTTMenuItemValueUpdateThrottleHz` (default 30) in the item's `BTTMenuConfig`. `BTTActionCategoryValueChangeEnd` always fires when the interaction ends, independent of the update mode. Knobs publish their value under the crown rotate categories (42/43) as well - a fixed-range knob reports an absolute value, an endless knob reports a delta. A fixed-range knob keeps reporting its absolute position even while it sits at its minimum or maximum, and its delta is the *actual* change, so a tick absorbed by the end stop reports a delta of 0 (and a partly clamped tick reports only the part that took effect, not the full step).
 
 **BTT Remote trackpad items** in floating menus support:
 
@@ -8163,8 +8955,8 @@ Most trackpad, Magic Mouse, and Siri Remote gesture triggers support:
 
 | Category | Value | Description |
 |----------|-------|-------------|
-| `BTTActionCategoryCrownRotateLeftSmooth` | 40 | Actions executed on rotate left (smooth) |
-| `BTTActionCategoryCrownRotateRightSmooth` | 41 | Actions executed on rotate right (smooth) |
+| `BTTActionCategoryCrownRotateLeftSmooth` | 40 | Actions executed on rotate left (smooth). Macro pad knob items reuse this as "rotate left while pressed" |
+| `BTTActionCategoryCrownRotateRightSmooth` | 41 | Actions executed on rotate right (smooth). Macro pad knob items reuse this as "rotate right while pressed" |
 | `BTTActionCategoryCrownRotateLeftRatchet` | 42 | Actions executed on rotate left (ratchet) |
 | `BTTActionCategoryCrownRotateRightRatchet` | 43 | Actions executed on rotate right (ratchet) |
 | `BTTActionCategoryStandard` | 0 | Actions executed on crown tap |
@@ -8191,5 +8983,149 @@ When defining actions in JSON, set the `BTTActionCategory` field on the action t
 ```
 
 This example assigns a left-click action to the **key release** category (value 35) of a keyboard shortcut trigger, meaning the left click will be performed when the key is released rather than when it is pressed down.
+
+### Work Louder Keyboard: Set Key LED Color
+
+> Sets key / zone LED colors on a Work Louder keyboard with OpenAI firmware (Codex Micro) via its vendor lighting protocol. The 6 agent keys (top row) are individually addressable; the remaining keys and the outer ring are zone-lit. Colors are volatile — the device's own companion app may overwrite them, and they reset on power-cycle.
+
+Parameters:
+* **BTTPredefinedActionType**: 626
+* **BTTAdditionalActionData**: JSON object with configuration
+  - `BTTActionWorkLouderLEDTarget`: number - 0 = agent keys (individually addressable), 1 = keys backlight zone, 2 = ambient ring (default 0)
+  - `BTTActionWorkLouderKeySlots`: string - agent key slots to color: "all" or comma-separated slot numbers 0-5, e.g. "0,2,5" (target 0 only; supports variable placeholders)
+  - `BTTActionWorkLouderLEDColor`: string - RGBA color string with 0-255 components, e.g. "255,109,0,255"
+  - `BTTActionWorkLouderLEDEffect`: number - 0 = off, 1 = solid, 2 = snake, 3 = rainbow cycle, 4 = breathing, 5 = gradient, 6 = shallow breathing (default 1)
+  - `BTTActionWorkLouderLEDBrightness`: number - brightness 0-100 (default 100)
+  - `BTTActionWorkLouderLEDSpeed`: number - effect speed 0-100 for animated effects (default 30)
+  - `BTTActionWorkLouderDeviceName`: string - optional device name filter (first connected Work Louder device if omitted)
+
+Example (make agent keys 0-2 breathe orange):
+```json
+{
+  "BTTPredefinedActionType": 626,
+  "BTTAdditionalActionData": {
+    "BTTActionWorkLouderLEDTarget": 0,
+    "BTTActionWorkLouderKeySlots": "0,1,2",
+    "BTTActionWorkLouderLEDColor": "255,109,0,255",
+    "BTTActionWorkLouderLEDEffect": 4,
+    "BTTActionWorkLouderLEDBrightness": 100,
+    "BTTActionWorkLouderLEDSpeed": 40
+  }
+}
+```
+
+### macOS Native Window Tiling (macOS 15+)
+
+> Triggers the native macOS window tiling / arrangement functions (System Settings => Keyboard => Keyboard Shortcuts => Windows). Unlike BTT's own window snapping actions, these use the system's tiling engine including animations and tiling groups. The corresponding macOS keyboard shortcut does not need to be enabled or assigned — BTT triggers the function directly. Requires macOS 15 or later.
+
+Parameters:
+* **BTTPredefinedActionType**: one of the following values
+  - `627`: Tile window to left half
+  - `628`: Tile window to right half
+  - `629`: Tile window to top half
+  - `630`: Tile window to bottom half
+  - `631`: Tile window to top left quarter
+  - `632`: Tile window to top right quarter
+  - `633`: Tile window to bottom left quarter
+  - `634`: Tile window to bottom right quarter
+  - `635`: Fill screen with window
+  - `636`: Center window
+  - `637`: Restore previous window size
+  - `638`: Arrange two windows left & right
+  - `639`: Arrange two windows right & left
+  - `640`: Arrange two windows top & bottom
+  - `641`: Arrange two windows bottom & top
+  - `642`: Arrange windows: front left half, others in quarters
+  - `643`: Arrange windows: front right half, others in quarters
+  - `644`: Arrange windows: front top half, others in quarters
+  - `645`: Arrange windows: front bottom half, others in quarters
+  - `646`: Arrange four windows in quarters
+
+Example (tile the focused window to the left half using the native macOS tiling):
+```json
+{
+  "BTTPredefinedActionType": 627
+}
+```
+
+### Minimize / Zoom All Windows Of Current App (macOS 15+)
+
+> Minimizes or zooms all windows of the frontmost application using the native macOS window shortcuts. Requires macOS 15 or later.
+
+Parameters:
+* **BTTPredefinedActionType**: `647` = minimize all windows of the current app, `648` = zoom all windows of the current app
+
+### Fullscreen Split View Controls (macOS 15+)
+
+> Controls the native macOS fullscreen Split View. Value 649 makes the focused window the left tile of a fullscreen Split View, 650 makes it the right tile (equivalent to the green-button "Tile Window to Left/Right of Screen" fullscreen options). 651 opens the window picker to choose the second window, 652 / 653 switch focus between the Split View windows. Requires macOS 15 or later.
+
+Parameters:
+* **BTTPredefinedActionType**: `649` = tile window left (fullscreen Split View), `650` = tile window right (fullscreen Split View), `651` = choose second window, `652` = focus next window, `653` = focus previous window
+
+Example (move the focused window into a fullscreen Split View on the left side):
+```json
+{
+  "BTTPredefinedActionType": 649
+}
+```
+
+### Start macOS Dictation
+
+> Starts the built-in macOS dictation, the same as pressing the configured dictation shortcut (e.g. the microphone key or double-pressing Fn). Works regardless of which dictation shortcut is configured in System Settings. For BTT's own speech recognition see action 576 ("Start Dictation / Speech Recognition").
+
+Parameters:
+* **BTTPredefinedActionType**: 654
+
+### Open Quick Note (macOS 12+)
+
+> Opens a Quick Note (like the Fn-Q shortcut / hot corner). Requires macOS 12 or later.
+
+Parameters:
+* **BTTPredefinedActionType**: 655
+
+### Visual Intelligence Captures (macOS 26+)
+
+> Triggers the macOS Visual Intelligence capture functions (Apple Intelligence). Captures a screen selection or the frontmost window and opens it in Visual Intelligence, optionally placing the capture on the clipboard. Requires macOS 26 or later and Apple Intelligence to be enabled.
+
+Parameters:
+* **BTTPredefinedActionType**: `657` = capture selection, `658` = capture selection to clipboard, `659` = capture front window, `660` = capture front window to clipboard
+
+### Toggle Game Overlay (macOS 15+)
+
+> Shows or hides the macOS Game Overlay (Game Mode). Requires macOS 15 or later.
+
+Parameters:
+* **BTTPredefinedActionType**: 661
+
+### Speak Selected Text
+
+> Speaks the currently selected text using the system's "Speak Selection" accessibility feature (System Settings => Accessibility => Spoken Content).
+
+Parameters:
+* **BTTPredefinedActionType**: 662
+
+### Open Accessibility Reader (macOS 26+)
+
+> Activates the macOS Accessibility Reader for the current content. Requires macOS 26 or later.
+
+Parameters:
+* **BTTPredefinedActionType**: 663
+
+### Keyboard Clean Mode (Lock Keyboard & Trackpad For Cleaning)
+
+> The modern successor of the KeyboardCleanTool, built into BTT. Locks the keyboard (incl. media/function keys) and optionally trackpad & mouse clicks/scrolling/gestures (the cursor may still move - macOS does not allow blocking that) so they can be wiped without triggering anything, darkens all screens (a black screen makes smudges visible) and shows a status card with unlock instructions. Display sleep / screensaver are prevented while active. No keyboard shortcut (not even Esc) can end the mode: unlock by pressing & holding any trackpad / mouse button (or the on-screen button) for the configured duration, via the optional auto-unlock timer, or by running the "End Keyboard Clean Mode" action from a trigger that can't be hit while wiping (Stream Deck, macro pad, MIDI, BTT Remote, script ...). The mode ends automatically on sleep / screen lock, and quitting BTT always unlocks. Physical-input trigger types (trackpad, mouse, keyboard, touch bar) don't fire while active. The variable `currently_in_keyboard_clean_mode` is available for Conditional Activation Groups.
+
+Parameters:
+* **BTTPredefinedActionType**: `664` = start, `665` = end, `666` = toggle
+* **BTTActionData** (start / toggle only, JSON, all optional):
+  * `BTTKeyboardCleanModeBlockKeyboard`: boolean, default `true`
+  * `BTTKeyboardCleanModeBlockModifierKeys`: boolean, also disable modifier keys (⌘ ⌥ ⌃ ⇧, Caps Lock, fn/🌐) by temporarily remapping them to "nothing" on the HID level (restored when the mode ends; only applies while `BTTKeyboardCleanModeBlockKeyboard` is true), default `true`
+  * `BTTKeyboardCleanModeBlockPointer`: boolean, block trackpad & mouse clicks, scrolling and gestures (mouse-move events are swallowed too, but macOS still moves the cursor itself - that cannot be prevented without root privileges), default `true`
+  * `BTTKeyboardCleanModeBlackoutScreen`: boolean, darken all screens, default `true`
+  * `BTTKeyboardCleanModeOverlayOpacity`: number 10-100, darkening strength in percent, default `100`
+  * `BTTKeyboardCleanModeShowStatusCard`: boolean, default `true`
+  * `BTTKeyboardCleanModeUnlockHoldSeconds`: number 0.5-10, press & hold duration to unlock, default `3`
+  * `BTTKeyboardCleanModeAutoUnlockSeconds`: number, automatically unlock after this many seconds, `0` = never (default)
+  * `BTTKeyboardCleanModePreventDisplaySleep`: boolean, default `true`
 
 This documentation covers all available BetterTouchTool actions as of the current version. Actions may be added or modified in future releases.

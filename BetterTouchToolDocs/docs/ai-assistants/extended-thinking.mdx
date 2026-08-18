@@ -21,7 +21,9 @@ Leave it off for quick rewriting, short answers, and simple one-step automations
 
 BTT offers levels from **Minimal** to **Maximum**, plus **Adaptive** where supported. Higher levels can improve difficult tasks, but they also increase latency and provider cost.
 
-When multiple active skills request thinking, BTT uses the strongest requested setting.
+Newer Claude models only support adaptive thinking, where the model decides when and how much to think. For these models BTT automatically switches to adaptive mode and translates the selected level into a matching effort setting.
+
+When multiple active skills request thinking, BTT uses the strongest requested setting. If any skill requests adaptive, adaptive wins.
 
 ## Provider Support
 

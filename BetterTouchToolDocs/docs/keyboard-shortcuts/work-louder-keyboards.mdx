@@ -1,0 +1,129 @@
+---
+title: "Work Louder Keyboard Support (Codex Micro, XYZ, Nomad, ...)"
+sidebar_position: 5
+slug: "/docs/keyboard-shortcuts/work-louder-keyboards"
+---
+# Work Louder Keyboard Support
+
+Recent versions of BetterTouchTool natively support Work Louder keyboards and macro pads. BTT
+talks to the device directly over USB/Bluetooth HID (using the same configuration protocol the
+Work Louder app uses), so every key on the device can be recognized and assigned to any BTT action —
+without the Work Louder app running.
+
+Recognized devices:
+
+- **Codex Micro** (the OpenAI edition of the Creator Micro) — see the [dedicated section](#codex-micro) below
+- Creator Micro V2
+- XYZ
+- Nomad E / Nomad E V2
+- Knob / Knob F1
+
+The XYZ and the Codex Micro have been tested on real hardware, the other models use the same protocol
+and should work as well. If something doesn't work on your device, please report it on
+https://community.folivora.ai.
+
+## How it works
+
+BTT installs a small **Work Louder Keyboard Configuration** in the Keyboard Shortcuts section. Once
+applied, the keys of the Work Louder device are sent to BTT instead of typing their default keycodes.
+BTT then treats them like any other keyboard key: you record a normal **Keyboard Shortcut** trigger by
+pressing the key on the device (it shows up as *"Work Louder N"*, where N is the key index) and
+assign any BTT action to it. All standard keyboard shortcut features are available — app-specific
+shortcuts, key-up / key-down actions, long press, hold to show a floating menu, etc.
+
+Depending on the model BTT uses one of two mechanisms:
+
+- **Codex Micro:** the OpenAI firmware already reports every key press, encoder tick and click to
+  the host. BTT simply listens to those events — **the on-device layout is not modified at all**.
+- **All other models (QMK based):** BTT rewrites the keyboard's on-device layout so that the selected
+  keys report to BTT (all other device settings — layers, lighting, other profiles — are preserved).
+  The original layout is backed up on the device and can be restored at any time.
+
+The configuration is re-applied automatically whenever the device connects (USB or Bluetooth), so it
+also survives unplugging or restarting your Mac.
+
+## Setup
+
+1. Go to the **Keyboard Shortcuts** section in BetterTouchTool and click the
+   **"Add Work Louder Keyboard Configuration"** button (if you also own a Logitech keyboard, the
+   button becomes an "Add Keyboard Configuration…" dropdown).
+2. Configure the options (see below) and click **"Apply to Connected Keyboard Now"**. If no keyboard
+   is connected yet, the configuration is saved and applied automatically as soon as one connects.
+3. Add normal Keyboard Shortcut triggers: click into the shortcut recorder and press a key on the
+   Work Louder device. It will be recorded as *"Work Louder N"*. Assign any BTT action to it.
+
+## Configuration options
+
+| Option | Description |
+|--------|-------------|
+| **Configuration is Enabled** | Turns the whole configuration on/off. When disabled the keyboard keeps its default behavior. |
+| **Keyboard Name (optional)** | Only apply this configuration to a specific device (useful with more than one Work Louder device). Empty = any connected Work Louder keyboard. |
+| **Send all keys to BTT** | Recommended for macro pads: every key is sent to BTT. If unchecked you can record just the specific keys that should be diverted, all other keys keep their default function. |
+| **Key LED color** | One static color for the diverted keys, e.g. `#FF3300`. For dynamic / per-key lighting use the predefined action described below. |
+| **Keep the keyboard's default behavior for these apps** | Add apps in which the keyboard should keep its original layout (e.g. the app the pad was designed for). BTT tells the device which app is focused, so this works without the Work Louder app. |
+| **Apply to Connected Keyboard Now** | Writes the configuration to the device. |
+| **Restore Keyboard to Default** | Puts the original on-device layout back (only relevant for the QMK based models where BTT rewrites the layout). |
+
+## Codex Micro
+
+BTT can fully control the Codex Micro:
+
+- **All keys are available as triggers**: the six "agent" keys in the top row (Work Louder 0–5),
+  the seven action keys below (Work Louder 6–12), and the encoder — turn left (13), turn right (14)
+  and click (15). Assign them to any BTT action, per app if you like.
+- **Lighting is fully controllable via the predefined action "Work Louder Keyboard: Set Key LED
+  Color"**. This action can be attached to any trigger (a keyboard shortcut, a script, a timer, a
+  named trigger called from AppleScript / the web server, ...), so key colors can change dynamically,
+  e.g. to reflect a status. It supports three targets:
+  - the six agent keys — individually addressable (`all` or a comma-separated list of slots like `0,2,5`),
+  - the keys backlight zone,
+  - the ambient ring around the device.
+
+  For each target you can choose color, effect (off, solid, snake, rainbow cycle, breathing,
+  gradient, shallow breathing), brightness and effect speed. The static "Key LED color" field in the
+  keyboard configuration is a convenient shortcut for a single solid color on the diverted keys.
+- **No layout changes**: because the Codex Micro's firmware already reports every key press to the
+  host, BTT never rewrites its keymap. The device stays exactly as it came out of the box, and the
+  "excluded apps" list is enforced by BTT itself.
+
+:::caution The Codex Micro can not be used by BTT and the ChatGPT / Codex app at the same time
+
+The ChatGPT / Codex desktop app opens the Codex Micro **exclusively**. While it holds the device,
+macOS does not deliver the device to any other application — BTT (like every other HID tool) can't
+see key presses or send lighting commands, and the keyboard configuration in BTT will show that the
+device is connected but not available.
+
+This is a limitation of how the Codex app claims the device, not something BTT can work around. To
+use the Codex Micro with BTT, quit the ChatGPT / Codex app (or disconnect the device in its
+settings), then unplug and replug the device. Once BTT can talk to it, everything works — key presses,
+per-key colors, effects.
+
+Also note that the LED colors set by BTT are stored in the device's volatile state: they are reset
+when the device is power-cycled, and the Codex app overwrites them whenever it takes over the device.
+Attach the "Set Key LED Color" action to the *"Action Executed After Keyboard Initialization"* slot of
+the keyboard configuration if you want your colors to be restored automatically on every (re)connect.
+
+:::
+
+## Troubleshooting
+
+- **"connected, but its configuration interface isn't available to BTT right now"** — another app
+  has opened the device: the ChatGPT / Codex app (Codex Micro), the Work Louder input app, or a WebUSB
+  session in a browser / Electron app. Quit that app, unplug/replug the device and reopen the
+  configuration.
+- **Keys don't record** — make sure the configuration is enabled and was applied ("Apply to
+  Connected Keyboard Now"). On the QMK based models the layout only changes after applying; on the
+  Codex Micro no apply is needed for recording, but the configuration must be enabled for BTT to
+  route the keys.
+- **Reserved F-keys** — on the QMK based models BTT maps the diverted keys to F13–F20 (+ modifier)
+  combinations internally. These are consumed by BTT and never reach macOS or other apps, and
+  F13–F20 shortcuts from your regular keyboard are unaffected.
+
+## Scripting / JSON
+
+- The keyboard configuration is a trigger of type `1346`, see the
+  [trigger definitions](/docs/json/trigger-definitions#4-keyboard-shortcuts) for the JSON
+  format (`BTTWorkLouderDeviceName`, `BTTWorkLouderDivertAllKeys`, `BTTWorkLouderKeyColor`,
+  `BTTWorkLouderExcludedApps`, ...).
+- The lighting action is predefined action `626`, see
+  [Work Louder Keyboard: Set Key LED Color](/docs/actions/action-definitions#work-louder-keyboard-set-key-led-color).

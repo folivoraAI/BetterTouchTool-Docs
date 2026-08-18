@@ -1,0 +1,69 @@
+---
+title: "Setting Up a Macro Pad"
+sidebar_position: 2
+slug: "/docs/macro-pads/setup"
+---
+# Setting Up a Macro Pad
+
+:::caution This is a very new feature
+
+Driving a macro pad from a Floating Menu is new and still evolving. Some things
+are not possible yet, and details may still change between versions. Feedback is
+very welcome — especially if you have a device that isn't recognised.
+
+If you want the established, fully featured configuration for Elgato Stream Decks,
+use the [Stream Deck section](/docs/stream-deck/overview) instead. It continues to
+work and is not going away; the two approaches exist side by side, and a device can
+only be driven by one of them at a time.
+
+:::
+
+## 1. Create a Floating Menu
+
+Go to **Custom Floating Menus / Widgets** and add a Floating Menu, or start from
+one of the macro pad templates.
+
+## 2. Bind it to your device
+
+In the menu's configuration on the right you'll find:
+
+- **Menu Availability** — choose **Macro Pad Only** if the menu should exist purely
+  on the device and never appear on screen. Any other availability also works; the
+  menu will then be shown on screen *and* on the pad.
+- **Macro Pad** — pick your device. Connected pads are listed by name and serial
+  number.
+
+You can bind either to a **specific device** (by serial number) or to **any device
+of that model**. Model binding is the better choice for presets you want to share,
+since it doesn't depend on one particular unit's serial number.
+
+## 3. Add items
+
+Every item of the menu becomes something on the device. Items fill the keys in the
+normal item order, so the order of your items decides the layout.
+
+That's all — the pad updates as you edit the menu.
+
+## Per-app pads
+
+Menus that are set up for a specific app take priority over global ones, so a pad
+automatically follows the frontmost application and falls back to your global menu.
+Create one menu per app, bind them to the same device, and the pad switches by
+itself.
+
+## My device isn't listed
+
+Open the **Macro Pad** dropdown once with the device plugged in — Stream Decks are
+only initialised when something asks for them.
+
+If it's a **Loupedeck or Razer Stream Controller**, make sure no other software is
+using it. Loupedeck's own application and Logitech's plugin service hold the
+connection exclusively, and while either runs BetterTouchTool cannot see the device
+at all.
+
+If it's a **Logitech MX Creative Keypad**, the same applies to Logi Options+ and its
+plugin service — quit them first. Also connect the Keypad by USB; it cannot be
+driven over Bluetooth.
+
+If it still isn't listed, see [Supported Devices](/docs/macro-pads/supported-devices)
+— your pad may be a rebadge of a supported design and can be registered manually.

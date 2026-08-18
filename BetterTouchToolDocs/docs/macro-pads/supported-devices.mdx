@@ -1,0 +1,229 @@
+---
+title: "Supported Devices"
+sidebar_position: 5
+slug: "/docs/macro-pads/supported-devices"
+---
+# Supported Devices
+
+BetterTouchTool can drive macro pads directly from a floating menu: your menu items
+become the keys, knobs and touch strip of the device, with the same look and the
+same actions you already configure everywhere else.
+
+This page lists the devices BetterTouchTool recognises.
+
+## Elgato Stream Deck
+
+All Stream Deck models supported by BetterTouchTool's Stream Deck integration can
+also be used as macro pads, including the Stream Deck + with its knobs and touch
+strip.
+
+## Loupedeck and Razer Stream Controller
+
+These devices were discontinued after Logitech acquired Loupedeck, and Loupedeck's
+own software dropped support for the Razer versions in 2026. BetterTouchTool drives
+them anyway.
+
+| Device | Status |
+|---|---|
+| Loupedeck Live | Tested |
+| Razer Stream Controller | Tested |
+| Loupedeck Live S | Should work |
+| Razer Stream Controller X | Should work |
+
+On the Loupedeck Live and the Razer Stream Controller you get all of it: the 12
+touch keys, both side touch strips, the 6 dials (turning **and** pressing) and the 8
+round buttons.
+
+The round buttons have no display, so an item placed on one **lights it in the
+item's own colour** instead of drawing on it.
+
+To use the side strips, set an item's placement to **LCD Strip** — items fill the
+left strip from top to bottom, then the right one.
+
+:::caution The device can only be used by one application at a time
+
+Loupedeck's own software and Logitech's plugin service claim the connection
+exclusively. If either is running, BetterTouchTool cannot talk to the device at all.
+Quit them first.
+
+:::
+
+**Loupedeck+ is a different device.** It is screenless and behaves as a MIDI
+controller, so use BetterTouchTool's MIDI triggers for it instead. Note that
+"LD-2001" printed on the case belongs to the Loupedeck **Live**, not the Loupedeck+.
+
+Very old firmware (0.2.5 and earlier) used a different display layout and is not
+supported. BetterTouchTool detects this and leaves the device alone rather than
+drawing garbage on it.
+
+## Logitech MX Creative Console
+
+The console is two separate devices, and BetterTouchTool treats them differently.
+
+| Device | Status |
+|---|---|
+| MX Creative Keypad (the half with the 9 screens) | Tested |
+| MX Creative Dialpad (the half with the dials) | Tested |
+
+The **Keypad** is a macro pad: its 9 keys show your menu items, exactly like a Stream
+Deck. The two `<` and `>` buttons below the keys have no display, so set an item's
+placement to **Buttons Without Display** to put actions on them.
+
+Connect the Keypad with its USB cable — it cannot be driven over Bluetooth.
+
+The **Dialpad** has no screens, so it is not a macro pad. It is configured under
+[Logitech Mouse Support](/docs/normal-mouse/logitech#mx-creative-dialpad) instead,
+where its four buttons can be made available for remapping and each of its two dials
+can be set to scroll or to trigger your own actions.
+
+:::caution
+Quit Logi Options+ before using the Keypad. Logitech's software and its plugin
+service claim the device exclusively, and BetterTouchTool then cannot talk to it at
+all.
+:::
+
+## AJAZZ, Mirabox and related pads
+
+Many of these pads are the same hardware sold under different brand names, so a
+device that isn't from AJAZZ or Mirabox may still work — look for your model in the
+lists below.
+
+### Pads with 10 keys, 4 knobs and a touch strip
+
+| Device | Status |
+|---|---|
+| AJAZZ AKP05E | Tested |
+| AJAZZ AKP05 | Should work |
+| AJAZZ AKP05E Pro | Should work |
+| AJAZZ AKP05CN Pro | Should work |
+| Mirabox N4 | Should work |
+| Mirabox N4E | Should work |
+| Mirabox N4 Pro | Should work |
+| Mirabox N4 Pro E | Should work |
+| VSDInside N4 Pro | Should work |
+| Mars Gaming MSD-Pro | Should work |
+| Soomfon CN003 | Should work |
+| Streonor S10 Pro | Should work |
+| Redragon SS552 | Should work |
+
+### Pads with 6 keys, 3 buttons and 3 knobs
+
+Tested on hardware. The three plain buttons and the three knobs have no displays;
+they work like any other item and simply can't show anything.
+
+| Device | Status |
+|---|---|
+| AJAZZ AKP03 | Should work |
+| AJAZZ AKP03E | Should work |
+| AJAZZ AKP03R | Should work |
+| AJAZZ AKP03E (rev. 2) | Should work |
+| AJAZZ AKP03R (rev. 2) | Should work |
+| Mirabox N3 | Should work |
+| Mirabox N3EN | Should work |
+| Mirabox N3CN3 | Should work |
+| Soomfon SE | Should work |
+| TreasLin N3 | Tested |
+| Redragon SS551 | Should work |
+| Mars Gaming MSD TWO | Should work |
+
+### Pads with 15 keys and a side display strip
+
+Tested on hardware (AKP153 rev. 2). Alongside the 15 keys these have a narrow LCD
+strip down the side, split into three segments. Place items on it by setting their
+placement to **LCD Strip**. The segments appear to be display-only — they show what
+you put there, but pressing them does nothing.
+
+| Device | Status |
+|---|---|
+| AJAZZ AKP153E (rev. 2) | Tested |
+| AJAZZ AKP153R (rev. 2) | Should work |
+| KUIYN and other rebadges of the above | Should work |
+
+### Pads with 15 keys and 3 buttons
+
+| Device | Status |
+|---|---|
+| VSD Inside M18 | Should work |
+| Mirabox M18 | Should work |
+| Mirabox M18EN | Should work |
+
+## Not yet supported
+
+- **The older AJAZZ AKP153 / AKP153E / AKP153R and Mirabox HSV293S** — the first
+  hardware revision is recognised but not finished, and keys are likely to appear in
+  the wrong order. The **rev. 2** models listed above do work. If your AKP153 is
+  detected but scrambled, you have a first-revision unit.
+- **Ulanzi D200 / D200H** — a different kind of device that needs separate support.
+
+## Every model BetterTouchTool recognises
+
+Most of these pads are a handful of designs sold under many brand names, so it is
+worth searching this list for your exact model. Every name below is recognised by
+name and USB id; see the sections above for what each family can do.
+
+**Logitech** — MX Creative Keypad, MX Creative Dialpad
+
+**Loupedeck / Razer** — Loupedeck Live, Loupedeck Live S, Razer Stream Controller,
+Razer Stream Controller X
+
+**Elgato** — Stream Deck, Stream Deck Mini, Stream Deck XL, Stream Deck Neo,
+Stream Deck +, Stream Deck Pedal
+
+**AJAZZ** — AKP03, AKP03E, AKP03R, AKP03E (rev. 2), AKP03R (rev. 2), AKP05,
+AKP05E, AKP05E Pro, AKP05CN Pro, AKP153, AKP153E, AKP153R, AKP153E (rev. 2),
+AKP153R (rev. 2)
+
+**Mirabox** — N3, N3EN, N3CN3, N4, N4E, N4 Pro, N4 Pro E, M18, M18EN, HSV293S
+
+**Other brands on the same hardware** — VSDInside N4 Pro, VSD Inside M18,
+Basicolor / VSDInside HSV293S, Mars Gaming MSD-Pro, Mars Gaming MSD TWO,
+Soomfon CN003, Soomfon SE, Streonor S10 Pro, TreasLin N3, Redragon SS551,
+Redragon SS552, KUIYN
+
+If your pad is not in this list it may still be the same hardware under yet another
+badge — see [My pad is the same hardware but isn't recognised](#my-pad-is-the-same-hardware-but-isnt-recognised)
+to register it yourself.
+
+## What "Should work" means
+
+The AJAZZ AKP05E, the AKP153 rev. 2, the AKP03/N3 family, the Loupedeck Live and the
+Razer Stream Controller have been tested on real hardware. The other pads use the
+same designs and are expected to work, but they haven't been confirmed yet — if you
+own one, feedback is very welcome.
+
+## My pad isn't listed or isn't detected
+
+If your pad looks like one of the devices above but isn't picked up, it may be the
+same hardware with a different identifier. To report it:
+
+1. Open **System Information** (hold ⌥ and choose  → System Information).
+2. Select **USB** in the sidebar and find your pad in the list.
+3. Note its **Vendor ID** and **Product ID** (for example `0x0300` and `0x3004`),
+   along with the exact product name.
+
+Send those along with the brand and model, and support can usually be added.
+
+## My pad is the same hardware but isn't recognised
+
+Most of these pads are a handful of designs sold under many brand names, so an
+unlisted device is usually one of the families above with a different identifier.
+You can register it yourself, without waiting for a new version.
+
+Find the Vendor and Product ID as described above, then run this in Terminal
+(quit BetterTouchTool first), using the family your pad matches:
+
+```
+defaults write com.hegenberg.BetterTouchTool BTTMacroPadExtraDevices -array \
+  "0x0300:0x3010:akp153v3:My Macro Pad"
+```
+
+- The first two values are the Vendor ID and Product ID.
+- The third is the family: `akp05` (10 keys, 4 knobs, touch strip), `akp03`
+  (6 keys, 3 buttons, 3 knobs), `m18` (15 keys, 3 buttons) or `akp153`
+  (15 keys + side strip). If your pad is a newer revision try `akp153v3`, and for
+  older AKP03-style pads `akp03v2`.
+- The fourth is any name you like, shown in BetterTouchTool.
+
+Start BetterTouchTool again and the pad should be listed. If it is detected but
+keys appear in the wrong order, it is a different family — try another one, and
+please report what worked so it can be added properly.

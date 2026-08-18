@@ -16,9 +16,9 @@ BetterTouchTool provides a Unix socket server that allows external applications 
 - **Socket Path**: `/tmp/com.hegenberg.BetterTouchTool.sock`
 - **Protocol**: Unix domain socket
 - **Security**: 
-  - Socket server must be enabled in BTT preferences (`BTTSocketServer` setting)
+  - Socket server must be enabled in BTT preferences (Settings → Scripting BTT → Command Line; defaults key `BTTSocketServerEnabled`)
   - Optional shared secret authentication
-  - Socket permissions set to 0666 for accessibility
+  - Socket permissions are 0600 (only processes running as your user can connect)
 
 ![alt text](/media/cli_preset_selection.png)
 ![alt text](/media/cli_keyboard_shortcuts.png)
