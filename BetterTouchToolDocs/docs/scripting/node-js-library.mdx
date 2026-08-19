@@ -70,14 +70,17 @@ Since BTT 6.735 a copy of the library ships inside BetterTouchTool and BTT's Jav
 CommonJS-style `require()`. Nothing to install:
 
 ```js
-// Run Real JavaScript action
+// Run Real JavaScript action – shows a HUD, returns the frontmost app
 async function main() {
-  const { Btt, actions, triggers } = require("bettertouchtool");
-  const btt = Btt.inProcess();
+  const { Btt, actions } = require("bettertouchtool");
+  const btt = Btt.inProcess();               // talks to BTT directly, no socket / webserver needed
+
   const app = await btt.getStringVariable("BTTActiveAppBundleIdentifier");
-  await btt.triggerAction(actions.showHUD("Hello", { detail: app, duration: 1.5 }));
-  await btt.chain().sendShortcut("cmd+s").delay(0.3).showHUD("saved").run();
-  return app;
+  await btt.triggerAction(
+    actions.showHUD("Hello from inside BTT 🖐", { detail: `frontmost app: ${app}`, duration: 2 }),
+  );
+  await btt.chain().sendShortcut("cmd+s").delay(0.3).showHUD("saved").run();   // sequences work too
+  return app;                                // becomes the action's result
 }
 ```
 

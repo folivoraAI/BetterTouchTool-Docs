@@ -9113,7 +9113,7 @@ Parameters:
 
 ### Keyboard Clean Mode (Lock Keyboard & Trackpad For Cleaning)
 
-> The modern successor of the KeyboardCleanTool, built into BTT. Locks the keyboard (incl. media/function keys) and optionally trackpad & mouse clicks/scrolling/gestures (the cursor may still move - macOS does not allow blocking that) so they can be wiped without triggering anything, darkens all screens (a black screen makes smudges visible) and shows a status card with unlock instructions. Display sleep / screensaver are prevented while active. No keyboard shortcut (not even Esc) can end the mode: unlock by pressing & holding any trackpad / mouse button (or the on-screen button) for the configured duration, via the optional auto-unlock timer, or by running the "End Keyboard Clean Mode" action from a trigger that can't be hit while wiping (Stream Deck, macro pad, MIDI, BTT Remote, script ...). The mode ends automatically on sleep / screen lock, and quitting BTT always unlocks. Physical-input trigger types (trackpad, mouse, keyboard, touch bar) don't fire while active. The variable `currently_in_keyboard_clean_mode` is available for Conditional Activation Groups.
+> The modern successor of the KeyboardCleanTool, built into BTT. Locks the keyboard (incl. media/function keys and, on Touch Bar Macs, the Touch Bar via a system-modal "locked" bar) and optionally trackpad & mouse clicks/scrolling/gestures (the cursor may still move - macOS does not allow blocking that) so they can be wiped without triggering anything, darkens all screens (a black screen makes smudges visible) and shows a status card with unlock instructions. Display sleep / screensaver are prevented while active. No keyboard shortcut (not even Esc) can end the mode: unlock by pressing & holding any trackpad / mouse button (or the on-screen button) for the configured duration, via the optional auto-unlock timer, or by running the "End Keyboard Clean Mode" action from a trigger that can't be hit while wiping (Stream Deck, macro pad, MIDI, BTT Remote, script ...). The mode ends automatically on sleep / screen lock, and quitting BTT always unlocks. Physical-input trigger types (trackpad, mouse, keyboard, touch bar) don't fire while active. The variable `currently_in_keyboard_clean_mode` is available for Conditional Activation Groups.
 
 Parameters:
 * **BTTPredefinedActionType**: `664` = start, `665` = end, `666` = toggle
@@ -9122,7 +9122,7 @@ Parameters:
   * `BTTKeyboardCleanModeBlockModifierKeys`: boolean, also disable modifier keys (⌘ ⌥ ⌃ ⇧, Caps Lock, fn/🌐) by temporarily remapping them to "nothing" on the HID level (restored when the mode ends; only applies while `BTTKeyboardCleanModeBlockKeyboard` is true), default `true`
   * `BTTKeyboardCleanModeBlockPointer`: boolean, block trackpad & mouse clicks, scrolling and gestures (mouse-move events are swallowed too, but macOS still moves the cursor itself - that cannot be prevented without root privileges), default `true`
   * `BTTKeyboardCleanModeBlackoutScreen`: boolean, darken all screens, default `true`
-  * `BTTKeyboardCleanModeOverlayOpacity`: number 10-100, darkening strength in percent, default `100`
+  * `BTTKeyboardCleanModeOverlayOpacity`: number 10-100, darkening strength in percent, default `85`
   * `BTTKeyboardCleanModeShowStatusCard`: boolean, default `true`
   * `BTTKeyboardCleanModeUnlockHoldSeconds`: number 0.5-10, press & hold duration to unlock, default `3`
   * `BTTKeyboardCleanModeAutoUnlockSeconds`: number, automatically unlock after this many seconds, `0` = never (default)
