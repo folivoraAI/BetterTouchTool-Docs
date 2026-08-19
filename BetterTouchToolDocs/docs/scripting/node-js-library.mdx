@@ -87,11 +87,18 @@ async function main() {
 `require()` resolves, in this order:
 
 1. modules bundled with BTT – currently `bettertouchtool` (also `require("bettertouchtool").catalog` for the action/trigger reference data)
-2. `~/Library/Application Support/BetterTouchTool/JavaScriptModules/<name>.js` (or `.cjs`, or `<name>/index.js`) – put your own bundles there and load them by name
-3. a file path (`require("~/Scripts/my-bundle.cjs")`, `require("/absolute/path.js")`)
+2. your own modules in `~/Library/Application Support/BetterTouchTool/JavaScriptModules/`, loaded by name:
+   `<name>.js` / `<name>.cjs`, a package folder `<name>/` (`package.json` → `exports["."]` or `main`, else
+   `index.js` / `index.cjs`), nested names like `require("utils/parse")`; with or without the extension
+3. a file path (`require("~/Scripts/my-bundle.cjs")`, `require("/absolute/path.js")`, `require("./relative")`)
 
-Modules are evaluated once per JavaScript context and cached (`require.cache`); `module.exports` /
-`exports` work like in Node, and IIFE bundles that assign to a global work as well.
+`module.exports` / `exports` work like in Node, and IIFE bundles that assign to a global work as well.
+
+Modules are evaluated once per JavaScript context and cached (`require.cache`). **Editing a module file is
+picked up automatically** – BTT compares the file's modification date on every `require()` and re-evaluates
+changed modules, so you can iterate without restarting BTT. To force it: `require.reload("name")` (re-loads
+one module and returns it), `require.reload()` (drops the whole cache) or `delete require.cache["name"]`.
+(Auto-reload and package folders: BTT 6.736+; `require()` itself: 6.735+.)
 
 ### Using other npm packages inside BetterTouchTool
 

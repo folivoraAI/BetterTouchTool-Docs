@@ -9128,4 +9128,19 @@ Parameters:
   * `BTTKeyboardCleanModeAutoUnlockSeconds`: number, automatically unlock after this many seconds, `0` = never (default)
   * `BTTKeyboardCleanModePreventDisplaySleep`: boolean, default `true`
 
+### Logitech Litra Light Control (Turn On / Off / Toggle, Brightness, Color Temperature)
+
+> Controls Logitech Litra Glow, Litra Beam and Litra Beam LX lights directly over USB (HID++), Logitech's software is not required. Multiple lights can be connected; by default every connected light is addressed, or a single light is selected by (partial) name / serial number. Brightness is a percentage of the light's supported range (Glow 20-250 lm, Beam / Beam LX 30-400 lm), color temperature is 2700-6500 K in steps of 100 K. Increase / decrease actions read the current value from the light first, so they also work if the value was changed on the light itself or by another app.
+
+Parameters:
+* **BTTPredefinedActionType**: `667` = turn on (optionally also set brightness / temperature), `668` = turn off, `669` = toggle on/off, `670` = set brightness, `671` = increase brightness, `672` = decrease brightness, `673` = set color temperature, `674` = increase color temperature (cooler), `675` = decrease color temperature (warmer)
+* **BTTActionData** (JSON, all optional):
+  * `BTTLitraDeviceSelector`: string, empty = all connected Litra lights, otherwise a case-insensitive partial match against the light's name (e.g. "Litra Glow") or serial number
+  * `BTTLitraApplyBrightness`: boolean (667 only), also set the brightness when turning on, default `false`
+  * `BTTLitraBrightnessPercent`: number 0-100 (667 with `BTTLitraApplyBrightness`, 670), default `50`
+  * `BTTLitraBrightnessStepPercent`: number 1-100 (671 / 672), percentage points per step, default `10`
+  * `BTTLitraApplyTemperature`: boolean (667 only), also set the color temperature when turning on, default `false`
+  * `BTTLitraTemperatureKelvin`: number 2700-6500 (667 with `BTTLitraApplyTemperature`, 673), rounded to 100 K, default `4500`
+  * `BTTLitraTemperatureStepKelvin`: number (674 / 675), kelvin per step, default `300`
+
 This documentation covers all available BetterTouchTool actions as of the current version. Actions may be added or modified in future releases.
