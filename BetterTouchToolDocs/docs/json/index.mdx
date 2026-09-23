@@ -3,12 +3,43 @@ title: "JSON Definitions"
 sidebar_position: 1
 slug: "/docs/json/overview"
 ---
-# Everything in BetterTouchTool can be represented as JSON.
+# Configuring BetterTouchTool With JSON and AI
 
-This here is a work in progress to document all possible properties.
+Triggers, actions and floating menus can be exported as JSON and imported again. Copy a configured trigger or action in BTT and paste it into a text editor to see its exported properties.
 
-In general you can copy any trigger / action to your clipboard and paste it into some text editor to see the JSON properties.
+The references below cover many legacy settings, but coverage is partial. Use definitions from the running BTT when configuring it with AI, because accepted keys, value encodings and supported options can differ between versions.
 
 * [All Predefined Actions JSON Definitions](/docs/actions/action-definitions)
 * [All Trigger JSON Definitions](/docs/json/trigger-definitions)
 * [Floating Menu JSON Definitions](/docs/json/floating-menu)
+
+## AI Configuration Workflow
+
+1. Read the target's current JSON when editing existing configuration. Identify its UUID, application, preset and action category.
+2. Use `lookup_btt_action_definition` with an `action_id` for the full action section and native schema. Confirm fixed gesture IDs with `lookup_btt_trigger_definition(trigger_id: ...)`, then read the matching category or floating-menu reference. The running app's native names and IDs take precedence over prose and web search. Finger count, swipe direction and device class must all match.
+3. Construct JSON using the documented key locations and value representations. A form control's internal ID is not necessarily its exported JSON key.
+4. Run `validate_btt_trigger_json`. When validating a patch, pass `existing_trigger_uuid` and the same `replace_action_data` setting planned for the update. For floating menus, also run `validate_floating_menu_json`. Fix errors and review warnings before writing.
+5. Use the appropriate create or update tool, following the native-name requirements below for trackpad and Magic Mouse gestures. Inspect exported readback and returned UUIDs. Confirm the app scope, preset, enabled state, values and child order. Compare `BTTTriggerTypeDescriptionReadOnly` and every `BTTPredefinedActionName` with the requested behavior. A custom `BTTTriggerTypeDescription` only changes a label. Repair mismatches and read the result again before reporting success.
+
+Native schemas describe covered fields, choices and known defaults. Choices are exhaustive only when `optionsComplete` is true. An editor default can differ from the value used at runtime when a key is omitted. A preserved key outside partial schema coverage is not proof that the action consumes it.
+
+Validation checks structure and covered fields. An import/export round trip checks persistence. Verify that the trigger fires and the action behaves as intended separately.
+
+## Creating Trackpad and Magic Mouse Gestures
+
+In the updated AI tools, `create_new_btt_trigger_from_json` requires the intended gesture's exact native name when creating a top-level trackpad or Magic Mouse gesture. Look up the gesture first and supply the name in one of these places:
+
+- **Single trigger:** pass `expected_trigger_name` as a tool argument alongside `trigger_json`. It is not a property inside the trigger JSON.
+- **JSON or batch creation:** include `BTTTriggerTypeDescriptionReadOnly` in each top-level trackpad or Magic Mouse trigger object. For a batch, use this per-object field instead of the single-trigger tool argument.
+
+The tool compares the supplied name with the native name of `BTTTriggerType`, ignoring case and surrounding whitespace. Missing required names or mismatches stop the call before import begins. These checks also run inside the creation tool even if a separate structural validation passed. Preserve the intended gesture name and correct the ID after a mismatch; changing the name to fit a wrong ID would still create the wrong gesture.
+
+This requirement applies to the AI creation tool. Ordinary JSON/preset imports treat `BTTTriggerTypeDescriptionReadOnly` as display metadata. Keyboard shortcut descriptions and triggers created under a parent do not have this mandatory name check.
+
+## Updating Existing Configuration
+
+`update_btt_trigger` requires an existing target. In the updated AI tools, `BTTAdditionalActionData` merges by key unless `replace_action_data: true` is supplied or a different action type is supplied with new action data. The tool rejects child/action arrays; use `manage_trigger_actions` to change action lists. Other containers retain their replacement behavior, so inspect their current values before replacing them.
+
+Inspect the installed tool's parameter descriptions when working with older BTT builds. If a write reports a partial failure, read the current configuration before retrying to avoid duplicates. The legacy importer does not make every batch atomic.
+
+Plugin source files and `.bttjsonplugin` files have their own installation workflow. See [Creating Plugins With AI](/docs/plugins/ai-authoring); trigger creation does not install plugin source code.

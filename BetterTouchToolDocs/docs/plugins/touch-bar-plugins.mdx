@@ -66,10 +66,12 @@ func touchBarViewController() -> NSViewController? {
 
 ```swift
 // Optional: return form items for the BTT sidebar
-static func configurationFormItems() -> BTTPluginFormItem? { ... }
+static func configurationFormItems() -> BTTPluginFormItem? { nil }
 
 // Called when the user changes configuration values
-func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]) { ... }
+func didReceiveNewConfigurationValues(_ configurationValues: [AnyHashable: Any]) {
+    // Apply saved values to your retained view or model here.
+}
 ```
 
 See the [Configuration Forms Reference](/docs/plugins/configuration-forms) for available field types.
@@ -81,7 +83,7 @@ The `delegate` property (type `BTTTouchBarPluginDelegate`) provides:
 | Method | Description |
 |---|---|
 | `executeAssignedBTTActions(_:)` | Execute the BTT actions assigned to this widget |
-| `updateWithString(_:sender:)` | Update the widget's displayed title |
+| `update(with:sender:)` | Update the widget's displayed title |
 | `setVariable(_:value:)` | Set a BTT variable |
 | `getVariable(_:)` | Read a BTT variable |
 
@@ -90,13 +92,14 @@ The `delegate` property (type `BTTTouchBarPluginDelegate`) provides:
 A Touch Bar widget that shows a configurable label and executes assigned actions when tapped:
 
 ```swift
-// BTT-Plugin-Name: Custom Label
+// BTT-Plugin-Name: Configurable Label
+// BTT-Plugin-Identifier: com.example.configurablelabel
 // BTT-Plugin-Type: TouchBar
 // BTT-Plugin-Icon: textformat
 
 import Cocoa
 
-class CustomLabel: NSObject, BTTPluginInterface {
+class ConfigurableLabel: NSObject, BTTPluginInterface {
     weak var delegate: (any BTTTouchBarPluginDelegate)?
     private var labelText = "Hello"
 
@@ -104,24 +107,21 @@ class CustomLabel: NSObject, BTTPluginInterface {
         let group = BTTPluginFormItem()
         group.formFieldType = BTTFormTypeFormGroup
 
-        let title = BTTPluginFormItem()
-        title.formFieldType = BTTFormTypeTitleField
-        title.formLabel1 = "Custom Label Settings"
-
         let textField = BTTPluginFormItem()
         textField.formFieldType = BTTFormTypeTextField
         textField.formLabel1 = "Label Text"
         textField.formFieldID = "labelText"
         textField.defaultValue = "Hello"
 
-        group.formOptions = [title, textField]
+        group.formOptions = [textField]
         return group
     }
 
-    func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]) {
+    func didReceiveNewConfigurationValues(_ configurationValues: [AnyHashable: Any]) {
         if let text = configurationValues["plugin_var_labelText"] as? String {
             labelText = text
         }
+        delegate?.update(with: labelText, sender: self)
     }
 
     func touchBarTitleString() -> String? {

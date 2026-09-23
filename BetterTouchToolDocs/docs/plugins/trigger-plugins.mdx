@@ -39,7 +39,7 @@ BTT manages the trigger plugin lifecycle:
 4. Your plugin monitors events and calls `delegate?.triggerFired(self)` or `delegate?.triggerFired(self, withContext:)` when conditions are met.
 5. **`stopObserving()`** is called when the trigger is no longer needed (app change, trigger deleted, BTT quit, etc.).
 
-Always clean up resources (timers, file descriptors, observers) in `stopObserving()` to avoid leaks.
+Make repeated starts safe by stopping existing observation first. Clean up timers, file descriptors and observers in `stopObserving()`, and cancel remaining resources during deinitialization.
 
 ## Firing Triggers
 
@@ -74,6 +74,7 @@ A trigger that fires whenever the clipboard content changes:
 
 ```swift
 // BTT-Plugin-Name: Clipboard Change
+// BTT-Plugin-Identifier: com.example.clipboardchangetrigger
 // BTT-Plugin-Type: Trigger
 // BTT-Plugin-Icon: doc.on.clipboard
 
@@ -88,9 +89,10 @@ class ClipboardChangeTrigger: NSObject, BTTTriggerPluginInterface {
     static func triggerDescription() -> String { "Fires when clipboard content changes" }
     static func triggerIcon() -> String { "doc.on.clipboard" }
     static func configurationFormItems() -> BTTPluginFormItem? { nil }
-    func didReceiveNewConfigurationValues(_ config: [String: Any]?) {}
+    func didReceiveNewConfigurationValues(_ config: [AnyHashable: Any]?) {}
 
     func startObserving() {
+        stopObserving()
         lastChangeCount = NSPasteboard.general.changeCount
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self else { return }
@@ -116,6 +118,7 @@ A trigger that monitors a user-configurable file or folder for changes using `Di
 
 ```swift
 // BTT-Plugin-Name: File Watcher
+// BTT-Plugin-Identifier: com.example.filewatchertrigger
 // BTT-Plugin-Type: Trigger
 // BTT-Plugin-Icon: doc.badge.clock
 
@@ -124,7 +127,6 @@ import Cocoa
 class FileWatcherTrigger: NSObject, BTTTriggerPluginInterface {
     weak var delegate: (any BTTTriggerPluginDelegate)?
     private var watchedPath: String = ""
-    private var fileDescriptor: Int32 = -1
     private var dispatchSource: DispatchSourceFileSystemObject?
 
     static func triggerName() -> String { "File Watcher" }
@@ -146,20 +148,21 @@ class FileWatcherTrigger: NSObject, BTTTriggerPluginInterface {
         return group
     }
 
-    func didReceiveNewConfigurationValues(_ config: [String: Any]?) {
+    func didReceiveNewConfigurationValues(_ config: [AnyHashable: Any]?) {
         let newPath = (config?["plugin_var_watchPath"] as? String ?? "~/Desktop")
-            .replacingOccurrences(of: "~", with: NSHomeDirectory())
-        if newPath != watchedPath {
+        let expandedPath = (newPath as NSString).expandingTildeInPath
+        if expandedPath != watchedPath {
             let wasObserving = dispatchSource != nil
             if wasObserving { stopObserving() }
-            watchedPath = newPath
+            watchedPath = expandedPath
             if wasObserving { startObserving() }
         }
     }
 
     func startObserving() {
+        stopObserving()
         guard !watchedPath.isEmpty else { return }
-        fileDescriptor = open(watchedPath, O_EVTONLY)
+        let fileDescriptor = open(watchedPath, O_EVTONLY)
         guard fileDescriptor >= 0 else { return }
 
         let path = watchedPath
@@ -172,12 +175,10 @@ class FileWatcherTrigger: NSObject, BTTTriggerPluginInterface {
             guard let self else { return }
             self.delegate?.triggerFired(self, withContext: ["changedPath": path])
         }
-        dispatchSource?.setCancelHandler { [weak self] in
-            guard let self else { return }
-            if self.fileDescriptor >= 0 {
-                close(self.fileDescriptor)
-                self.fileDescriptor = -1
-            }
+        // Capture this source's descriptor. A later restart may already have
+        // opened another file by the time this cancellation handler runs.
+        dispatchSource?.setCancelHandler {
+            close(fileDescriptor)
         }
         dispatchSource?.resume()
     }
@@ -186,8 +187,12 @@ class FileWatcherTrigger: NSObject, BTTTriggerPluginInterface {
         dispatchSource?.cancel()
         dispatchSource = nil
     }
+
+    deinit { dispatchSource?.cancel() }
 }
 ```
+
+This watches one open file or directory, not its descendants recursively. If the path is deleted or replaced with a different file, observation must be restarted to follow the new file.
 
 ## Configuration Form Items
 

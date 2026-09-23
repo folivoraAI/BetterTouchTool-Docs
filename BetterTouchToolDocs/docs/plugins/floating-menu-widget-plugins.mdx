@@ -31,7 +31,7 @@ Plugin widgets appear as a dedicated item type when configuring a floating menu.
 | `widgetMaxWidth() -> CGFloat` | Maximum width override | Item's configured size |
 | `widgetMaxHeight() -> CGFloat` | Maximum height override | Item's configured size |
 | `configurationFormItems() -> BTTPluginFormItem?` | Configuration form for the BTT sidebar | None |
-| `additionalActionCategories() -> [[String: Any]]?` | Custom action categories | None |
+| `additionalActionCategories() -> [[AnyHashable: Any]]?` | Custom action categories | None |
 
 ### Optional Instance Methods
 
@@ -45,6 +45,7 @@ Plugin widgets appear as a dedicated item type when configuring a floating menu.
 
 ```swift
 // BTT-Plugin-Name: Hello Widget
+// BTT-Plugin-Identifier: com.example.hellowidget
 // BTT-Plugin-Type: FloatingMenuWidget
 // BTT-Plugin-Icon: hand.wave.fill
 
@@ -57,6 +58,7 @@ class HelloWidget: NSObject, BTTFloatingMenuWidgetInterface {
     static func widgetDescription() -> String { "A simple greeting widget" }
     static func widgetIcon() -> String { "hand.wave.fill" }
 
+    // Override the menu item's configured size (optional)
     static func widgetMinWidth() -> CGFloat { 200 }
     static func widgetMinHeight() -> CGFloat { 80 }
 
@@ -74,15 +76,18 @@ class HelloWidget: NSObject, BTTFloatingMenuWidgetInterface {
 
 ## Interactive Widget (SwiftUI)
 
-For richer UI, use SwiftUI by wrapping your view in an `NSHostingView`. If your widget contains interactive controls, return `true` from `widgetWantsInteractiveView()` so BTT doesn't intercept clicks.
+For richer UI, use SwiftUI by wrapping your view in an `NSHostingView`. If your widget contains interactive controls, return `true` from `widgetWantsInteractiveView()` so BTT doesn't intercept clicks. The timer uses a [compatible `State` property-wrapper alias](/docs/plugins/swift-source-plugins#swiftui-state-with-command-line-tools) for standalone Command Line Tools and previous macOS SDKs.
 
 ```swift
 // BTT-Plugin-Name: Timer Widget
+// BTT-Plugin-Identifier: com.example.timerwidget
 // BTT-Plugin-Type: FloatingMenuWidget
 // BTT-Plugin-Icon: timer
 
 import Cocoa
 import SwiftUI
+
+private typealias TimerWidgetState<Value> = SwiftUI.State<Value>
 
 class TimerWidget: NSObject, BTTFloatingMenuWidgetInterface {
     weak var delegate: (any BTTFloatingMenuWidgetDelegate)?
@@ -104,8 +109,8 @@ class TimerWidget: NSObject, BTTFloatingMenuWidgetInterface {
 }
 
 struct TimerView: View {
-    @State private var secondsLeft = 60
-    @State private var running = false
+    @TimerWidgetState private var secondsLeft = 60
+    @TimerWidgetState private var running = false
 
     var body: some View {
         VStack(spacing: 12) {
@@ -142,16 +147,19 @@ Add a custom configuration UI that appears in the BTT sidebar when the user sele
 
 ```swift
 // BTT-Plugin-Name: Greeting Widget
+// BTT-Plugin-Identifier: com.example.greetingwidget
 // BTT-Plugin-Type: FloatingMenuWidget
 // BTT-Plugin-Icon: text.bubble.fill
 
 import Cocoa
+import SwiftUI
 
 class GreetingWidget: NSObject, BTTFloatingMenuWidgetInterface {
     weak var delegate: (any BTTFloatingMenuWidgetDelegate)?
 
     private var greetingText = "Hello!"
     private var fontSize: Double = 24
+    private let label = NSTextField(labelWithString: "")
 
     static func widgetName() -> String { "Greeting Widget" }
     static func widgetDescription() -> String { "A configurable greeting" }
@@ -176,33 +184,35 @@ class GreetingWidget: NSObject, BTTFloatingMenuWidgetInterface {
         sizeSlider.defaultValue = NSNumber(value: 24)
         sizeSlider.dataType = BTTFormDataNumber
 
-        let colorPicker = BTTPluginFormItem()
-        colorPicker.formFieldType = BTTFormTypeColorPicker
-        colorPicker.formLabel1 = "Text Color"
-        colorPicker.formFieldID = "textColor"
-
-        group.formOptions = [textField, sizeSlider, colorPicker]
+        group.formOptions = [textField, sizeSlider]
         return group
     }
 
-    func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]?) {
+    func didReceiveNewConfigurationValues(_ configurationValues: [AnyHashable: Any]?) {
         if let text = configurationValues?["plugin_var_greetingText"] as? String {
             greetingText = text
         }
         if let size = configurationValues?["plugin_var_fontSize"] as? Double {
             fontSize = size
         }
+        updateLabel()
         delegate?.requestWidgetUpdate(self)
     }
 
-    func makeWidgetView() -> NSView {
-        let label = NSTextField(labelWithString: greetingText)
+    private func updateLabel() {
+        label.stringValue = greetingText
         label.font = .systemFont(ofSize: CGFloat(fontSize), weight: .medium)
-        label.textColor = .white
+        label.textColor = .labelColor
+    }
+
+    func makeWidgetView() -> NSView {
+        updateLabel()
         return label
     }
 }
 ```
+
+The example keeps the label alive and applies configuration changes directly to it before requesting an update. Use the same pattern for an observable SwiftUI model.
 
 See the [Configuration Forms Reference](/docs/plugins/configuration-forms) for all available field types.
 
@@ -211,7 +221,7 @@ See the [Configuration Forms Reference](/docs/plugins/configuration-forms) for a
 By default, actions assigned to a widget item are executed when clicked. You can define additional action categories so your widget can trigger different sets of user-configured actions for different events - for example, "On Minute Change" or "On Play".
 
 ```swift
-static func additionalActionCategories() -> [[String: Any]]? {
+static func additionalActionCategories() -> [[AnyHashable: Any]]? {
     return [
         [
             "CategoryActionName": "On Minute Change",
@@ -251,7 +261,7 @@ The `delegate` property (type `BTTFloatingMenuWidgetDelegate`) provides:
 | Method | Description |
 |---|---|
 | `executeAssignedBTTActions(_:)` | Execute the BTT actions assigned to this widget |
-| `requestWidgetUpdate(_:)` | Request BTT to refresh the widget view |
+| `requestWidgetUpdate(_:)` | Request a refresh after updating the retained view or model; this does not recreate the view |
 | `setVariable(_:value:)` | Set a BTT variable |
 | `getVariable(_:)` | Read a BTT variable |
 | `executeNamedTrigger(_:)` | Execute a named trigger configured in BTT |

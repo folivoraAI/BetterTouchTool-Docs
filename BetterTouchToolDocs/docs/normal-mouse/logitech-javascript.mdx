@@ -389,9 +389,11 @@ async function checkBattery() {
         // Use BTT to show a notification
         await trigger_action({
             json: JSON.stringify({
-                BTTPredefinedActionType: 309,  // Show notification
-                BTTNotificationTitle: "Low Battery Warning",
-                BTTNotificationText: `${deviceName}: ${battery.level}%`
+                BTTPredefinedActionType: 371,  // Show Notification
+                BTTAdditionalActionData: {
+                    BTTActionSendNotificationTitle: "Low Battery Warning",
+                    BTTActionSendNotificationMessage: `${deviceName}: ${battery.level}%`
+                }
             })
         });
     }
@@ -1104,9 +1106,11 @@ async function setBacklightWithNotification(level) {
     // Show notification
     await trigger_action({
         json: JSON.stringify({
-            BTTPredefinedActionType: 309,
-            BTTNotificationTitle: "Keyboard Backlight",
-            BTTNotificationText: `Brightness: ${clampedLevel}/${state.maxLevel}`
+            BTTPredefinedActionType: 371,  // Show Notification
+            BTTAdditionalActionData: {
+                BTTActionSendNotificationTitle: "Keyboard Backlight",
+                BTTActionSendNotificationMessage: `Brightness: ${clampedLevel}/${state.maxLevel}`
+            }
         })
     });
 

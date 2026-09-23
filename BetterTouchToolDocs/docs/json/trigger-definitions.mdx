@@ -9,12 +9,15 @@ This document provides a reference for creating trigger configurations in Better
 
 ## Basic Trigger Structure
 
-Every trigger must have these required fields:
+This complete example binds Command-Space to the action shown below. Trigger identity and required configuration depend on the trigger class; read that class's section before choosing key codes or properties.
 
 ```json
 {
-  "BTTTriggerType": 123,
+  "BTTTriggerType": 0,
   "BTTTriggerClass": "BTTTriggerTypeKeyboardShortcut",
+  "BTTShortcutKeyCode": 49,
+  "BTTShortcutModifierKeys": 1048576,
+  "BTTTriggerOnDown": 1,
   "BTTActionsToExecute": [
     {
       "BTTPredefinedActionType": 45
@@ -35,7 +38,8 @@ Every trigger must have these required fields:
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
 | `BTTUUID` | String | Unique identifier | Auto-generated |
-| `BTTTriggerTypeDescription` | String | User-visible name/description | Auto-generated |
+| `BTTTriggerTypeDescription` | String | User-visible name/description. A custom label only; it never selects or changes the gesture | Auto-generated |
+| `BTTTriggerTypeDescriptionReadOnly` | String | The gesture's native name in exported JSON. The AI creation tool also uses it to check the intended name for top-level trackpad/Magic Mouse gestures (see below) | Native name |
 | `BTTEnabled` | Number | Enable/disable trigger (0 or 1) | 1 |
 | `BTTEnabled2` | Number | Secondary enabled state | 1 |
 | `BTTOrder` | Number | Sort order in list | Auto |
@@ -53,107 +57,92 @@ Every trigger must have these required fields:
 - `"BTTTriggerTypeTouchpadMagicTrackpad2"` - Magic Trackpad 2
 - `"BTTTriggerTypeTouchBarTrackpad"` - Touch Bar surface
 
-#### Zero Finger Gestures
-- `214` - Release Last Finger Regardless of How Many Were Touching Before
+The following names and IDs are generated from BTT’s native catalog. A custom `BTTTriggerTypeDescription` only changes the label; use `BTTTriggerTypeDescriptionReadOnly` in readback to verify the gesture.
+
+**AI creation guard:** `create_new_btt_trigger_from_json` requires the requested gesture's native name when creating a top-level trackpad gesture. Supply `BTTTriggerTypeDescriptionReadOnly` in the JSON or `expected_trigger_name` as a separate tool argument for a single trigger. For a batch, include the JSON field in each top-level trackpad/Magic Mouse object instead of passing the single-trigger argument. The tool compares the name with the native name of `BTTTriggerType`, ignoring case and surrounding whitespace. A missing required name or mismatch stops the call before import begins. Ordinary JSON/preset imports treat the read-only field as display metadata; the mandatory name check belongs to this AI tool and does not apply to children created under a parent. Preserve the intended name and look up the correct ID after a mismatch.
+
+<!-- BEGIN NATIVE BTTGestureTP -->
+
+#### Release Gestures
 - `209` - Release Last Finger After Previous Touch With 1 Finger
 - `210` - Release Last Finger After Previous Touch With 2 Fingers
 - `211` - Release Last Finger After Previous Touch With 3 Fingers
 - `212` - Release Last Finger After Previous Touch With 4 Fingers
 - `213` - Release Last Finger After Previous Touch With 5 Fingers
+- `214` - Release Last Finger Regardless of How Many Were Touching Before
 
 #### Single Finger Gestures
-- `215` - 1 Finger Touch Start
-- `221` - 1 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
-- `226` - 1 Finger Circle Clockwise (configurable circles via `BTTAdditionalConfiguration`, default 0.9)
-- `227` - 1 Finger Circle Counter-Clockwise (configurable circles via `BTTAdditionalConfiguration`, default 0.9)
-- `157` - Corner Click Bottom Left
-- `158` - Corner Click Bottom Right
-- `182` - Corner Click Top Left
-- `183` - Corner Click Top Right
-- `184` - Corner Force Click Top Left
-- `185` - Corner Force Click Top Right
-- `186` - Corner Force Click Bottom Left
-- `187` - Corner Force Click Bottom Right
+- `113` - TipTap Left (1 Finger Fix)
+- `114` - TipTap Right (1 Finger Fix)
+- `122` - 1 Finger Tap Top Left
+- `123` - 1 Finger Tap Top Right
+- `124` - 1 Finger Tap Top Middle
+- `125` - 1 Finger Tap Bottom Left
+- `126` - 1 Finger Tap Bottom Right
+- `127` - 1 Finger Tap Bottom Middle
+- `134` - 1 Finger Tap Left Side Middle
+- `135` - 1 Finger Tap Right Side Middle
 - `207` - 1 Finger Tap
 - `208` - 1 Finger Double Tap
-- `203` - Single Finger Force Click
-- `100` - 1 Finger Tap Left Side
-- `101` - 1 Finger Tap Right Side
-- `102` - 1 Finger Tap Bottom
-- `103` - 1 Finger Tap Top
-- `104` - 1 Finger Tap Left Side Middle
-- `105` - 1 Finger Tap Right Side Middle
-- `106` - 1 Finger Tap Upper Left
-- `107` - 1 Finger Tap Upper Right
-- `108` - 1 Finger Tap Bottom Left
-- `109` - 1 Finger Tap Bottom Right
-- `228` - 1 Finger Swipe Up on Left Edge (Continuous)
-- `229` - 1 Finger Swipe Down on Left Edge (Continuous)
-- `230` - 1 Finger Swipe Up on Right Edge (Continuous)
-- `231` - 1 Finger Swipe Down on Right Edge (Continuous)
-- `232` - 1 Finger Swipe Left on Top Edge (Continuous)
-- `233` - 1 Finger Swipe Right on Top Edge (Continuous)
-- `234` - 1 Finger Swipe Left on Bottom Edge (Continuous)
-- `235` - 1 Finger Swipe Right on Bottom Edge (Continuous)
+- `215` - 1 Finger Touch Start
+- `221` - 1 Finger Long Touch
+- `226` - 1 Finger Circle Clockwise
+- `227` - 1 Finger Circle Counter-Clockwise
+- `228` - 1 Finger Swipe Up on Left Edge
+- `229` - 1 Finger Swipe Down on Left Edge
+- `230` - 1 Finger Swipe Up on Right Edge
+- `231` - 1 Finger Swipe Down on Right Edge
+- `232` - 1 Finger Swipe Left on Top Edge
+- `233` - 1 Finger Swipe Right on Top Edge
+- `234` - 1 Finger Swipe Left on Bottom Edge
+- `235` - 1 Finger Swipe Right on Bottom Edge
 
 #### Two Finger Gestures
-- `236` - 2 Finger Swipe Up on Left Edge (Continuous)
-- `237` - 2 Finger Swipe Down on Left Edge (Continuous)
-- `238` - 2 Finger Swipe Up on Right Edge (Continuous)
-- `239` - 2 Finger Swipe Down on Right Edge (Continuous)
-- `240` - 2 Finger Swipe Left on Top Edge (Continuous)
-- `241` - 2 Finger Swipe Right on Top Edge (Continuous)
-- `242` - 2 Finger Swipe Left on Bottom Edge (Continuous)
-- `243` - 2 Finger Swipe Right on Bottom Edge (Continuous)
-- `216` - 2 Finger Touch Start
-- `222` - 2 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
-- `173` - 2 Finger Tap
-- `179` - 2 Finger Double-Tap
-- `174` - 2 Finger Click
-- `175` - 2 Finger Force Click
-- `176` - 2 Finger Click (Left Finger Harder)
-- `177` - 2 Finger Click (Right Finger Harder)
-- `178` - 2 Finger Click (Both Fingers Same)
-- `180` - 2 Finger Force Click (Left Finger Harder)
-- `181` - 2 Finger Force Click (Right Finger Harder)
-- `159` - 2 Finger Swipe Left
-- `160` - 2 Finger Swipe Right
-- `161` - 2 Finger Swipe Up
-- `162` - 2 Finger Swipe Down
-- `165` - 2 Finger Swipe From Left Edge
-- `166` - 2 Finger Swipe From Right Edge
-- `167` - 2 Finger Swipe From Top Edge
-- `168` - 2 Finger Swipe From Bottom Edge
-- `121` - 2 Finger Pinch In
-- `122` - 2 Finger Pinch Out
-- `138` - TipTap Middle (2 Fingers Fix)
 - `132` - TipTap Left (2 Fingers Fix)
 - `133` - TipTap Right (2 Fingers Fix)
+- `138` - TipTap Middle (2 Fingers Fix)
 - `142` - TipSwipe Left Finger Down (2 Fingers Fix)
 - `143` - TipSwipe Left Finger Up (2 Fingers Fix)
 - `145` - TipSwipe Left Finger Right (2 Fingers Fix)
 - `146` - TipSwipe Left Finger Left (2 Fingers Fix)
+- `159` - 2 Finger Swipe Left
+- `160` - 2 Finger Swipe Right
+- `161` - 2 Finger Swipe Up
+- `162` - 2 Finger Swipe Down
+- `165` - 2 Finger Swipe From Left Edge (start outside of the trackpad on the aluminum)
+- `166` - 2 Finger Swipe From Right Edge (start outside of the trackpad on the aluminum)
+- `167` - 2 Finger Swipe From Top Edge
+- `168` - 2 Finger Swipe From Bottom Edge
+- `173` - 2 Finger Tap
+- `174` - 2 Finger Click
+- `175` - 2 Finger Force Click
+- `176` - 2 Finger Click, Left Finger Harder
+- `177` - 2 Finger Click, Right Finger Harder
+- `179` - 2 Finger Double-Tap
+- `180` - 2 Finger FORCE Click, Left Finger Harder
+- `181` - 2 Finger FORCE Click, Right Finger Harder
+- `197` - Pinch With Thumb And 2 Fingers
+- `198` - Spread With Thumb And 2 Fingers
+- `216` - 2 Finger Touch Start
+- `222` - 2 Finger Long Touch
+- `236` - 2 Finger Swipe Up on Left Edge
+- `237` - 2 Finger Swipe Down on Left Edge
+- `238` - 2 Finger Swipe Up on Right Edge
+- `239` - 2 Finger Swipe Down on Right Edge
+- `240` - 2 Finger Swipe Left on Top Edge
+- `241` - 2 Finger Swipe Right on Top Edge
+- `242` - 2 Finger Swipe Left on Bottom Edge
+- `243` - 2 Finger Swipe Right on Bottom Edge
 
 #### Three Finger Gestures
-- `217` - 3 Finger Touch Start
-- `223` - 3 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
-- `110` - 3 Finger Tap
-- `163` - 3 Finger Double-Tap
-- `111` - 3 Finger Click
-- `170` - 3 Finger Force Click
-- `181` - 3 Finger Click & Hold
-- `188` - 3 Finger Click (Left Finger Harder)
-- `189` - 3 Finger Click (Middle Finger Harder)
-- `190` - 3 Finger Click (Right Finger Harder)
-- `191` - 3 Finger Force Click (Left Finger Harder)
-- `192` - 3 Finger Force Click (Middle Finger Harder)
-- `193` - 3 Finger Force Click (Right Finger Harder)
-- `112` - 3 Finger Swipe Up
-- `113` - 3 Finger Swipe Down
-- `114` - 3 Finger Swipe Left
-- `115` - 3 Finger Swipe Right
-- `197` - 3 Finger Pinch In
-- `198` - 3 Finger Pinch Out
+- `100` - 3 Finger Swipe Left
+- `101` - 3 Finger Swipe Right
+- `102` - 3 Finger Swipe Up
+- `103` - 3 Finger Swipe Down
+- `104` - 3 Finger Tap
+- `112` - 3 Finger Click
+- `136` - TipTap Left (3 Fingers Fix)
+- `137` - TipTap Right (3 Fingers Fix)
 - `139` - 3 Finger Tap Bottom
 - `140` - 3 Finger Tap Top
 - `152` - 3 Finger Dragging
@@ -161,49 +150,73 @@ Every trigger must have these required fields:
 - `154` - 3 Finger Clickswipe Right
 - `155` - 3 Finger Clickswipe Up
 - `156` - 3 Finger Clickswipe Down
-- `136` - TipTap Left (3 Fingers Fix)
-- `137` - TipTap Right (3 Fingers Fix)
+- `163` - 3 Finger Double-Tap
+- `170` - 3 Finger FORCE Click
+- `188` - 3 Finger Click (Left Finger Harder)
+- `189` - 3 Finger Click (Middle Finger Harder)
+- `190` - 3 Finger Click (Right Finger Harder)
+- `191` - 3 Finger Force Click (Left Finger Harder)
+- `192` - 3 Finger Force Click (Middle Finger Harder)
+- `193` - 3 Finger Force Click (Right Finger Harder)
+- `194` - Pinch With Thumb And 3 Fingers
+- `195` - Spread With Thumb And 3 Fingers
+- `204` - 3 Finger Drawing
+- `217` - 3 Finger Touch Start
+- `223` - 3 Finger Long Touch
+
+#### Four Finger Gestures
+- `105` - 4 Finger Swipe Left
+- `106` - 4 Finger Swipe Right
+- `107` - 4 Finger Swipe Down
+- `108` - 4 Finger Swipe Up
+- `110` - 4 Finger Tap
+- `121` - 4 Finger Click
+- `164` - Custom Tap Sequence (4 Fingers)
+- `169` - 4 Finger Double Tap
+- `171` - 4 Finger FORCE Click
+- `200` - Pinch With Thumb And 4 Fingers
+- `201` - Spread With Thumb And 4 Fingers
+- `205` - 4 Finger Drawing
+- `218` - 4 Finger Touch Start
+- `224` - 4 Finger Long Touch
+
+#### Five And More Finger Gestures
+- `111` - 5 Finger Tap
+- `128` - 5 Finger Swipe Left
+- `129` - 5 Finger Swipe Right
+- `130` - 5 Finger Swipe Down
+- `131` - 5 Finger Swipe Up
+- `141` - 5 Finger Click
+- `151` - 5 Finger Touch
+- `172` - 5 Finger FORCE Click
+- `199` - 11 Finger Tap / Whole Hand
+- `206` - 5 Finger Drawing
+- `219` - 5 Finger Touch Start
+- `225` - 5 Finger Long Touch
+
+#### Other Gestures
+- `115` - Pinch In
+- `116` - Pinch Out
+- `117` - Rotate Left
+- `118` - Rotate Right
+- `119` - Scroll Up (modifier key needed)
+- `120` - Scroll Down (modifier key needed)
 - `147` - Triangle Swipe Top Left Corner
 - `148` - Triangle Swipe Top Right Corner
 - `149` - Triangle Swipe Bottom Left Corner
 - `150` - Triangle Swipe Bottom Right Corner
-- `204` - 3 Finger Drawing
+- `157` - Corner Click Bottom Left
+- `158` - Corner Click Bottom Right
+- `182` - Corner Click Top Left
+- `183` - Corner Click Top Right
+- `184` - Corner FORCE Click Top Left
+- `185` - Corner FORCE Click Top Right
+- `186` - Corner FORCE Click Bottom Left
+- `187` - Corner FORCE Click Bottom Right
+- `203` - Single Finger FORCE Click
+- `220` - First Touch With 1 2 3 4 5 X Fingers, Then Release Y Of Them
 
-#### Four Finger Gestures
-- `218` - 4 Finger Touch Start
-- `224` - 4 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
-- `116` - 4 Finger Tap
-- `169` - 4 Finger Double Tap
-- `117` - 4 Finger Click
-- `171` - 4 Finger Force Click
-- `182` - 4 Finger Click & Hold
-- `123` - 4 Finger Swipe Up
-- `124` - 4 Finger Swipe Down
-- `125` - 4 Finger Swipe Left
-- `126` - 4 Finger Swipe Right
-- `194` - 4 Finger Pinch In
-- `195` - 4 Finger Pinch Out
-- `205` - 4 Finger Drawing
-
-#### Five And More Finger Gestures
-- `219` - 5 Finger Touch Start
-- `225` - 5 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
-- `119` - 5 Finger Tap
-- `141` - 5 Finger Click
-- `172` - 5 Finger Force Click
-- `130` - 5 Finger Swipe Down
-- `131` - 5 Finger Swipe Up
-- `128` - 5 Finger Swipe Left
-- `129` - 5 Finger Swipe Right
-- `200` - 5 Finger Pinch In
-- `201` - 5 Finger Pinch Out
-- `206` - 5 Finger Drawing
-- `151` - 5 Finger Touch/Move
-- `199` - 11 Finger Tap / Whole Hand
-
-#### Your Own Gestures
-- `164` - Custom Tap Sequence (4 Fingers)
-- `220` - First Touch With X Fingers, Then Release Y Fingers
+<!-- END NATIVE BTTGestureTP -->
 
 #### Long Touch & Circle Gesture Configuration
 
@@ -219,80 +232,87 @@ Every trigger must have these required fields:
 
 **BTTTriggerClass**: `"BTTTriggerTypeMagicMouse"`
 
-#### Zero Finger Gestures
-- `51` - Release Last Finger Regardless of How Many Were Touching Before
-- `52` - Release Last Finger After Previous Touch With 1 Finger
-- `53` - Release Last Finger After Previous Touch With 2 Fingers
-- `54` - Release Last Finger After Previous Touch With 3 Fingers
-- `55` - Release Last Finger After Previous Touch With 4 Fingers
-- `56` - Release Last Finger After Previous Touch With 5 Fingers
+These names and IDs are generated from BTT’s native catalog and are separate from the trackpad IDs above. The AI creation tool requires the same native-name check for top-level Magic Mouse gestures as for trackpad gestures: `BTTTriggerTypeDescriptionReadOnly` in JSON or `expected_trigger_name` for a single trigger.
+
+<!-- BEGIN NATIVE BTTGestureMM -->
+
+#### Release Gestures
+- `46` - Release Last Finger Regardless of How Many Were Touching Before
+- `47` - Release Last Finger After Previous Touch With 1 Finger
+- `48` - Release Last Finger After Previous Touch With 2 Fingers
+- `49` - Release Last Finger After Previous Touch With 3 Fingers
+- `50` - Release Last Finger After Previous Touch With 4 Fingers
+- `51` - Release Last Finger After Previous Touch With 5 Fingers
 
 #### Single Finger Gestures
-- `52` - 1 Finger Touch Start
-- `57` - 1 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
-- `62` - 1 Finger Circle Clockwise (configurable circles via `BTTAdditionalConfiguration`, default 0.9)
-- `63` - 1 Finger Circle Counter-Clockwise (configurable circles via `BTTAdditionalConfiguration`, default 0.9)
 - `1` - 1 Finger Tap
 - `2` - 1 Finger Tap Left
 - `3` - 1 Finger Tap Right
+- `16` - TipTap Left (1 Finger Fix)
+- `17` - TipTap Right (1 Finger Fix)
 - `23` - 1 Finger Middle Click
 - `24` - 1 Finger Tap Middle
 - `32` - 1 Finger Tap Above Apple
-- `18` - Scroll Up (modifier key needed)
-- `19` - Scroll Down (modifier key needed)
 - `33` - 1 Finger Swipe Down
 - `34` - 1 Finger Swipe Up
 - `35` - 1 Finger Swipe Left
 - `36` - 1 Finger Swipe Right
+- `40` - 1 Finger Touch Top
+- `52` - 1 Finger Touch Start
+- `57` - 1 Finger Long Touch
+- `62` - 1 Finger Circle Clockwise
+- `63` - 1 Finger Circle Counter-Clockwise
 
 #### Two Finger Gestures
-- `53` - 2 Finger Touch Start
-- `58` - 2 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
 - `4` - 2 Finger Tap
-- `62` - 2 Finger Double-Tap
-- `20` - 2 Finger Click
-- `7` - 2 Finger Swipe Up
-- `8` - 2 Finger Swipe Down
 - `5` - 2 Finger Swipe Left
 - `6` - 2 Finger Swipe Right
-- `14` - Pinch In
-- `15` - Pinch Out
-- `16` - TipTap Left (1 Finger Fix)
-- `17` - TipTap Right (1 Finger Fix)
+- `7` - 2 Finger Swipe Up
+- `8` - 2 Finger Swipe Down
+- `20` - 2 Finger Click
+- `30` - TipTap Left (2 Fingers Fix)
+- `31` - TipTap Right (2 Fingers Fix)
+- `37` - TipTap Middle (2 Fingers Fix)
+- `38` - 2 Finger Touch Top
+- `41` - TipSwipe Left Finger Down (2 Fingers Fix)
+- `42` - TipSwipe Left Finger Up (2 Fingers Fix)
+- `44` - 2 Finger Double-Tap
+- `53` - 2 Finger Touch Start
+- `58` - 2 Finger Long Touch
 
 #### Three Finger Gestures
-- `54` - 3 Finger Touch Start
-- `59` - 3 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
 - `9` - 3 Finger Tap
-- `63` - 3 Finger Double-Tap
-- `21` - 3 Finger Click
-- `13` - 3 Finger Swipe Up
-- `12` - 3 Finger Swipe Down
 - `10` - 3 Finger Swipe Left
 - `11` - 3 Finger Swipe Right
-- `30` - TipTap Left (2 Fingers Fix)
-- `37` - TipTap Middle (2 Fingers Fix)
-- `31` - TipTap Right (2 Fingers Fix)
-- `60` - TipSwipe Left Finger Up
-- `61` - TipSwipe Left Finger Down
+- `12` - 3 Finger Swipe Down
+- `13` - 3 Finger Swipe Up
+- `21` - 3 Finger Click
+- `39` - 3 Finger Touch Top
+- `45` - 3 Finger Double-Tap
+- `54` - 3 Finger Touch Start
+- `59` - 3 Finger Long Touch
 
 #### Four Finger Gestures
-- `55` - 4 Finger Touch Start
-- `60` - 4 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
 - `25` - 4 Finger Click
-- `27` - 4 Finger Swipe Up
 - `26` - 4 Finger Swipe Down
+- `27` - 4 Finger Swipe Up
 - `28` - 4 Finger Swipe Left
 - `29` - 4 Finger Swipe Right
+- `55` - 4 Finger Touch Start
+- `60` - 4 Finger Long Touch
 
-#### Five Finger Gestures
+#### Five And More Finger Gestures
 - `56` - 5 Finger Touch Start
-- `61` - 5 Finger Long Touch (configurable duration via `BTTAdditionalConfiguration`, default 0.5s)
+- `61` - 5 Finger Long Touch
 
-#### Moving, Resizing and Custom Drawings
-- `40` - 1 Finger Touch Top
-- `38` - 2 Finger Touch Top
-- `39` - 3 Finger Touch Top
+#### Other Gestures
+- `14` - Pinch In
+- `15` - Pinch Out
+- `18` - Scroll Up (modifier key needed)
+- `19` - Scroll Down (modifier key needed)
+- `22` - This gesture is not available anymore
+
+<!-- END NATIVE BTTGestureMM -->
 
 ### 3. Other Triggers / Automations
 
@@ -350,18 +370,13 @@ A trigger that provides dynamic items for the BetterTouchTool Launcher. The trig
 
 The script is stored as a JSON object in the trigger's secondary action data. The script must be configured using the BetterTouchTool UI script editor.
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `BTTGestureConfig` | String | Display name of this launcher item |
-
-The trigger should have a Launcher Config with `BTTLauncherShowInLauncher` set to `1` (or `3` for always visible) so it appears in the launcher.
+The trigger's display name comes from `BTTLauncherTitle` in its `BTTTriggerLauncherConfig`. The launcher config should have `BTTLauncherShowInLauncher` set to `1` (or `3` for always visible) so the item appears in the launcher.
 
 ```json
 {
   "BTTTriggerType": 849,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
-  "BTTGestureConfig": "My Custom Items",
-  "BTTLauncherConfig": {
+  "BTTTriggerLauncherConfig": {
     "BTTLauncherShowInLauncher": 1,
     "BTTLauncherTitle": "My Custom Items"
   },
@@ -387,8 +402,8 @@ The trigger should have a Launcher Config with `BTTLauncherShowInLauncher` set t
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTAdditionalConfiguration": "file:///Applications/Safari.app/",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Safari launched!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Safari launched!" }
   }]
 }
 ```
@@ -424,8 +439,8 @@ These are simple event triggers with no configuration — just assign actions.
   "BTTTriggerType": 815,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Space changed!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Space changed!" }
   }]
 }
 ```
@@ -446,8 +461,8 @@ These are simple event triggers with no configuration — just assign actions.
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTAdditionalConfiguration": "20",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Battery below 20%!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Battery below 20%!" }
   }]
 }
 ```
@@ -466,8 +481,8 @@ These are simple event triggers with no configuration — just assign actions.
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTWifiName": "MyHomeNetwork",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Connected to home WiFi!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Connected to home WiFi!" }
   }]
 }
 ```
@@ -489,8 +504,8 @@ These are simple event triggers with no configuration — just assign actions.
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTUSBDeviceName": "YubiKey.*",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "YubiKey connected!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "YubiKey connected!" }
   }]
 }
 ```
@@ -618,8 +633,8 @@ These are configured via `BTTTriggerConfig` with Touch Bar-style properties for 
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTAdditionalConfiguration": "myVariableName",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Variable changed!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Variable changed!" }
   }]
 }
 ```
@@ -631,7 +646,7 @@ Fires when an Open Sound Control (OSC) message is received by BetterTouchTool's 
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `BTTGestureConfig` | String | OSC address filter (e.g. `/btt/fader1`). Also accepts a regular expression that must match the whole incoming address (e.g. `/btt/fader.*`). Leave empty to trigger for any incoming OSC address. |
+| `BTTAdditionalConfiguration` | String | OSC address filter (e.g. `/btt/fader1`). Also accepts a regular expression that must match the whole incoming address (e.g. `/btt/fader.*`). Leave empty to trigger for any incoming OSC address. |
 
 **Variables available when triggered:** `BTTOSCAddress`, `BTTOSCArgsJSON`, `BTTOSCArg0`, `BTTOSCArg0Type`, `BTTOSCPath0`, `BTTOSCSourceHost`, `BTTOSCReceiveCounter` (and related indexed `BTTOSCArgN` / `BTTOSCArgNType` / `BTTOSCPathN` variables).
 
@@ -639,10 +654,10 @@ Fires when an Open Sound Control (OSC) message is received by BetterTouchTool's 
 {
   "BTTTriggerType": 850,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
-  "BTTGestureConfig": "/btt/fader1",
+  "BTTAdditionalConfiguration": "/btt/fader1",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Received OSC message!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Received OSC message!" }
   }]
 }
 ```
@@ -654,8 +669,9 @@ Fires when an application icon in the macOS Dock is left-clicked. By default the
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `BTTGestureConfig` | String | File URL of a specific app to match (e.g. `file:///Applications/Safari.app/`). If omitted, the trigger uses the app from the section it is assigned to, or matches every application icon in the Dock when assigned to "All Apps". |
-| `BTTNumber1` | Number | Also pass the original click through to the Dock (0/1). Default 0 = the click is consumed and only the configured actions run. |
+| `BTTAdditionalConfiguration` | String | File URL of a specific app to match (e.g. `file:///Applications/Safari.app/`). If omitted, the trigger uses the app from the section it is assigned to, or matches every application icon in the Dock when assigned to "All Apps". |
+
+The "also pass the original click through to the Dock" option can currently only be configured via the BetterTouchTool UI, not via JSON.
 
 **Variables available when triggered:** `hovered_dock_app_name`, `hovered_dock_app_path`, `hovered_dock_app_bundleidentifier`
 
@@ -665,11 +681,44 @@ For activate/restore/minimize behavior, combine this trigger with the predefined
 {
   "BTTTriggerType": 851,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
-  "BTTGestureConfig": "file:///Applications/Safari.app/",
-  "BTTNumber1": 0,
+  "BTTAdditionalConfiguration": "file:///Applications/Safari.app/",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Safari Dock icon clicked!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Safari Dock icon clicked!" }
+  }]
+}
+```
+
+#### Mouse Hovers Dock App Icon
+- `861` - Mouse Hovers Dock App Icon (macOS 13+)
+
+Runs assigned actions once after the pointer dwells on a native Dock application icon. Shares app targeting with Left-Click Dock App Icon; folders, minimized windows and Trash are ignored. No global Settings switch is needed: enabled triggers install the event monitor.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTAdditionalConfiguration` | String | Optional app file URL. Without one, uses the app section, or all Dock app icons in the All Apps section. |
+| `BTTDelayBeforeTriggering` | Number | Hover delay in seconds, 0–3; zero triggers immediately, omitted defaults to 0.45. |
+
+**Saved variables:** `hovered_dock_app_name`, `hovered_dock_app_bundleidentifier`, and `hovered_dock_app_path` contain the app name, bundle identifier, and filesystem path captured after the hover delay, before dispatching the assigned actions. They are available to actions, scripts, and conditions; supported text fields can use placeholders such as `{hovered_dock_app_name}`. Values remain available after the pointer leaves the Dock until the next matching Dock hover/click or BetterTouchTool quits. Non-running apps supply these variables too; a missing bundle identifier is saved as an empty string. These are the same variable names used by Left-Click Dock App Icon. Before any Dock trigger saves them, they are resolved from the current pointer position.
+
+Assign **Show Window Switcher for Active App** to show the hovered app's windows beside its icon, using that action's full layout, thumbnail, filter and interaction configuration. The target is captured per invocation and retained across action-chain delays; presentation is canceled if the pointer leaves the hover session. Non-running apps can trigger other actions, but have no windows to show. **Show Window switcher for All Open Apps** retains its normal scope and positioning.
+
+Moving into the Dock switcher keeps it open; moving away dismisses it unless the action's keep-open option is enabled. Screen Recording must already be allowed for automatic switcher presentation. Matching Dock hover triggers take precedence over Focus Follows Mouse's Dock app activation.
+
+#### Razer Mouse DPI Stage Changed
+- `859` - Razer Mouse DPI Stage Changed
+
+Fires when a supported Razer mouse (Basilisk V3 family) announces a DPI change via its passive input-report channel — typically because the hardware DPI button was pressed or the on-device stage was cycled. The DPI button itself is handled entirely by the mouse's firmware and emits no normal HID event, so this trigger is the only way to react to it. No configuration properties.
+
+**Variables available when triggered:** `razer_dpi` (new horizontal DPI), `razer_dpi_stage` (1-based stage index, 0 if the value doesn't match a known stage), `razer_device` (display name of the mouse).
+
+```json
+{
+  "BTTTriggerType": 859,
+  "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
+  "BTTActionsToExecute": [{
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "DPI is now {razer_dpi}" }
   }]
 }
 ```
@@ -727,8 +776,8 @@ This off-by-one is kept for backwards compatibility with existing scripts and co
   "BTTGenericActionConfig": "/Users/me/Documents;;/Users/me/Desktop",
   "BTTFileChangeType": 8,
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "File modified!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "File modified!" }
   }]
 }
 ```
@@ -834,19 +883,19 @@ Accelerometer triggers use the built-in Bosch BMI286 IMU on Apple Silicon MacBoo
 | Property | Type | Description |
 |----------|------|-------------|
 | `BTTRepeatDelay` | Number | Threshold value in g (e.g. 0.5 means 0.5g) |
-| `BTTNumber1` | Number | Re-trigger prevention: value must change by this amount before the trigger can fire again |
 | `BTTTriggerOnDown` | Number | If 1, trigger fires on the very first accelerometer reading if threshold is already crossed |
+
+The re-trigger prevention delta (how much the value must change before the trigger can fire again) can currently only be configured via the BetterTouchTool UI, not via JSON.
 
 ```json
 {
   "BTTTriggerType": 842,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTRepeatDelay": -0.9,
-  "BTTNumber1": 0.1,
   "BTTTriggerOnDown": 0,
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Z-axis crossed -0.9g (laptop tilted!)"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Z-axis crossed -0.9g (laptop tilted!)" }
   }]
 }
 ```
@@ -864,8 +913,8 @@ Accelerometer triggers use the built-in Bosch BMI286 IMU on Apple Silicon MacBoo
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTRepeatDelay": 0.3,
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Shake detected!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Shake detected!" }
   }]
 }
 ```
@@ -880,17 +929,17 @@ These use a Short-Term Average / Long-Term Average (STA/LTA) algorithm with a hi
 | Property | Type | Description |
 |----------|------|-------------|
 | `BTTRepeatDelay` | Number | Sensitivity (1–10, default 5). Lower = more sensitive, higher = stronger impact required |
-| `BTTNumber1` | Number | Required number of taps/knocks (default 1). E.g. 3 for triple-knock. Multi-tap window is 0.4s × count |
+
+The required number of taps/knocks (e.g. 3 for triple-knock) can currently only be configured via the BetterTouchTool UI, not via JSON.
 
 ```json
 {
   "BTTTriggerType": 846,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTRepeatDelay": 5,
-  "BTTNumber1": 2,
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Double knock detected!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Double knock detected!" }
   }]
 }
 ```
@@ -906,18 +955,18 @@ Fires when the macOS energy mode changes (e.g. switching between Automatic, Low 
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `BTTGestureConfig` | String | Which power mode to trigger on: `all`, `automatic`, `low-power`, or `high-power` |
+| `BTTAdditionalConfiguration` | String | Which power mode to trigger on: `all`, `automatic`, `low-power`, or `high-power` |
 
-When `BTTGestureConfig` is set to a specific mode (e.g. `low-power`), the trigger only fires when switching to that mode. Use `all` to fire on every power mode change.
+When `BTTAdditionalConfiguration` is set to a specific mode (e.g. `low-power`), the trigger only fires when switching to that mode. Use `all` to fire on every power mode change.
 
 ```json
 {
   "BTTTriggerType": 848,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
-  "BTTGestureConfig": "low-power",
+  "BTTAdditionalConfiguration": "low-power",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Switched to Low Power mode"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Switched to Low Power mode" }
   }]
 }
 ```
@@ -929,10 +978,10 @@ Trigger plugins are custom Swift plugins that observe arbitrary system events an
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `BTTGestureConfig` | String | Plugin bundle identifier (selects which trigger plugin to use) |
+| `BTTAdditionalConfiguration` | String | Plugin bundle identifier (selects which trigger plugin to use) |
 | `BTTAdditionalData` | JSON object | Optional per-trigger plugin configuration values, keyed as `plugin_var_<fieldID>` |
 
-The plugin identifier is stored in `BTTGestureConfig` (aka `gestureConfig`). When a trigger plugin fires, any context values it provides are stored as BTT variables with the `TriggerPlugin_` prefix (e.g. context key `clipboardContent` becomes variable `TriggerPlugin_clipboardContent`).
+The plugin identifier is stored in `BTTAdditionalConfiguration` (internally `gestureConfig`). When a trigger plugin fires, any context values it provides are stored as BTT variables with the `TriggerPlugin_` prefix (e.g. context key `clipboardContent` becomes variable `TriggerPlugin_clipboardContent`).
 
 Plugin-specific configuration values (defined by the plugin's `configurationFormItems`) are stored alongside the trigger in `BTTAdditionalData` / `icondata3` with keys prefixed by `plugin_var_`. Plugin authors can use plain `formFieldID` values such as `watchPath`; BTT adds the `plugin_var_` prefix when saving and when passing values to `didReceiveNewConfigurationValues(_:)`.
 
@@ -940,13 +989,13 @@ Plugin-specific configuration values (defined by the plugin's `configurationForm
 {
   "BTTTriggerType": 837,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
-  "BTTGestureConfig": "com.example.myTriggerPlugin",
+  "BTTAdditionalConfiguration": "com.example.myTriggerPlugin",
   "BTTAdditionalData": {
     "plugin_var_watchPath": "~/Desktop"
   },
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Plugin triggered!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Plugin triggered!" }
   }]
 }
 ```
@@ -1132,14 +1181,23 @@ Drawings use trigger type `620`.
 
 ### 7. Normal Mouse
 
-**BTTTriggerClass**: `"BTTTriggerTypeMouse"`
+**BTTTriggerClass**: `"BTTTriggerTypeNormalMouse"`
 
 Normal mouse triggers use button numbers for trigger type IDs. The formula is:
 - Single click: `1000 + buttonNumber` (button 0=left, 1=right, 2=middle, 3-99=extra buttons)
 - Double click: `1100 + buttonNumber`
 - Triple click: `1200 + buttonNumber`
-- Quadruple click: `1300 + buttonNumber` (buttons 0-23 and 47-99 only — `1324`-`1346` are used by unrelated trigger types)
+- Quadruple click: `1300 + buttonNumber` (buttons 0-23 and 48-99 only — `1324`-`1347` are used by unrelated trigger types)
 - Scroll: `996`=scroll down, `997`=scroll up, `998`=scroll left, `999`=scroll right
+
+#### Mouse Device Configuration Triggers
+
+These special normal-mouse-class triggers configure a whole external mouse instead of reacting to a single button:
+
+- `1324` - Logitech Mouse Configuration (configured via BTT UI)
+- `1347` - Razer Mouse Configuration
+
+The Razer configuration row stores persistent settings for a Razer mouse (DPI stages, polling rate, wireless idle timeout, low battery threshold, lighting) and re-applies them automatically when the mouse connects or the Mac wakes. Works over USB cable, HyperSpeed dongle and direct Bluetooth (over Bluetooth, polling rate and low battery threshold are skipped - the mouse protocol does not expose them there). Settings are written to the mouse's onboard memory where supported, so they also persist without BTT. Supports one optional action category: "Action Executed After Mouse Initialization". Configured via the BTT UI; the settings are stored as a JSON object in `BTTAdditionalDataJSON` with these properties: `BTTRazerMouseName` (string, empty = all Razer mice), `BTTRazerCfgDPIStages` (string, comma separated DPI values e.g. `"400, 800, 1600"`), `BTTRazerCfgActiveStage` (number, 1-based), `BTTRazerCfgPollingRate` (number, 0 = don't manage / 125 / 500 / 1000), `BTTRazerCfgIdleTimeout` (number, seconds 60-900, 0 = don't manage), `BTTRazerCfgLowBatteryThreshold` (number, percent 5-25, 0 = don't manage), `BTTRazerCfgLightingMode` (number, -1 = don't manage, 0 = off, 1 = static, 2 = spectrum, 3 = breathing, 4 = wave), `BTTRazerCfgLightingColor` (string `"r,g,b,a"`), `BTTRazerCfgApplyBrightness` (boolean), `BTTRazerCfgLightingBrightness` (number 0-100), `BTTRazerCfgRemapSlot<N>` (string, on-device button remap for slot N; targets: `default`, `disable`, `left_click`/`right_click`/`middle_click`/`back`/`forward`, `scroll_up`/`scroll_down`, `dpi_cycle`, `f13`…`f24` to make the button send an F-key that can be recorded as a normal BTT Keyboard Shortcut, or `key:MM:KK` raw hex modifier+HID key; slots: 3 middle, 4 back, 5 forward, 9/10 scroll, 15 clutch, 52/53 wheel tilt, 96 DPI button).
 
 #### Common Mouse Buttons
 - `996` - Scroll Down
@@ -1156,6 +1214,27 @@ Normal mouse triggers use button numbers for trigger type IDs. The formula is:
 - `1101` - Right Double Click
 - `1102` - Middle Double Click
 
+#### Restricting a Mouse Button Trigger to a Logitech Model
+
+Mouse button triggers can be limited to one Logitech mouse model ("Only On Logitech Mouse Model" in the UI) by setting `BTTAdditionalConfiguration` (internally `gestureConfig`) to the exact string `"Vendor: 0xVVVV, Product: 0xPPPP"`, with 4-digit uppercase hex IDs (e.g. `"Vendor: 0x046D, Product: 0xB034"`). Such a trigger only matches button events BTT receives through its Logitech support that carry that vendor/product identity. Buttons that the mouse sends as ordinary macOS clicks don't carry it, so a restricted trigger never fires for them.
+
+Matching rules:
+- If a trigger restricted to the current device matches, it takes precedence and unrestricted triggers for the same button/click count are skipped.
+- Otherwise only unrestricted triggers (no `BTTAdditionalConfiguration`) are used. Triggers restricted to a different model are ignored and don't block a fallback.
+- The restriction is applied before the click-count fallback (e.g. quadruple → triple → double → single), so another device's double-click trigger doesn't stop a single-click trigger from firing.
+- It applies to mouse-down and mouse-up (`BTTTriggerOnDown`) triggers, long-press/hold-release triggers, simultaneous button combinations and drag-with-button gestures. For a drag, the button press that started it decides the device, including for its release actions.
+
+```json
+{
+  "BTTTriggerType": 1004,
+  "BTTTriggerClass": "BTTTriggerTypeNormalMouse",
+  "BTTAdditionalConfiguration": "Vendor: 0x046D, Product: 0xB034",
+  "BTTActionsToExecute": [{
+    "BTTPredefinedActionType": 45
+  }]
+}
+```
+
 #### Logitech Thumb Wheel Touch (Button 50)
 
 Button number `50` is reserved for the capacitive thumb wheel touch sensor of supported Logitech mice (the MX Master line - MX Master 3, 3S and 4 report the required touch capability). These triggers only fire while "Allow Thumb Wheel Touch As A Button" is enabled in that mouse's Logitech configuration. Resting a finger on the wheel then acts like holding a mouse button (so long press and drag gestures work), a quick touch is a tap:
@@ -1170,7 +1249,7 @@ While this is enabled BTT takes over the thumb wheel, so its horizontal scrollin
 ```json
 {
   "BTTTriggerType": 1004,
-  "BTTTriggerClass": "BTTTriggerTypeMouse",
+  "BTTTriggerClass": "BTTTriggerTypeNormalMouse",
   "BTTActionsToExecute": [{
     "BTTPredefinedActionType": 45
   }]
@@ -1701,9 +1780,23 @@ Menu items (773) and submenus (774) can carry child triggers (keyboard shortcut,
 
 **BTTTriggerClass**: `"BTTTriggerTypeMIDI"`
 
+The `BTTTriggerType` for MIDI triggers is `5000 + the MIKMIDI command type value`, e.g.:
+- `5143` - Note Off (0x8F)
+- `5159` - Note On (0x9F)
+- `5175` - Polyphonic Key Pressure (0xAF)
+- `5191` - Control Change (0xBF)
+- `5207` - Program Change (0xCF)
+- `5239` - Pitch Bend (0xEF)
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `BTTMidiTriggerDeviceName` | String | Device name to match, `"*"` = any device (inside `BTTTriggerConfig`) |
+
+Note: the note/controller number a MIDI trigger listens to can currently not be set via JSON - record it via the MIDI trigger configuration UI in BTT ("MIDI learn"). Learned triggers additionally round-trip the keys `BTTMidiTriggerIfVelocity`, `BTTMidiTriggerValue`, `BTTMidiActiveNotes`, `BTTMidiRepeatDelay` and `BTTMidiRepeatRate`.
+
 ```json
 {
-  "BTTTriggerType": 650,
+  "BTTTriggerType": 5159,
   "BTTTriggerClass": "BTTTriggerTypeMIDI",
   "BTTTriggerConfig": {
     "BTTMidiTriggerDeviceName": "*"
@@ -1791,8 +1884,8 @@ Advanced conditions use `BTTTriggerConditionsData` with base64 encoded predicate
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTAdditionalConfiguration": "file:///Applications/Safari.app/",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Safari launched!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Safari launched!" }
   }]
 }
 ```
@@ -1804,8 +1897,8 @@ Advanced conditions use `BTTTriggerConditionsData` with base64 encoded predicate
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTWifiName": "Office Network",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Connected to office WiFi"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Connected to office WiFi" }
   }]
 }
 ```
@@ -1836,21 +1929,24 @@ Advanced conditions use `BTTTriggerConditionsData` with base64 encoded predicate
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTAdditionalConfiguration": "{\"BTTTimedRepeatEveryXSeconds\":\"0 0 * * * *\"}",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Take a break!",
-    "BTTNotificationDetails": "You've been working for an hour"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationTitle": "Take a break!", "BTTActionSendNotificationMessage": "You've been working for an hour" }
   }]
 }
 ```
 
-### Trackpad Three Finger Swipe
+### Trackpad Three Finger Swipe Up → Mission Control
+
+This shows all windows via Mission Control. Trigger 102 is the swipe; 112 is a three-finger click. Action 5 is Mission Control; 7 is Show Spaces.
+
 ```json
 {
-  "BTTTriggerType": 112,
+  "BTTTriggerType": 102,
   "BTTTriggerClass": "BTTTriggerTypeTouchpadAll",
-  "BTTTriggerTypeDescription": "Switch to Next Desktop",
+  "BTTTriggerTypeDescriptionReadOnly": "3 Finger Swipe Up",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 2
+    "BTTPredefinedActionType": 5,
+    "BTTPredefinedActionName": "Mission Control"
   }]
 }
 ```
@@ -1863,8 +1959,8 @@ Advanced conditions use `BTTTriggerConditionsData` with base64 encoded predicate
   "BTTGenericActionConfig": "/Users/me/Downloads",
   "BTTFileChangeType": 5,
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "New file in Downloads!"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "New file in Downloads!" }
   }]
 }
 ```
@@ -1876,8 +1972,8 @@ Advanced conditions use `BTTTriggerConditionsData` with base64 encoded predicate
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTUSBDeviceName": "YubiKey.*",
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "YubiKey connected"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "YubiKey connected" }
   }]
 }
 ```
@@ -1914,8 +2010,9 @@ Actions are placed in `BTTActionsToExecute` by default (standard action category
 | `BTTActionCategoryScrollUp` | Actions on scroll up |
 | `BTTActionCategoryScrollDown` | Actions on scroll down |
 | `BTTActionCategoryButtonRelease` | Actions on button release |
-| `BTTActionCategoryQuickRelease` | Actions on quick release (short press) |
-| `BTTActionCategoryReleaseAfterLongPress` | Actions on release after long press |
+| `BTTActionCategoryButtonQuickRelease` | Actions on quick release (short press) |
+| `BTTActionCategoryButtonReleaseAfterLongPress` | Actions on release after long press |
+| `BTTActionCategoryButtonReleaseAfterDrag` | Actions once on button release after a discrete or continuous drag action has fired |
 | `BTTActionCategoryKeyRelease` | Actions on key release |
 | `BTTActionCategoryKeyQuickRelease` | Actions on quick key release |
 | `BTTActionCategoryKeyReleaseAfterLongPress` | Actions on key release after long press |
@@ -1959,17 +2056,22 @@ when the change ends, 2 = both. `BTTMenuItemValueUpdateThrottleHz` caps continuo
 | `BTTActionCategoryDragLeftContinuous` | Actions during continuous drag left |
 | `BTTActionCategoryDragRightContinuous` | Actions during continuous drag right |
 
+For single mouse button triggers, the click, quick-click, and long-hold release
+categories do not fire after a drag action. Use `BTTActionCategoryButtonReleaseAfterDrag`
+for drag completion, such as activating the selected window in a window switcher.
+It does not fire on a plain click or when movement has not triggered a drag action.
+
 ### Logitech Craft Crown Categories
 
 | JSON Key | Description |
 |----------|-------------|
-| `BTTActionCategoryLogitechCrownTouch` | Actions on Crown touch |
-| `BTTActionCategoryLogitechCrownRotateLeft` | Actions on Crown rotate left |
-| `BTTActionCategoryLogitechCrownRotateRight` | Actions on Crown rotate right |
-| `BTTActionCategoryLogitechCrownRotateLeftCont` | Continuous Crown rotate left |
-| `BTTActionCategoryLogitechCrownRotateRightCont` | Continuous Crown rotate right |
-| `BTTActionCategoryLogitechCrownClick` | Actions on Crown click |
-| `BTTActionCategoryLogitechCrownRelease` | Actions on Crown release |
+| `BTTActionCategoryCrownRotateLeftRatchet` | Crown rotate left (ratchet mode, stepwise) |
+| `BTTActionCategoryCrownRotateRightRatchet` | Crown rotate right (ratchet mode, stepwise) |
+| `BTTActionCategoryCrownRotateLeftSmooth` | Crown rotate left (smooth/continuous mode) |
+| `BTTActionCategoryCrownRotateRightSmooth` | Crown rotate right (smooth/continuous mode) |
+| `BTTActionCategoryCrownTap` | Actions on Crown tap |
+| `BTTActionCategoryCrownPressDown` | Actions on Crown press down |
+| `BTTActionCategoryCrownPressUp` | Actions on Crown press up (release) |
 
 ### Logitech Dialpad Dial Categories
 
@@ -1996,16 +2098,16 @@ dial). A dial only fires these while its mode is set to "Trigger Actions" — ot
     "BTTStreamDeckCornerRadius": 12
   },
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Button pressed"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Button pressed" }
   }],
   "BTTActionCategoryLongPress": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Long press detected"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Long press detected" }
   }],
   "BTTActionCategoryTouchRelease": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Button released"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Button released" }
   }]
 }
 ```
@@ -2018,12 +2120,12 @@ dial). A dial only fires these while its mode is set to "Trigger Actions" — ot
   "BTTShortcutKeyCode": 49,
   "BTTShortcutModifierKeys": 1048576,
   "BTTActionsToExecute": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Key pressed"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Key pressed" }
   }],
   "BTTActionCategoryKeyRelease": [{
-    "BTTPredefinedActionType": 172,
-    "BTTNotificationText": "Key released"
+    "BTTPredefinedActionType": 371,
+    "BTTAdditionalActionData": { "BTTActionSendNotificationMessage": "Key released" }
   }]
 }
 ```
@@ -2032,7 +2134,7 @@ dial). A dial only fires these while its mode is set to "Trigger Actions" — ot
 
 ## Launcher Config
 
-Any trigger can optionally include a `BTTLauncherConfig` object to control how it appears in the BetterTouchTool Launcher.
+Any trigger can optionally include a `BTTTriggerLauncherConfig` object to control how it appears in the BetterTouchTool Launcher.
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -2060,7 +2162,7 @@ The launcher also exposes the current prompt through these variables:
   "BTTTriggerType": 643,
   "BTTTriggerClass": "BTTTriggerTypeOtherTriggers",
   "BTTTriggerName": "quick_note",
-  "BTTLauncherConfig": {
+  "BTTTriggerLauncherConfig": {
     "BTTLauncherShowInLauncher": 1,
     "BTTLauncherTitle": "Quick Note",
     "BTTLauncherDetails": "Create a new note",

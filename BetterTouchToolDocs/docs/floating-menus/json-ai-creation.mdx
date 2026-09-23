@@ -46,7 +46,7 @@ You want to import a complete menu, including its size, positioning, layout, ite
 
 This is the most powerful format, and it is the format used by BetterTouchTool's floating menu AI skill when it imports a new menu.
 
-The AI assistant validates generated floating-menu JSON before importing it. The validator expands the short keys, checks the menu tree, catches misspelled or misplaced `BTTMenuConfig` properties, verifies important enum values, and reports errors with JSON paths and suggested fixes.
+The AI assistant uses `validate_btt_trigger_json` for trigger/action structure and `validate_floating_menu_json` for menu-specific checks before calling `create_new_btt_trigger_from_json`. It should inspect the exported result after creation. Validation covers known fields and structure, and does not prove that every visual or runtime behavior is correct. The validator expands the short keys, checks the menu tree, catches misspelled or misplaced `BTTMenuConfig` properties, verifies important enum values, and reports errors with JSON paths and suggested fixes.
 
 ### Use a Swift plugin widget when
 
@@ -87,7 +87,7 @@ The most important fields for a full import are:
 ]
 ```
 
-UUIDs are optional. If you omit `BTTUUID` and `BTTTriggerParentUUID`, BetterTouchTool generates and links them during import.
+UUIDs are optional for new menus. Omit `BTTUUID` to let BetterTouchTool generate it. Place child items inside `BTTMenuItems` so the importer links them to their parent; `BTTTriggerParentUUID` is not the property used for that nesting.
 
 ### Short Keys
 

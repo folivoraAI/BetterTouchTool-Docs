@@ -20,15 +20,13 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 [
   {
     "©TriggerType": 767,
-    "©TriggerTypeDescriptionReadOnly": "Floating Menu",
     "©TriggerClass": "©TriggerTypeFloatingMenu",
-    "©UUID": "unique-uuid-here",
     "©Enabled": 1,
     "©TriggerName": "Floating Menu: Menu Name",
     "$Name": "Menu Name",
-    "$Config": { /* menu configuration */ },
-    "§s": [ /* array of menu items */ ],
-    "$Availability": 0  /* 0=everywhere, 1=mac, 2=ios */
+    "$Config": {},
+    "§s": [],
+    "$Availability": 0
   }
 ]
 ```
@@ -216,6 +214,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `$AttributedTextDark`: Dark mode RTF text
 - `§Text`: Plain text/HTML (for webviews)
 - `$ElementIdentifier`: Scripting identifier
+- Item text supports variables in curly braces; `{item_identifier}` resolves to the item's `$ElementIdentifier` (standard items, submenus & back buttons only — sliders, knobs & widgets render text as-is). New items use it as default text so renaming the identifier updates the displayed text
 - `$ElementTooltip`: Tooltip text
 - `§ShowIdentifierAsTooltip`: 1=identifier, 2=tooltip
 - `$TextMinimumScaleFactor`: Min scale 0-1
@@ -261,6 +260,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `§ImageOffsetX`/`Y`: Image offset
 - `§ImagePadding`: Image padding
 - Dark mode variants with `Dark` suffix (`§IconTypeDark`, `§IconPositionDark`, `§ImageDark`, `§IconPresetPathDark`, `§ResizeImageDark`, `§ImageChangeColorDark`, `§ImageWidthDark`, `§ImageHeightDark`, `§ImageOffsetXDark`/`YDark`, `§ImagePaddingDark`)
+- `$AutomaticallyOptimizeImages` (menu property, set in the `$Config` of a menu, `©TriggerType` 767): 1 = bitmap icons are drawn from compressed copies scaled to their displayed size (Retina included) instead of the full-resolution source, and a standalone menu export carries those smaller copies (embedded as `§Image*` with `§IconType*` 1, replacing the preset path). Only affects `§IconType*` 1 (data), 3 (file) and 7 (presetFile); SF symbols, colors and gradients are untouched, and the original images stay in the local configuration so the icons can be enlarged again later. Every item of the menu inherits the value; a nested menu (767) may override it with its own 0/1. The key is ignored on items (773, 774, ...). Default 0. Exports and the runtime copy repeat the resolved value in each item's `$Config` as a JSON boolean; `true`/`false` and `1`/`0` are both accepted on import
 
 #### SF Symbols
 - `§SFSymbolName`: Symbol name
@@ -272,7 +272,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 
 #### WebView Properties
 - `§WebViewPlain`: 1 for plain HTML
-- `§UserAgent`: Custom user agent
+- `§UserAgent`: Custom user agent string. Omitted or empty = a Safari user agent matching the installed Safari version (falls back to Safari 18.3 if Safari's version can't be read)
 - `§UserScript`: Script on load
 - `§UserScriptOnvisible`: Script on visible
 - `§WebViewFocusTextField`: 1 to auto-focus
@@ -339,6 +339,7 @@ A floating menu JSON is an array containing menu objects. Each menu can contain 
 - `$WidgetTrackpadEdgeScroll`: 1 to enable edge scroll
 - `$WidgetTrackpadEdgeRightClick`: 1 to enable edge right-click
 - `$WidgetTrackpadTwoFingerScroll`: 1 to enable two-finger scroll
+- `$WidgetTrackpadInvertScroll`: 1 to invert the scrolling direction sent to the Mac (two-finger and edge scrolling only; three-finger swipes are unaffected). Default 0
 - `$WidgetTrackpadTwoFingerRightClick`: 1 to enable two-finger right-click
 - `$WidgetTrackpadThreeFingerMiddleClick`: 1 to enable three-finger middle-click
 - `$WidgetTrackpadInertialCursor`: 1 to enable inertial cursor
@@ -404,12 +405,18 @@ restarts; knob values are.
 
 ## Actions (`§Actions`)
 ```json
-"§Actions": [{
+{
+  "©TriggerType": 773,
+  "©TriggerClass": "©TriggerTypeFloatingMenu",
+  "$Name": "Mission Control",
+  "$Config": {},
+  "§Actions": [{
   "©PredefinedActionType": 5,
   "©PredefinedActionName": "Mission Control",
   "©Enabled": 1,
   "©Order": 0
-}]
+  }]
+}
 ```
 
 ## Item Triggers (`§Triggers`)
@@ -420,14 +427,21 @@ Standard items (773) and submenu items (774) can have triggers (keyboard shortcu
 - `©PredefinedActionType` 603 ("Trigger Specific Floating Menu Item"): with no further config the trigger executes its parent item's assigned actions. Any other action can be assigned instead.
 
 ```json
-"§Triggers": [{
+{
+  "©TriggerType": 773,
+  "©TriggerClass": "©TriggerTypeFloatingMenu",
+  "$Name": "Keyboard Item",
+  "$Config": {},
+  "§Triggers": [{
+  "©TriggerType": 0,
   "©TriggerClass": "©TriggerTypeKeyboardShortcut",
   "©ActionCategory": 50,
   "©MenuTriggerScope": 0,
   "©ShortcutKeyCode": 11,
   "©ShortcutModifierKeys": 0,
   "©PredefinedActionType": 603
-}]
+  }]
+}
 ```
 
 Menus (767) can also carry such trigger children themselves (any supported trigger type): a trigger with `©ActionCategory` 50, `©MenuTriggerScope` 8 and `©PredefinedActionType` 388 (Toggle Floating Menu; 386 = Show, 387 = Hide) whose action config contains `{"BTTMenuActionMenuID": "<menu uuid>"}` acts as a global shortcut that shows/hides the menu. The Hide action (387) additionally accepts `"BTTMenuActionReleaseFromMemory": 1` in that config: the targeted menu is then closed and its content (including cached web views) released from memory instead of just hidden — same behavior as `$CloseButtonReleasesMemory`, and it likewise overrides `$KeepCached`.
@@ -463,7 +477,7 @@ Properties listed below can be **omitted** from `$Config` when their value match
 `$WidgetNowPlayingHideCover`, `$WidgetNowPlayingHideWhenNoPlayer`, `$WidgetNowPlayingHideWhenPaused`,
 `$WidgetWeatherLayout`, `$WidgetWeatherUnit`, `$WidgetWeatherHideWhenNoData`,
 `§HardwarePlacement`, `§MacroPadNavigation`, `§KnobMode`, `§KnobHideValue`, `§RepeatRate`,
-`$CloseButtonReleasesMemory`
+`$CloseButtonReleasesMemory`, `$AutomaticallyOptimizeImages`
 
 ### Defaults = 1
 `$TextMinimumScaleFactor`, `$OpacityActive`, `$OpacityInactive`,
@@ -491,6 +505,7 @@ Properties listed below can be **omitted** from `$Config` when their value match
 ```json
 [{
   "©TriggerType": 767,
+  "©TriggerClass": "©TriggerTypeFloatingMenu",
   "©UUID": "menu-uuid",
   "©Enabled": 1,
   "$Name": "Example Menu",
@@ -511,7 +526,7 @@ Properties listed below can be **omitted** from `$Config` when their value match
   },
   "§s": [{
     "©TriggerType": 773,
-    "©TriggerParentUUID": "menu-uuid",
+    "©TriggerClass": "©TriggerTypeFloatingMenu",
     "©UUID": "item-uuid",
     "©Enabled": 1,
     "$Name": "Click Me",
@@ -544,5 +559,12 @@ Colors use "R, G, B, A" format (0-255): "255, 0, 0, 255" = opaque red
 
 ## Import Method
 ```javascript
-ai.create_bettertouchtool_trigger(json: theJSONAsString)
+await ai.validate_btt_trigger_json({ trigger_json: theJSONAsString });
+await ai.validate_floating_menu_json({ menu_json: theJSONAsString });
 ```
+Inspect both reports, fix validation errors and review warnings. Then import in a separate tool call:
+```javascript
+await ai.create_new_btt_trigger_from_json({ trigger_json: theJSONAsString });
+```
+
+For native Swift widgets, use `retrieve_floating_menu_widget_plugin_reference` and `compile_swift_plugin` to prepare the plugin, then reference its installed identifier with `$WidgetCustomPluginID` on an item of type `835`. The trigger creation tool accepts trigger/action objects; it does not install plugin sources from a preset wrapper.

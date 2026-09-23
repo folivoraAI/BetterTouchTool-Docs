@@ -38,7 +38,7 @@ Launcher plugins appear in the Launcher's **Launcher Plugins** section. For the 
 | Method | Description |
 |---|---|
 | `configurationFormItems() -> BTTPluginFormItem?` | Return configuration form items for the BTT sidebar |
-| `didReceiveNewConfigurationValues(_:)` | Called when BetterTouchTool updates the plugin configuration |
+| `didReceiveNewConfigurationValues(_:)` | Receives `[AnyHashable: Any]?` when BetterTouchTool updates the plugin configuration |
 
 ### Main Launcher Methods
 
@@ -54,7 +54,7 @@ Launcher plugins appear in the Launcher's **Launcher Plugins** section. For the 
 
 A useful launcher plugin usually implements `launcherResults(for:)` plus either `performAction(...)`, `launcherSurface(...)`, or both.
 
-If your plugin needs to call a command line tool, web API, database, or other potentially slow provider, implement `loadLauncherResults(for:completion:)` instead of blocking inside `launcherResults(for:)`. BetterTouchTool prefers the async method when available and falls back to the synchronous method for older or simpler plugins.
+If your plugin needs to call a command line tool, web API, database, or other potentially slow provider, implement `loadLauncherResults(for:completion:)` instead of blocking inside `launcherResults(for:)`. BetterTouchTool uses the async method when it is implemented; the synchronous method is used only when the async method is absent. Completing with `nil` does not invoke the synchronous method.
 
 ## Context: `BTTLauncherPluginContext`
 
@@ -63,7 +63,7 @@ The launcher passes contextual information through `BTTLauncherPluginContext`:
 | Property | Description |
 |---|---|
 | `launcherID` | Identifier of the active launcher instance |
-| `query` | Current search string |
+| `query` | Full current search string, including any leading keyword |
 | `frontmostBundleIdentifier` | Bundle identifier of the frontmost app |
 | `finderURLs` | Current Finder selection URLs when available |
 | `finderSelection` | Whether Finder currently has a selection |
@@ -71,6 +71,16 @@ The launcher passes contextual information through `BTTLauncherPluginContext`:
 | `launcherPluginInstance` | Saved plugin instance currently being rendered, acted on, or opened, when applicable |
 
 Use `query` for result filtering, `frontmostBundleIdentifier` for app-aware rows, the Finder fields when building file-sensitive actions, and `launcherPluginInstance` when handling a saved item created by the plugin.
+
+### Query Keywords And Arguments
+
+`context.query` always contains the full input. For an item that accepts arguments, call the optional delegate method `launcherQueryInput(pluginIdentifier:itemIdentifier:query:keywords:launcherID:)` with the plugin identifier, that result's stable item identifier, the full query, the item's searchable terms (including its title), and `context.launcherID`. The host merges the user's custom keywords and launcher-specific overrides for that item.
+
+The returned dictionary contains `query` (unchanged), `matchedKeyword` (empty when none matched), and `argument` (the trimmed input after the longest leading match). A keyword `g` turns `g cats` into `cats`; multiword keywords match as a whole, and symbol keywords such as `>` also accept `>cats`. A keyword alone produces an empty argument. If nothing matches, `argument` contains the full trimmed query.
+
+Use the same helper and item identity when rendering previews and performing actions. A single callback can return several items with different keywords, so there is no one argument value on the shared context. Do not read the activation-time `BTTLauncherPromptInputWithoutKeyword` variable for previews or remove the first word unconditionally.
+
+The method is optional: use an optional call and provide a fallback for BTT versions without it. A fallback can preserve the full trimmed input or parse only the plugin's own known search terms; it cannot discover custom launcher keywords through this API on an older host. If source must also compile against an older BTT header that does not declare the method, use the availability bridge shown in the [Quick Links sample](https://github.com/folivoraAI/BetterTouchToolPlugins/blob/master/plugins/official/launcher-quick-links/QuickLinkLauncherPlugin.swift).
 
 ## Result Model: `BTTLauncherPluginResult`
 
@@ -134,7 +144,7 @@ The [Quick Links sample](https://github.com/folivoraAI/BetterTouchToolPlugins/bl
 | `configuration` | Property-list-safe per-instance values |
 | `isEnabled` | Whether the saved instance should appear |
 
-Only store property-list-safe values in `configuration`: strings, numbers, booleans, dates, data, arrays, and dictionaries.
+Only store property-list-safe values in `configuration`: strings, numbers, booleans, dates, data, arrays, and dictionaries. This is a plugin-owned `[String: Any]` dictionary, separate from per-launcher plugin form settings. The form callback receives merged defaults and saved values under both plain and `plugin_var_` keys.
 
 ### Instance Display Modes
 
@@ -160,7 +170,7 @@ Useful values:
 | `saveLauncherPluginInstance(_:pluginIdentifier:launcherID:)` | Create or update an instance |
 | `deleteLauncherPluginInstance(_:pluginIdentifier:launcherID:)` | Delete an instance by ID |
 
-Saving or deleting an instance asks the launcher to refresh results. Calling `requestLauncherResultsRefresh()` after larger changes is still fine.
+Saving returns the persisted instance, including an assigned identifier when one was missing. Keep that identifier when editing; saving a fresh unidentified object creates a new item. Saving or deleting an instance asks the launcher to refresh results. Calling `requestLauncherResultsRefresh()` after larger changes is still fine.
 
 ### Rendering Saved Instances
 
@@ -172,8 +182,9 @@ func launcherResult(
     context: BTTLauncherPluginContext
 ) -> BTTLauncherPluginResult? {
     let result = BTTLauncherPluginResult()
-    let instanceID = instance.instanceIdentifier ?? UUID().uuidString
-    result.itemIdentifier = "instance:\(instanceID)"
+    if let instanceID = instance.instanceIdentifier {
+        result.itemIdentifier = "instance:\(instanceID)"
+    }
     result.title = instance.title
     result.subtitle = instance.subtitle
     result.systemImageName = instance.systemImageName ?? "link"
@@ -182,7 +193,7 @@ func launcherResult(
 }
 ```
 
-If a plugin does not implement this method, BTT creates a default result from the instance fields.
+If the method is absent or returns `nil`, BTT creates a default result from the instance fields. Returning `nil` does not hide the saved item; disable it with `isEnabled` when appropriate. Do not create a UUID while rendering. BTT can fill the item identifier from the saved instance if the result leaves it unset.
 
 Saved instance results inherit `instance.launcherDisplayMode` unless `launcherResult(for:context:)` explicitly sets `result.launcherDisplayMode`.
 
@@ -209,16 +220,17 @@ instance.subtitle = urlTemplate
 instance.systemImageName = "link"
 instance.primaryActionIdentifier = "open"
 instance.configuration = [
-    "urlTemplate": urlTemplate,
-    "openWithBundleIdentifier": selectedBundleID
+    "urlTemplate": urlTemplate
 ]
 
-delegate?.saveLauncherPluginInstance(
+if let savedInstance = delegate?.saveLauncherPluginInstance(
     instance,
     pluginIdentifier: "com.example.quicklink",
     launcherID: context.launcherID
-)
-delegate?.requestLauncherSurfaceGoBack()
+) {
+    instance.instanceIdentifier = savedInstance.instanceIdentifier
+    delegate?.requestLauncherSurfaceGoBack()
+}
 ```
 
 When a saved item action, command, child loader, or surface runs, BTT sets `context.launcherPluginInstance`:
@@ -235,10 +247,24 @@ func performAction(
         return nil
     }
 
-    // Resolve placeholders and open the configured URL.
+    let query = context.query ?? ""
+    let keywords = (instance.keywords ?? []) + [instance.title ?? ""]
+    let input = delegate?.launcherQueryInput?(
+        pluginIdentifier: "com.example.quicklink",
+        itemIdentifier: itemIdentifier,
+        query: query,
+        keywords: keywords,
+        launcherID: context.launcherID
+    )
+    let argument = input?["argument"] ?? query.trimmingCharacters(in: .whitespacesAndNewlines)
+    let resolved = delegate?.replaceVariables(in: urlTemplate,
+        extraVariables: ["argument": argument, "query": query]) ?? urlTemplate
+    guard let url = URL(string: resolved), let scheme = url.scheme,
+          ["https", "http"].contains(scheme.lowercased()) else { return nil }
     let result = BTTLauncherPluginActionResult()
-    result.success = true
-    result.closeLauncher = true
+    result.success = NSWorkspace.shared.open(url)
+    result.closeLauncher = result.success
+    result.message = result.success ? "Open request accepted." : "Could not open the URL."
     return result
 }
 ```
@@ -265,6 +291,8 @@ func loadLauncherResults(
     }
 }
 ```
+
+The host calls these methods on the main thread. Move slow work to a background queue and deliver results on the main thread. BTT currently waits up to 20 seconds for top-level results and 60 seconds for children; a timeout does not cancel your underlying task. Manage cancellation and stale-query results in the plugin.
 
 Call the completion handler exactly once. Return `nil` or an empty array when the plugin has no results for the current query. If you also implement `launcherResults(for:)`, BetterTouchTool uses it as a compatibility fallback when the async method is not available.
 
@@ -345,7 +373,7 @@ For most launcher-native workflows, it is better to keep `closeLauncher = false`
 
 ## Launcher Surfaces
 
-Use a surface when the plugin should show richer native UI inside the launcher. For SwiftUI surfaces, return an `NSHostingView` from `makeLauncherSurfaceView()`.
+Use a surface when the plugin should show richer native UI inside the launcher. For SwiftUI surfaces, return an `NSHostingView` from `makeLauncherSurfaceView()`. Use the [compatible `State` property-wrapper alias](/docs/plugins/swift-source-plugins#swiftui-state-with-command-line-tools) when the view needs local state and must compile with standalone Command Line Tools.
 
 ### Surface Methods
 
@@ -356,7 +384,7 @@ Use a surface when the plugin should show richer native UI inside the launcher. 
 | `launcherSurfaceWillDisappear()` | Called before the surface disappears |
 | `launcherSurfaceQueryDidChange(_:)` | Called when the launcher query changes while the surface is visible |
 | `handleLauncherInputCommand(_:)` | Optionally handle launcher navigation or activation commands |
-| `launcherSurfaceShouldBypassGlobalKeyboardHandlingForEvent(_:)` | Return `true` only when the surface must consume raw key events itself |
+| `launcherSurfaceShouldBypassGlobalKeyboardHandling(for:)` | Return `true` only when the surface must consume raw key events itself |
 | `launcherSurfacePlaceholderText()` | Placeholder text for the search field while the surface is active |
 | `launcherSurfaceFooterHint()` | Footer help text |
 | `launcherSurfaceStatusText()` | Status line text |
@@ -364,7 +392,7 @@ Use a surface when the plugin should show richer native UI inside the launcher. 
 | `launcherSurfaceMinimumContentSize()` | Minimum launcher content size |
 | `launcherSurfaceKeepsLauncherPinned()` | Request outside-click pinning while the surface is visible |
 
-When the pinned state changes while the surface is visible, call `delegate?.requestLauncherSurfaceUpdate()`.
+When size, placeholder, footer, status or pinning changes, call `delegate?.requestLauncherSurfaceUpdate()`. This refreshes the surface chrome and layout; it does not call `makeLauncherSurfaceView()` again. Update the retained view or observable model for content changes, and clean up timers or observers in `launcherSurfaceWillDisappear()`.
 
 If you implement `handleLauncherInputCommand(_:)`, return `nil` when the launcher should keep handling the command normally.
 
@@ -378,6 +406,7 @@ The `delegate` property (type `BTTLauncherPluginDelegate`) provides:
 | `getVariable(_:)` | Read a BTT variable |
 | `executeNamedTrigger(_:)` | Execute a named BTT trigger |
 | `requestLauncherResultsRefresh()` | Ask the launcher to rebuild the plugin's results |
+| `launcherQueryInput(pluginIdentifier:itemIdentifier:query:keywords:launcherID:)` | Optional: resolve the full query, matching keyword and argument for one result, including custom launcher keywords |
 | `replaceVariables(in:extraVariables:)` | Resolve BTT placeholders in a string, optionally adding plugin-specific variables |
 | `launcherGroups(launcherID:)` | Return existing launcher groups as dictionaries for building plugin UI pickers |
 | `launcherPluginInstances(forPluginIdentifier:launcherID:)` | Read saved instances |
@@ -393,6 +422,8 @@ let resolved = delegate?.replaceVariables(
 )
 ```
 
+Variable replacement expands text; it does not URL-encode query parameters or evaluate expressions. Build encoded URLs with `URLComponents` and `URLQueryItem` when inserting arbitrary query text.
+
 Use `launcherGroups(launcherID:)` when a configuration surface wants to show a group picker. Each dictionary contains `id`, `title`, `systemImageName`, and `isUserCreated`. Save the selected `id` or title into `BTTLauncherPluginInstance.launcherGroup`, or set it directly on `BTTLauncherPluginResult.launcherGroup`.
 
 Inside a launcher surface, the delegate also conforms to `BTTLauncherPluginSurfaceDelegate`:
@@ -407,6 +438,7 @@ Inside a launcher surface, the delegate also conforms to `BTTLauncherPluginSurfa
 
 ```swift
 // BTT-Plugin-Name: Demo Launcher Plugin
+// BTT-Plugin-Identifier: com.example.demolauncherplugin
 // BTT-Plugin-Type: Launcher
 // BTT-Plugin-Icon: sparkles.rectangle.stack
 

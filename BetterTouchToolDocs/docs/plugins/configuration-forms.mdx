@@ -30,24 +30,26 @@ static func configurationFormItems() -> BTTPluginFormItem? {
 
 ## Receiving Configuration Values
 
-When BTT loads the plugin and when the user changes a form field value, BTT calls `didReceiveNewConfigurationValues(_:)` on your plugin. Use plain field IDs in the form definition; values arrive with a `plugin_var_` prefix on the `formFieldID`:
+Use plain field IDs in Swift form definitions, for example `labelText`. BTT stores and delivers the value under `plugin_var_labelText`. Already-prefixed IDs are also supported. A two-field item needs distinct `formFieldID` and `formFieldID2` values; both receive the same prefix normalization.
+
+The callback differs by plugin type. Floating-menu widgets, Launcher plugins and trigger plugins use `[AnyHashable: Any]?`; Stream Deck and Touch Bar use `[AnyHashable: Any]`. Action plugins receive `[AnyHashable: Any]?` in `executeAction(withConfiguration:completionBlock:)`. See [Callback Signatures](/docs/plugins/swift-source-plugins#callback-signatures) for the complete table.
+
+This fragment belongs inside a floating-menu widget that retains an `NSTextField` named `label`:
 
 ```swift
-func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]?) {
-    if let text = configurationValues?["plugin_var_labelText"] as? String {
-        labelText = text
-    }
-    if let size = configurationValues?["plugin_var_fontSize"] as? Double {
-        fontSize = size
-    }
-    // Request a UI refresh (for widget plugins)
+func didReceiveNewConfigurationValues(_ configurationValues: [AnyHashable: Any]?) {
+    label.stringValue = configurationValues?["plugin_var_labelText"] as? String ?? "Hello!"
+    let size = configurationValues?["plugin_var_fontSize"] as? Double ?? 24
+    label.font = .systemFont(ofSize: CGFloat(size))
     delegate?.requestWidgetUpdate(self)
 }
 ```
 
-For example, `formFieldID = "labelText"` arrives as `configurationValues["plugin_var_labelText"]`. Including the `plugin_var_` prefix manually is supported, but not required.
+Update your retained view or observable model when configuration changes. A widget update request does not promise that BTT will call `makeWidgetView()` again. Perform UI changes on the main thread. The [greeting widget example](/docs/plugins/floating-menu-widget#configuration-forms) shows the complete pattern.
 
-For [JSON Action Plugins](/docs/plugins/json-action-plugins), form values are referenced with `@@@fieldID@@@` placeholders instead of the `plugin_var_` prefix.
+Launcher plugin settings are scoped to a plugin and launcher ID. Its callback receives merged form defaults and saved values with both plain and `plugin_var_` keys. A saved Launcher item's `instance.configuration` is a separate, plugin-owned `[String: Any]` dictionary; it does not automatically gain form prefixes.
+
+[JSON Action Plugins](/docs/plugins/json-action-plugins) use a smaller, flat form loader and `@@@fieldID@@@` action placeholders. The Swift constants and properties below are not an exhaustive list of supported JSON fields; use the JSON plugin page for that format.
 
 ## Form Field Types
 
@@ -86,7 +88,7 @@ For [JSON Action Plugins](/docs/plugins/json-action-plugins), form values are re
 | `formLabel1` | `String` | Primary label displayed next to the field |
 | `formLabel2` | `String` | Secondary label |
 | `formOption` | `Any` | Option value (used for popup button options) |
-| `defaultValue` | `Any` | Default value for the field |
+| `defaultValue` | `Any` | Initial editor value; do not assume it is a runtime fallback for every plugin type |
 | `dataType` | `BTTFormData*` | Data type hint |
 | `minValue` | `NSNumber` | Minimum value (for sliders) |
 | `maxValue` | `NSNumber` | Maximum value (for sliders) |

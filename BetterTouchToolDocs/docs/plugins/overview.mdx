@@ -23,6 +23,10 @@ BetterTouchTool supports six types of plugins:
 
 There is also a no-code option: [JSON Action Plugins](/docs/plugins/json-action-plugins) let you package reusable action sequences as a single JSON file with configurable form fields - no compilation required.
 
+## Creating Plugins With AI
+
+Use BTT’s **Plugin Creator / Editor** skills and the reference tool for your plugin type. Follow the [AI authoring workflow](/docs/plugins/ai-authoring) to validate configuration, compile Swift examples, and verify the resulting plugin.
+
 ## Two Development Approaches
 
 ### 1. Swift Source Plugins (Recommended for most use cases)
@@ -67,7 +71,7 @@ Plugins are managed through the BTT Plugin Manager, accessible from the BTT menu
 
 ## BTT Variables
 
-All plugin types can read and write BTT variables through their delegate:
+All six Swift plugin types can read and write BTT variables through their delegate:
 
 ```swift
 // Set a variable (accessible as {variable_name} throughout BTT)

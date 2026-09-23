@@ -24,6 +24,26 @@ In the screenshot above you see an example that begins by asking the user for in
 This is followed by an if condition that checks whether the var1 variable is 1 and does execute a "Show HUD" action if that's the case.
 This is followed by another if that executes different actions depending on whether the var1 variable is equal to 0 or not.
 
+## Repeat actions after accumulating movement
+
+**Only Continue After Accumulating Movement / Value** lets a continuous gesture repeat a discrete action or keyboard shortcut once per distance travelled. Find it under **Action Sequence Flow Control** and place it before the actions you want to repeat, in the same continuous action category.
+
+For example, add the following under a trackpad gesture's **Swipe Right (Continuous)** category:
+
+1. **Only Continue After Accumulating Movement / Value**, with **Movement / Value Threshold** set to **5**.
+2. A keyboard shortcut that selects the next tab.
+
+The following actions run once for each threshold crossed. For continuous swipes and edge slides, **5** means 5% of the trackpad's width or height after activation. Pinch uses magnification percentage points, rotation uses degrees, and mouse drags use pixels; other value-producing triggers use their own change units. Unlike **Debounce**, this measures movement rather than elapsed time.
+
+Partial movement is retained: with a threshold of 5, movements of 3 then 4 run the following sequence once and leave 2 toward the next execution. One larger update can run the sequence multiple times. There is a limit of 32 executions per input update; extra whole steps are skipped and the fractional remainder is kept.
+
+**Reset Partial Movement When Direction Reverses** is enabled by default. It is useful in **While Moving**, where one action receives both directions. New continuous trackpad gestures also reset the remainder, as does returning to a directional swipe category after reversing. Mouse drags can keep partial movement across separate drags and pauses.
+
+Use separate threshold actions in opposite directional categories when you want different shortcuts in each direction. An execution below the threshold stops that sequence; it does not leave it waiting in the background. Without a numeric trigger value, the actions after this gate do not run.
+
+![Debounce](../../static/media/control-flow2026-09-22T20:42:34.710Z.png)
+For complete setups, see [Fluid / Continuous Gestures](/docs/trackpad-mouse/continuous-gestures) and [Continuous Mouse Drags](/docs/normal-mouse/continuous-drags). If the action already has a numeric field you can drive directly, use an [Action Value Binding](/docs/actions/value-bindings) instead.
+
 ## Wait For Condition To Become True
 
 This is a helpful action if you want to wait for something before triggering other actions.

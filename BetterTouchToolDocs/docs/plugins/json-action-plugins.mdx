@@ -24,9 +24,12 @@ A `.bttjsonplugin` file is a JSON file with three top-level sections:
 
 ```json
 {
-  "BTTPluginMetadata": { ... },
-  "BTTPluginFormFields": [ ... ],
-  "BTTPluginActions": [ ... ]
+  "BTTPluginMetadata": {
+    "BTTPluginName": "Example",
+    "BTTPluginIdentifier": "com.example.plugin"
+  },
+  "BTTPluginFormFields": [],
+  "BTTPluginActions": []
 }
 ```
 
@@ -43,7 +46,7 @@ Describes the plugin in the action selector and plugin manager.
 | `BTTPluginVersion` | String | No | Version string (e.g. `1.0`) |
 
 ```json
-"BTTPluginMetadata": {
+{
   "BTTPluginName": "My Custom Action",
   "BTTPluginIdentifier": "com.example.myCustomAction",
   "BTTPluginDescription": "Does something useful",
@@ -59,10 +62,11 @@ An array of form field definitions. These create the configuration UI that appea
 | Key | Type | Required | Description |
 |---|---|---|---|
 | `formFieldType` | String | Yes | The form field type (see table below) |
-| `formFieldID` | String | Yes | Unique ID for this field. Used as the placeholder name: `@@@fieldID@@@` |
+| `formFieldID` | String | For value fields | Unique plain ID for this field. Used as the placeholder name: `@@@fieldID@@@` |
+| `formFieldID2` | String | For two-field items | Distinct ID for the second input of `BTTFormTypeTwoTextFields` |
 | `formLabel1` | String | No | Primary label displayed next to the field |
 | `formLabel2` | String | No | Secondary label |
-| `defaultValue` | Any | No | Default value for the field |
+| `defaultValue` | Any | No | Initial editor value; not an execution-time fallback for missing saved values |
 | `dataType` | Number | No | `1` = String, `2` = Number, `3` = JSON, `5` = Icon, `6` = Data |
 | `minValue` | Number | No | Minimum value (for sliders) |
 | `maxValue` | Number | No | Maximum value (for sliders) |
@@ -73,7 +77,7 @@ An array of form field definitions. These create the configuration UI that appea
 | Type | Description |
 |---|---|
 | `BTTFormTypeTextField` | Single-line text input |
-| `BTTFormTypeTwoTextFields` | Two text fields side by side |
+| `BTTFormTypeTwoTextFields` | Two text fields side by side, bound to `formFieldID` and `formFieldID2` |
 | `BTTFormTypeTextArea` | Multi-line text input |
 | `BTTFormTypeCheckbox` | Boolean toggle |
 | `BTTFormTypeSlider` | Numeric slider (set `minValue`, `maxValue`, `dataType` to `2`) |
@@ -82,7 +86,10 @@ An array of form field definitions. These create the configuration UI that appea
 | `BTTFormTypeImagePicker` | Image picker (value is Base64 encoded) |
 | `BTTFormTypeSeparator` | Visual separator line (no value) |
 | `BTTFormTypeDescription` | Static description text (use `formLabel1` for content) |
-| `BTTFormTypeTitleField` | Title/header text (use `formLabel1` for content) |
+
+The JSON loader supports the fields and types listed here. It loads flat fields and popup options; it does not recursively decode the nested form groups available to Swift plugins. Use `BTTFormTypeDescription` for static text.
+
+Use plain IDs such as `title`. Saved action configuration uses `plugin_var_title`; the placeholder remains `@@@title@@@`. Both inputs of a two-field item use the same prefix normalization.
 
 #### Popup Button Options
 
@@ -106,12 +113,11 @@ For `BTTFormTypePopupButton`, provide an array of option objects:
 
 An array of BTT action dictionaries - the same JSON format used when exporting triggers/actions from BTT. These actions are executed in sequence when the plugin is triggered.
 
-Use `@@@fieldID@@@` placeholders anywhere in the action JSON. At execution time, each placeholder is replaced with the corresponding form field value (properly JSON-escaped).
+Use `@@@fieldID@@@` placeholders inside JSON string values. BTT substitutes JSON-escaped text from the saved configuration at execution time. This example is the value of `BTTPluginActions`, assuming form fields named `hudTitle` and `duration`:
 
 ```json
-"BTTPluginActions": [
+[
   {
-    "BTTIsPureAction": true,
     "BTTPredefinedActionType": 254,
     "BTTAdditionalActionData": {
       "BTTActionHUDTitle": "@@@hudTitle@@@",
@@ -131,14 +137,14 @@ The easiest way to get the correct action JSON is to:
 
 ## Complete Example
 
-This plugin shows a configurable macOS notification:
+This plugin shows a configurable BTT HUD message:
 
 ```json
 {
   "BTTPluginMetadata": {
-    "BTTPluginName": "Show Notification",
+    "BTTPluginName": "Show HUD Message",
     "BTTPluginIdentifier": "com.example.showNotification",
-    "BTTPluginDescription": "Shows a macOS notification with a custom title and message",
+    "BTTPluginDescription": "Shows a BTT HUD with a custom title and message",
     "BTTPluginIcon": "bell.fill",
     "BTTPluginVersion": "1.0"
   },
@@ -146,21 +152,20 @@ This plugin shows a configurable macOS notification:
     {
       "formFieldType": "BTTFormTypeTextField",
       "formFieldID": "notifTitle",
-      "formLabel1": "Notification Title:",
+      "formLabel1": "HUD Title:",
       "defaultValue": "Hello",
       "dataType": 1
     },
     {
       "formFieldType": "BTTFormTypeTextField",
       "formFieldID": "notifMessage",
-      "formLabel1": "Notification Message:",
+      "formLabel1": "HUD Message:",
       "defaultValue": "World",
       "dataType": 1
     }
   ],
   "BTTPluginActions": [
     {
-      "BTTIsPureAction": true,
       "BTTPredefinedActionType": 254,
       "BTTAdditionalActionData": {
         "BTTActionHUDTitle": "@@@notifTitle@@@",
@@ -172,11 +177,10 @@ This plugin shows a configurable macOS notification:
 }
 ```
 
-When the user sets "Notification Title" to `Meeting Reminder` and "Notification Message" to `Standup in 5 minutes`, BTT replaces the placeholders and executes:
+When the user saves "HUD Title" as `Meeting Reminder` and "HUD Message" as `Standup in 5 minutes`, BTT replaces the placeholders and executes:
 
 ```json
 {
-  "BTTIsPureAction": true,
   "BTTPredefinedActionType": 254,
   "BTTAdditionalActionData": {
     "BTTActionHUDTitle": "Meeting Reminder",
@@ -188,22 +192,21 @@ When the user sets "Notification Title" to `Meeting Reminder` and "Notification 
 
 ## Placeholder Replacement
 
-- Placeholders use the format `@@@fieldID@@@` where `fieldID` matches a `formFieldID` from your form fields
-- Placeholders can appear anywhere in the action JSON - in string values, numeric values, or even keys
-- Values are automatically JSON-escaped, so special characters like quotes and backslashes in user input are handled safely
-- Replacement is done on the serialized JSON string, then parsed back - this means placeholders work even inside nested objects
+- Placeholders use `@@@fieldID@@@`, matching a plain `formFieldID` or `formFieldID2`.
+- Put placeholders inside quoted JSON strings. Replacement inserts text; numbers and booleans become text too. It does not inject typed objects or arrays or evaluate expressions.
+- Values are JSON-escaped, including quotes, backslashes and newlines. Replacement operates on the serialized action JSON and also reaches strings inside nested objects.
+- A missing saved value leaves its placeholder unchanged. Form defaults initialize the editor; the executor does not independently merge defaults into unsaved configuration.
+- Keep action identities and property names literal. Use a placeholder for a numeric option only when that action accepts a numeric string; check its action definition.
+
+## Validating an AI-Generated Plugin
+
+Parse the whole file as JSON and check its metadata and flat form definitions. Retrieve exact action fields with `lookup_btt_action_definition`, then validate a concrete copy of `BTTPluginActions` with `validate_btt_trigger_json`. Substitute representative values for that check, including text with quotes, backslashes and newlines.
+
+Action validation checks the embedded actions, not the surrounding plugin metadata or form schema. Save the `.bttjsonplugin` file with a file tool; do not send it to `compile_swift_plugin`. Check that BTT loads it, that its configuration fields persist, and that executing it produces the intended result. See the [AI authoring workflow](/docs/plugins/ai-authoring).
 
 ## Multiple Actions
 
-You can include multiple actions in the `BTTPluginActions` array. They are executed in sequence, just like additional actions on a regular BTT trigger:
-
-```json
-"BTTPluginActions": [
-  { "BTTIsPureAction": true, "BTTPredefinedActionType": 254, ... },
-  { "BTTIsPureAction": true, "BTTPredefinedActionType": 195, ... },
-  { "BTTIsPureAction": true, "BTTPredefinedActionType": 47, ... }
-]
-```
+Include additional complete action dictionaries in the `BTTPluginActions` array. They run in sequence, like additional actions on a regular BTT trigger. Use each action's documented wait or completion settings when later actions depend on asynchronous work finishing.
 
 ## Installation
 
@@ -228,11 +231,11 @@ JSON action plugins appear in the BTT Plugin Manager (accessible from the BTT me
 | Feature | JSON Action Plugin (`.bttjsonplugin`) | Compiled Action Plugin (`.bttactionplugin`) |
 |---|---|---|
 | **Format** | Single JSON file | Xcode bundle |
-| **Code required** | No | Yes (Swift or Objective-C) |
-| **Setup** | Text editor only | Xcode project |
-| **Capabilities** | Executes BTT actions with configurable parameters | Full native code execution |
-| **Distribution** | Share the file directly | Must be notarized |
-| **Custom UI** | Form fields only | Custom AppKit/SwiftUI views |
-| **Use case** | Reusable action sequences, sharing action recipes | Complex logic, custom rendering, API calls |
+| **Code required** | JSON; embedded actions may contain scripts | Swift or Objective-C |
+| **Setup** | Text editor only | Swift source file or Xcode project |
+| **Capabilities** | Existing BTT actions, including scripting and network actions | Native code with a persistent plugin object |
+| **Distribution** | Share the file directly | Share Swift source, or notarize a compiled bundle |
+| **Configuration UI** | Flat JSON form fields | Swift form items |
+| **Use case** | Reusable action sequences, sharing action recipes | Logic that needs native APIs or a persistent object |
 
-JSON action plugins are ideal when you want to package a reusable action configuration that others can install and customize through form fields - without requiring them to compile anything or trust executable code.
+JSON action plugins package reusable configurations without compilation. Their actions can still run scripts and perform other operations, so inspect the action sequence when installing one. Use a Launcher or Floating Menu Widget plugin for a custom native view.

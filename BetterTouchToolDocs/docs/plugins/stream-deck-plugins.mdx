@@ -43,7 +43,7 @@ func widgetAttributedTitleStrings() -> [NSAttributedString]? {
 Return dictionaries with detailed rendering descriptions for full control over appearance including images, SF Symbols, colors, and corner radius.
 
 ```swift
-func widgetDictionaries() -> [NSDictionary]? {
+func widgetDictionaries() -> [[AnyHashable: Any]]? {
     return [
         [
             "BTTStreamDeckBackgroundColor": "80, 96, 94, 255",
@@ -112,7 +112,7 @@ func buttonUp(_ identifier: String) -> Bool {
 }
 ```
 
-If your widget returns multiple buttons, implement `buttonIdentifiers()` to identify them:
+If your widget returns multiple buttons, implement `buttonIdentifiers()` with stable IDs in the same order and number as the rendered buttons:
 
 ```swift
 func buttonIdentifiers() -> [String]? {
@@ -138,7 +138,7 @@ func alternateModeActive() -> Bool { return false }
 Return default appearance configuration values:
 
 ```swift
-static func defaultConfiguration() -> [String: Any]? {
+static func defaultConfiguration() -> [AnyHashable: Any]? {
     return [
         "BTTStreamDeckCornerRadius": 13,
         "BTTStreamDeckBackgroundColor": "40, 40, 40, 255"
@@ -169,49 +169,58 @@ private func onDataChanged() {
 }
 ```
 
-## Complete Example: CPU Usage Monitor
+## Complete Example: CPU Core Count
+
+This widget displays the number of active CPU cores. The configuration checkbox controls whether that count appears on the button.
 
 ```swift
-// BTT-Plugin-Name: CPU Monitor
+// BTT-Plugin-Name: System Monitor
+// BTT-Plugin-Identifier: com.example.systemmonitor
 // BTT-Plugin-Type: StreamDeck
 // BTT-Plugin-Icon: cpu
 
 import Cocoa
 
-class CPUMonitor: NSObject, BTTStreamDeckPluginInterface {
+class SystemMonitor: NSObject, BTTStreamDeckPluginInterface {
     weak var delegate: (any BTTStreamDeckPluginDelegate)?
-    private var cpuUsage: Double = 0
-    private var timer: Timer?
+    private var showCoreCount = true
 
-    static func configurationFormItems() -> BTTPluginFormItem? { nil }
+    static func configurationFormItems() -> BTTPluginFormItem? {
+        let group = BTTPluginFormItem()
+        group.formFieldType = BTTFormTypeFormGroup
 
-    func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]) {}
+        let toggle = BTTPluginFormItem()
+        toggle.formFieldType = BTTFormTypeCheckbox
+        toggle.formLabel1 = "Show Core Count"
+        toggle.formFieldID = "showCoreCount"
+        toggle.defaultValue = NSNumber(value: true)
+
+        group.formOptions = [toggle]
+        return group
+    }
+
+    func didReceiveNewConfigurationValues(_ configurationValues: [AnyHashable: Any]) {
+        if let pct = configurationValues["plugin_var_showCoreCount"] as? Bool {
+            showCoreCount = pct
+        }
+        delegate?.requestUpdate(self)
+    }
 
     func widgetTitleStrings() -> [String]? {
-        return [String(format: "%.0f%%", cpuUsage)]
+        let info = ProcessInfo.processInfo
+        let usage = info.activeProcessorCount
+        if showCoreCount {
+            return ["CPU\n\(usage) cores"]
+        }
+        return ["CPU"]
     }
 
     func buttonDown(_ identifier: String) -> Bool {
-        delegate?.executeAssignedBTTActions(self)
-        return true
+        return false
     }
 
     func buttonUp(_ identifier: String) -> Bool {
         return false
-    }
-
-    // Start monitoring when the widget is loaded
-    init(delegate: (any BTTStreamDeckPluginDelegate)? = nil) {
-        self.delegate = delegate
-        super.init()
-        timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
-            self?.updateCPU()
-        }
-    }
-
-    private func updateCPU() {
-        // ... measure CPU usage ...
-        delegate?.requestUpdate(self)
     }
 }
 ```

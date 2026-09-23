@@ -1,0 +1,161 @@
+---
+title: "Using Swift"
+sidebar_position: 3.5
+slug: "/docs/scripting/swift"
+---
+## Running Swift Scripts in BTT
+
+:::info Requires BetterTouchTool 6.755 or newer
+The "Run Swift Script" action is available starting with BetterTouchTool **6.755**. It also requires the Xcode Command Line Tools (see below).
+:::
+
+Starting with BetterTouchTool 6.755 you can write actions directly in Swift using the **"Run Swift Script"** action. This is the easiest way to use native macOS APIs (AppKit, Accessibility, Core Graphics, `NSWorkspace`, `NSScreen`, `NSPasteboard`, …) from BetterTouchTool - things that are awkward in AppleScript and not reachable from JavaScript.
+
+The code is written directly in the BetterTouchTool action editor (with Swift syntax highlighting), no external file or Xcode project is needed. Like the AppleScript / JavaScript actions you can optionally store the script in the preset folder or in an external `.swift` file instead.
+
+---
+### Requirements
+
+Swift scripts are **compiled** with `swiftc`, so the Mac needs the **Xcode Command Line Tools** (or Xcode). BetterTouchTool detects whether they are installed and shows an "Install…" button in the action configuration if not. You can also install them manually via
+
+```bash
+xcode-select --install
+```
+
+Presets that contain Swift scripts will only work on Macs that have the Command Line Tools installed.
+
+---
+### How it works (and why it is fast)
+
+BetterTouchTool never interprets Swift. Every script is compiled **once** into a small native library that is cached in `~/Library/Application Support/BetterTouchTool/SwiftScriptCache` (keyed by a hash of the source). Only the first run after you change the script takes a few seconds (typically 1–5 s, depending on the imports); every later run takes milliseconds. BetterTouchTool also compiles in the background right after you save the action, so usually not even the first trigger has to wait.
+
+The **Compile** button in the editor compiles without running and shows compiler errors directly at the offending line. **Run** compiles (if needed), executes the script and shows the result.
+
+---
+### 1.) The recommended style: `run(_ btt:)`
+
+Define a `run` function. BetterTouchTool calls it when the action executes and whatever you return becomes the action result:
+
+```swift
+import Foundation
+import AppKit
+
+func run(_ btt: BTTScript) async throws -> Any? {
+    let app = NSWorkspace.shared.frontmostApplication?.localizedName ?? "unknown"
+    await btt.setVariable("frontApp", app)
+    return app
+}
+```
+
+* `run` may be `async`, `throws`, both or neither.
+* `run` is called on the **main actor**, so AppKit APIs can be used directly. For long running work use `await` or `Task.detached` - do not block the main thread.
+* The return value can be a `String`, a number, a `Bool`, `[String: Any]`, `[Any]` or `nil`. Dictionaries and arrays are returned to BetterTouchTool as JSON. The result is e.g. the reply of `trigger_named`, or the value shown by widgets that display script results.
+* Anything else at file scope is fine (helper functions, structs, classes, extensions, `import`s) - just not top-level *statements*; use the script style below for those.
+
+#### The `btt` object
+
+| API | Description |
+|---|---|
+| `await btt.getVariable(name)` | Value of a BTT variable (`Any?`) |
+| `await btt.getString(name)` / `await btt.getNumber(name)` | Typed convenience getters |
+| `await btt.setVariable(name, value, persist: false)` | Set a BTT variable (`persist: true` for persistent variables) |
+| `try await btt.triggerNamed(name)` | Run a named trigger and get its result |
+| `await btt.triggerNamedAsync(name)` | Run a named trigger without waiting |
+| `try await btt.call(route, params)` | Call **any** function of the [scripting interface](/docs/scripting/overview) (e.g. `get_clipboard_content`, `display_notification`, `update_menu_item`, `trigger_action`) |
+| `btt.log(message)` | Log a message (shown in the editor result view / BTT's log) |
+| `btt.triggerUUID`, `btt.triggerName`, `btt.presetPath` | Information about the trigger running the script |
+| `btt.runsInsideBetterTouchTool` | `true` when the script runs inside the BTT process (see execution modes) |
+
+**Important:** BTT variable placeholders like `{active_app_name}` are **not** replaced inside Swift source code (that would force a recompile on every run). Use `await btt.getVariable("active_app_name")` instead.
+
+**Example: use the scripting interface**
+
+```swift
+import Foundation
+
+func run(_ btt: BTTScript) async throws -> Any? {
+    let clipboard = try await btt.call("get_clipboard_content") ?? ""
+    try await btt.call("display_notification", ["title": "Clipboard", "text": clipboard])
+    return clipboard.count
+}
+```
+
+**Example: Accessibility API**
+
+```swift
+import Foundation
+import AppKit
+import ApplicationServices
+
+func run(_ btt: BTTScript) async throws -> Any? {
+    guard let app = NSWorkspace.shared.frontmostApplication else { return nil }
+    let appElement = AXUIElementCreateApplication(app.processIdentifier)
+    var focused: CFTypeRef?
+    AXUIElementCopyAttributeValue(appElement, kAXFocusedWindowAttribute as CFString, &focused)
+    var title: CFTypeRef?
+    if let window = focused {
+        AXUIElementCopyAttributeValue(window as! AXUIElement, kAXTitleAttribute as CFString, &title)
+    }
+    return title as? String
+}
+```
+
+---
+### 2.) Script style: plain top-level code
+
+If you prefer classic script files (like the ones you would run with `swift myscript.swift`), just write top-level code - BetterTouchTool detects this automatically:
+
+```swift
+#!/usr/bin/env swift
+import Foundation
+
+let date = DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .short)
+print("It is \(date)")
+```
+
+Script style behaves exactly like running the file from the command line:
+
+* it is compiled into a small executable (cached the same way) and runs as a **separate process**,
+* whatever the script prints to **stdout becomes the result** (trimmed),
+* a non-zero exit code or output on stderr is reported as an error,
+* `readLine()`, `exit()`, `CommandLine.arguments` etc. work as usual,
+* the environment variables `BTT_PRESET_PATH`, `BTT_TRIGGER_UUID` and `BTT_TRIGGER_NAME` are set, and the working directory is the preset folder,
+* if the script prints something and then exits with a non-zero code, the printed output is still returned as the result and the exit code is reported as a warning.
+
+The `btt` object is **not** available in script style - to talk to BetterTouchTool from such a script use the same options shell scripts use (the [btt:// URL scheme](/docs/scripting/url-scheme), the [webserver](/docs/scripting/webserver) or the [socket / CLI](/docs/scripting/cli)), or switch to the `run(_ btt:)` style.
+
+---
+### Execution modes
+
+Each Run Swift Script action can choose where the compiled code runs:
+
+* **Separate process (default, recommended)** - the script runs in a helper process (`BetterTouchToolSwiftScriptRunner`). A crashing script can't take BetterTouchTool down, and you can set a **timeout** after which the script is terminated. The `btt` object works exactly the same; calls are forwarded to BetterTouchTool.
+* **Inside BetterTouchTool** - the compiled code is loaded into the BetterTouchTool process itself. This is the fastest option and gives direct access to the app, but: **a crash (e.g. a force-unwrapped nil) crashes BetterTouchTool**, blocking the main thread freezes the BTT UI, and there is no timeout. If BetterTouchTool crashed while such a script was running it will automatically run that script in a separate process on the next start. Scripts that were not written on this Mac (e.g. from an imported preset) ask for confirmation before they run inside BetterTouchTool for the first time.
+
+Script style code always runs in a separate process.
+
+The "Inside BetterTouchTool" mode can be disabled globally in Terminal:
+
+```bash
+defaults write com.hegenberg.BetterTouchTool BTTSwiftScriptAllowInProcess -bool NO
+```
+
+---
+### Options
+
+* **Script location**: inline in the trigger (default), stored as a file inside the preset folder, or an external `.swift` file (created by BTT or chosen). External files are watched and recompiled when they change.
+* **Timeout** (separate process only): seconds after which the script is terminated, `0` = no timeout.
+* **Optimized build**: compiles with `-O` instead of `-Onone`. Slightly slower to compile, faster to run - useful for scripts that do real work.
+
+---
+### Troubleshooting
+
+* *"Command Line Tools not installed"* - install them with `xcode-select --install`, then press Compile again.
+* *"expressions are not allowed at the top level"* - you mixed a `func run(_ btt: BTTScript)` with top-level statements. Either move the statements into `run`, or remove `run` to use script style.
+* *Compiler errors after a macOS / Xcode update* - the cache is keyed by the compiler version, the next run just recompiles.
+* Errors are logged in BetterTouchTool's log and, for compile errors, shown as a notification (`defaults write com.hegenberg.BetterTouchTool BTTSwiftScriptNotifyOnError -bool NO` disables the notification).
+
+---
+### JSON format
+
+When creating the action via the [JSON scripting interface](/docs/json/trigger-definitions), see [Run Swift Script](/docs/actions/action-definitions#run-swift-script) for the keys (`BTTScriptString`, `BTTSwiftScriptExecutionMode`, `BTTSwiftScriptTimeout`, `BTTSwiftScriptOptimize`).

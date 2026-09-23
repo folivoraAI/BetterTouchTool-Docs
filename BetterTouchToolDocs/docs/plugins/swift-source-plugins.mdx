@@ -24,7 +24,7 @@ If you edit the `.swift` file, BTT detects the change and offers to recompile. D
 
 ## Metadata Comments
 
-Add optional metadata comments at the top of your file to configure the plugin:
+Put metadata comments in the first 50 lines of your file. Set an explicit, stable identifier so renaming the file does not change the plugin identity:
 
 ```swift
 // BTT-Plugin-Name: My Widget
@@ -44,7 +44,39 @@ Supported `BTT-Plugin-Type` values: `FloatingMenuWidget`, `Action`, `StreamDeck`
 
 ## Protocols and Bridging Header
 
-All plugin protocols are defined in `BTTSwiftPluginHeader.h`, shipped inside the BTT app bundle. The bridging header is automatically provided during compilation - you don't need to import it manually. Just conform to the protocol and BTT handles the rest.
+All plugin protocols are defined in `BTTSwiftPluginHeader.h`, shipped inside the BTT app bundle. The bridging header is automatically provided during compilation - you don't need to import it manually. Use the protocols, models, delegates and form constants exposed by that header, together with the installed macOS SDK. BTT app internals such as `LauncherStore`, `APPDEL` and internal SwiftUI modifiers are not plugin APIs.
+
+Keep the principal declaration on one line, for example `class MyWidget: NSObject, BTTFloatingMenuWidgetInterface`. The source metadata parser uses that declaration to discover your class. Let Swift provide its module-qualified Objective-C name; a custom `@objc(Name)` can conflict with the previous version during hot reload.
+
+## Callback Signatures
+
+Use the exact Swift signatures imported from BTT's header. Untyped Objective-C dictionaries use `AnyHashable` keys:
+
+| Plugin type | Configuration parameter |
+| --- | --- |
+| Floating Menu Widget, Launcher, Trigger | `[AnyHashable: Any]?` in `didReceiveNewConfigurationValues(_:)` |
+| Stream Deck, Touch Bar | `[AnyHashable: Any]` in `didReceiveNewConfigurationValues(_:)` |
+| Action | `[AnyHashable: Any]?` in `executeAction(withConfiguration:completionBlock:)` |
+
+A warning that a method “nearly matches” an optional protocol requirement means BTT may never call that method. Correct the signature; do not hide the warning by making the method private. Builds containing this warning are rejected by BTT's updated plugin compiler, leaving the previous compiled bundle intact. Older BTT builds may accept the warning, so check diagnostics when supporting older installations.
+
+Keep AppKit and SwiftUI updates on the main thread. Move blocking work out of callbacks, preserve stable item IDs, and release timers and observers when the plugin stops or its view disappears.
+
+## SwiftUI State With Command Line Tools
+
+For SwiftUI plugin views that need the existing `State` property-wrapper behavior, declare a uniquely named, file-local alias after importing SwiftUI: `private typealias BTTPluginState<Value> = SwiftUI.State<Value>`. Use that name as the attribute, for example `@BTTPluginState private var text = ""`. The [Timer Widget example](/docs/plugins/floating-menu-widget#interactive-widget-swiftui) includes the complete pattern.
+
+The macOS 27 SDK also defines `@State` as a macro. Some standalone Command Line Tools packages cannot load its `SwiftUIMacros` implementation, producing “external macro implementation type ... could not be found,” followed by errors about missing bindings or immutable `self`. The differently named alias selects the existing property wrapper, works with previous macOS SDKs, and does not require full Xcode or a macOS availability check. Writing `@SwiftUI.State` still selects the macro and does not solve that error.
+
+The alias preserves `$text` bindings and backing-storage initialization such as `_text = BTTPluginState(initialValue: initialText)`. It deliberately retains property-wrapper semantics; it does not adopt the new `@State` macro's lazy initialization behavior. Use it only for state that fits that model. It is not a general workaround for other macros such as `@Observable`, and it does not make newer macOS APIs available on older systems. Keep the plugin's deployment target and API availability requirements in mind.
+
+## Creating and Editing With AI
+
+Use the **BTT Plugin Creator / Editor** skills and retrieve the reference for the intended plugin type before generating code. The [AI authoring workflow](/docs/plugins/ai-authoring) lists the matching tools.
+
+For a new Swift plugin, pass `source_code` and `plugin_file_name` directly to `compile_swift_plugin`. For an existing plugin, read its source, make focused edits with the available file tools, then compile with `swift_file_path`. Preserve literal backslashes and Swift interpolation when moving source through JSON or JavaScript.
+
+The compile tool manages its file-watcher suppression. A `BTT-AI-Managed` comment has no effect on the current loader. A `SUCCESS:` result confirms compilation and loading; verify the configured plugin's behavior separately.
 
 ## Examples by Plugin Type
 
@@ -52,6 +84,7 @@ All plugin protocols are defined in `BTTSwiftPluginHeader.h`, shipped inside the
 
 ```swift
 // BTT-Plugin-Name: Hello Widget
+// BTT-Plugin-Identifier: com.example.hellowidget
 // BTT-Plugin-Type: FloatingMenuWidget
 // BTT-Plugin-Icon: hand.wave.fill
 
@@ -64,6 +97,7 @@ class HelloWidget: NSObject, BTTFloatingMenuWidgetInterface {
     static func widgetDescription() -> String { "A simple greeting widget" }
     static func widgetIcon() -> String { "hand.wave.fill" }
 
+    // Override the menu item's configured size (optional)
     static func widgetMinWidth() -> CGFloat { 200 }
     static func widgetMinHeight() -> CGFloat { 80 }
 
@@ -85,6 +119,7 @@ See [Floating Menu Widget Plugins](/docs/plugins/floating-menu-widget) for the f
 
 ```swift
 // BTT-Plugin-Name: Counter
+// BTT-Plugin-Identifier: com.example.counter
 // BTT-Plugin-Type: StreamDeck
 // BTT-Plugin-Icon: number.circle.fill
 
@@ -118,6 +153,7 @@ See [Stream Deck Plugins](/docs/plugins/stream-deck) for the full protocol refer
 
 ```swift
 // BTT-Plugin-Name: Clock Text
+// BTT-Plugin-Identifier: com.example.clocktext
 // BTT-Plugin-Type: TouchBar
 // BTT-Plugin-Icon: clock
 
@@ -142,6 +178,7 @@ See [Touch Bar Plugins](/docs/plugins/touch-bar) for the full protocol reference
 
 ```swift
 // BTT-Plugin-Name: Show Greeting
+// BTT-Plugin-Identifier: com.example.showgreeting
 // BTT-Plugin-Type: Action
 // BTT-Plugin-Icon: bubble.left.fill
 
@@ -153,13 +190,13 @@ class ShowGreeting: NSObject, BTTActionPluginInterface {
     static func configurationFormItems() -> BTTPluginFormItem? { nil }
 
     func executeAction(
-        withConfiguration config: [String: Any]?,
-        completionBlock: @escaping (Any?) -> Void
+        withConfiguration config: [AnyHashable: Any]?,
+        completionBlock: ((@Sendable (Any?) -> Void)?)
     ) {
         let alert = NSAlert()
         alert.messageText = "Hello from a BTT Action Plugin!"
         alert.runModal()
-        completionBlock("done")
+        completionBlock?("done")
     }
 }
 ```
@@ -170,6 +207,7 @@ See [Action Plugins](/docs/plugins/action) for the full protocol reference.
 
 ```swift
 // BTT-Plugin-Name: Clipboard Change
+// BTT-Plugin-Identifier: com.example.clipboardchangetrigger
 // BTT-Plugin-Type: Trigger
 // BTT-Plugin-Icon: doc.on.clipboard
 
@@ -184,9 +222,10 @@ class ClipboardChangeTrigger: NSObject, BTTTriggerPluginInterface {
     static func triggerDescription() -> String { "Fires when clipboard content changes" }
     static func triggerIcon() -> String { "doc.on.clipboard" }
     static func configurationFormItems() -> BTTPluginFormItem? { nil }
-    func didReceiveNewConfigurationValues(_ config: [String: Any]?) {}
+    func didReceiveNewConfigurationValues(_ config: [AnyHashable: Any]?) {}
 
     func startObserving() {
+        stopObserving()
         lastChangeCount = NSPasteboard.general.changeCount
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self else { return }
@@ -212,6 +251,7 @@ See [Trigger Plugins](/docs/plugins/trigger) for the full protocol reference, li
 
 ```swift
 // BTT-Plugin-Name: Demo Launcher Plugin
+// BTT-Plugin-Identifier: com.example.demolauncherplugin
 // BTT-Plugin-Type: Launcher
 // BTT-Plugin-Icon: sparkles.rectangle.stack
 
@@ -281,7 +321,7 @@ let value = delegate?.getVariable("my_var")
 
 ## Adding Configuration Forms
 
-Any Swift source plugin can include user-configurable settings by implementing `configurationFormItems()`:
+Any Swift source plugin can include user-configurable settings by implementing `configurationFormItems()`. This fragment uses the nullable callback for a floating-menu widget; choose the signature from the table above for other types:
 
 ```swift
 static func configurationFormItems() -> BTTPluginFormItem? {
@@ -298,7 +338,7 @@ static func configurationFormItems() -> BTTPluginFormItem? {
     return group
 }
 
-func didReceiveNewConfigurationValues(_ configurationValues: [String: Any]?) {
+func didReceiveNewConfigurationValues(_ configurationValues: [AnyHashable: Any]?) {
     // Values arrive with a "plugin_var_" prefix on the formFieldID
     if let text = configurationValues?["plugin_var_labelText"] as? String {
         labelText = text

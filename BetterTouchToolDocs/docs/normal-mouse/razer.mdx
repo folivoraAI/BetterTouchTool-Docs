@@ -1,0 +1,98 @@
+---
+title: "Razer Mouse Support"
+sidebar_position: 3.5
+slug: "/docs/normal-mouse/razer"
+---
+# Razer Mouse Support
+
+Current versions of BetterTouchTool natively support configuring Razer mice — no Razer Synapse required. BTT talks to the mouse directly over its USB cable, its HyperSpeed wireless dongle, or a direct Bluetooth connection.
+
+Unlike Logitech mice, Razer side buttons already report as standard mouse buttons (4 / 5), so they work with BetterTouchTool's [Normal Mouse triggers](/docs/normal-mouse/assigning-actions) without any special setup. The Razer support in BTT adds **on-device configuration** on top of that: DPI & DPI stages, polling rate, lighting, battery readout, idle timeout, and on-device button remapping.
+
+**Hardware-validated models:** Razer Basilisk V3, Basilisk V3 Pro, Basilisk V3 X HyperSpeed, Basilisk V3 35K, Basilisk V3 Pro 35K, Orochi V2. Most other Razer mice share the same protocol and work on a best-effort basis — if something doesn't work on your model, please report it on the [community forum](https://community.folivora.ai).
+
+## Setup
+
+Go to the "Normal Mouse" section in BetterTouchTool and add a **"Razer Mouse Configuration"** row (via the + button, under "Razer Mouse Setup"). If a Razer mouse is connected, BTT also suggests adding it automatically.
+
+Select your mouse in the configuration row, then adjust the settings you want to manage. Everything is written to the mouse's onboard memory (where the hardware supports it) and re-applied automatically whenever the mouse reconnects or the Mac wakes from sleep. Razer Synapse is not required and does not need to be installed.
+
+## What you can configure
+
+* **DPI stages** – the list of DPI values the mouse cycles through, plus which one is active. Supports independent X/Y DPI on the Basilisk V3 family.
+* **Polling rate** – 125 / 500 / 1000 Hz *(USB / dongle only — see below)*.
+* **Lighting** – static color, spectrum cycle, breathing, wave, or off, with brightness. Applies to all lighting zones (scroll wheel, logo, underglow).
+* **Wireless idle timeout** – how long before the mouse sleeps.
+* **Low battery threshold** *(USB / dongle only)*.
+* **Battery level** – shown live in the configuration row for wireless mice.
+
+## Button remapping
+
+BetterTouchTool can rewrite a button's binding **on the mouse itself**. Because the remap is stored in the mouse's onboard memory, it keeps working even without BTT running.
+
+The configuration row's **Button Remapping** section lets you reassign the DPI button, thumb / HyperShift button, back / forward / middle buttons, scroll, and (on full-size Basilisk V3 models) the sensitivity clutch and wheel-tilt buttons.
+
+### The thumb / HyperShift button
+
+The dedicated **thumb button** (the one Razer uses for HyperShift) is fully remappable in BetterTouchTool — you can turn it into a BTT trigger (see below), a keyboard key, a mouse action, or leave it as the HyperShift modifier. Just pick **Thumb Button (HyperShift)** in the Button Remapping section and choose what it should do, then **Apply To Mouse Now**.
+
+To put it back the way it came from the factory, choose **"Restore Factory Default"** — that reassigns HyperShift to the button. You can also assign the **HyperShift** modifier to *other* buttons via the same dropdown, if you want the HyperShift layer on a different button.
+
+:::note HyperShift as a trigger
+BTT reacts to the button *after* the mouse's firmware handles it. If you remap the thumb button to a key (e.g. F13) it becomes a normal BTT trigger, but it no longer acts as the HyperShift modifier — you get one behavior or the other per button.
+:::
+
+### Turning a mouse button into a BTT trigger
+
+Some Razer buttons — most notably the **DPI button** and the **thumb / HyperShift button** — are handled entirely inside the mouse's firmware and normally never reach macOS. To use one of them as a BetterTouchTool trigger:
+
+1. In the Button Remapping section, set the button to **"Send F13"** (F13–F20 are available).
+2. Press **Apply To Mouse Now**.
+3. Add a normal [Keyboard Shortcut](/docs/keyboard-shortcuts/overview) trigger in BTT and press the mouse button to record it — it registers as F13.
+
+From then on that button fires whatever actions you assign to the shortcut. Choose **"Restore Factory Default"** to give the button its original behavior back (for the thumb button that's HyperShift, for the DPI button that's DPI cycling).
+
+:::note macOS only recognizes F1–F20
+F21–F24 exist on the hardware but macOS never turns them into key events, so BTT only offers F13–F20. That's eight distinct trigger keys to spread across your mouse buttons.
+:::
+
+### DPI Stage Changed trigger
+
+If you'd rather keep the DPI button cycling DPI, you can still react to it: add the **"Razer Mouse DPI Stage Changed"** trigger (under Automations & Other Triggers). It fires whenever a supported mouse announces a DPI change, and sets the variables `razer_dpi`, `razer_dpi_stage` and `razer_device` before running its actions.
+
+## Predefined actions
+
+Besides the configuration row, these actions are available (they appear once a Razer mouse has been connected) and can be assigned to any trigger:
+
+* Razer Mouse: Set DPI
+* Razer Mouse: Cycle DPI Stage
+* Razer Mouse: Increase / Decrease DPI
+* Razer Mouse: Set Polling Rate
+* Razer Mouse: Set Lighting
+
+## Bluetooth vs. USB / dongle
+
+A Razer mouse connected through its cable or HyperSpeed dongle supports the full feature set. Over a **direct Bluetooth** connection (e.g. Basilisk V3 X HyperSpeed, Basilisk V3 Pro), DPI stages, battery, lighting (static / spectrum / brightness / off), idle timeout, button remapping and the DPI-stage trigger all work — but **polling rate** and the **low battery threshold** are not adjustable, because the mouse's Bluetooth protocol does not expose them. BTT shows a note when you try to set something that isn't available on the current connection.
+
+## JavaScript API
+
+Everything above is also scriptable from BetterTouchTool's JavaScript (Run Real JavaScript action, floating menu scripts, etc.):
+
+```javascript
+let devices = await razer_get_devices();
+let battery = await razer_get_battery({});
+let dpi     = await razer_get_dpi({});
+await razer_set_dpi({dpi: 1600});
+await razer_set_dpi_stages({stages: [400, 800, 1600, 3200], activeStage: 2});
+await razer_cycle_dpi_stage({direction: 1});
+await razer_set_polling_rate({hz: 1000});
+await razer_set_lighting({mode: "static", color: [0, 255, 0], brightness: 80});
+
+// Remap a physical button on the mouse. slot 96 = DPI button, 0x39 = thumb button.
+await razer_remap_button({slot: 96, target: "f13"});        // -> becomes a BTT trigger
+await razer_remap_button({slot: 0x39, target: "f14"});      // thumb/HyperShift button -> trigger
+await razer_remap_button({slot: 0x39, target: "hypershift"}); // restore HyperShift
+await razer_remap_button({slot: 96, target: "default"});    // factory default
+```
+
+There are also `razer_send_raw_request` (USB) and `razer_ble_send_raw_request` (Bluetooth) for sending raw protocol commands — useful for validating models BTT hasn't been tested with. If you get something working on an untested mouse this way, please share it on the forum so it can be added.

@@ -6,6 +6,14 @@ slug: "/docs/normal-mouse/assigning-actions"
 # Assigning actions to your mouse
 BetterTouchTool allows to completely customize your mouse, you can assign actions to various mouse related functionality:
 
+:::tip Logitech Mice
+If you own a Logitech mouse, BetterTouchTool supports it natively (no Logitech software required). Add a "Logitech Mouse Configuration" first — it makes all buttons recognizable and unlocks Logitech specific features like the scroll wheel modes or the gesture button. See [Logitech Mouse Support](/docs/normal-mouse/logitech) for how to set this up, then assign actions to the buttons as described on this page.
+:::
+
+:::tip Razer Mice
+Razer side buttons already work as normal mouse buttons here without any setup. For DPI stages, polling rate, lighting, battery and on-device button remapping (including turning the DPI or thumb/HyperShift button into a BTT trigger), add a "Razer Mouse Configuration" — see [Razer Mouse Support](/docs/normal-mouse/razer). Razer Synapse is not required.
+:::
+
 ## Assign Actions To Mouse Buttons
 
 First select the "Normal Mouse" trigger type, then press the + button and then record the specific mouse button by clicking the grey area:
@@ -33,7 +41,11 @@ While BetterTouchTool also offers a sophisticated mouse gesture system (see [Dra
 
 #### Discrete And Continuous Drag Gestures
 
-There are discrete drag gestures and continuous ones. **Usually you will want to use the discrete ones** as the continuous versions trigger for every pixel the mouse is dragged. The continuous ones are mostly suited for usage in scripts, they make the following variables available:
+Discrete drag categories trigger actions when a drag is recognized. Continuous drag categories keep supplying movement updates while you hold the button and drag. Use [Action Value Bindings](/docs/actions/value-bindings) to turn these updates into volume, brightness or MIDI values without a script, or add a movement threshold to repeat shortcuts by distance.
+
+See [Continuous Mouse Drags](/docs/normal-mouse/continuous-drags) for a volume-control walkthrough, sensitivity settings and distance-based repetition.
+
+For scripts, the following mouse-drag variables are also available:
  * BTTDragValue (also BTTDragUpValue, BTTDragDownValue, BTTDragLeftValue and BTTDragRightValue if you need them separated)
  * BTTDragDeltaX
  * BTTDragDeltaY

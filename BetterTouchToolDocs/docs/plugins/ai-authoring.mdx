@@ -1,0 +1,51 @@
+---
+title: "Creating Plugins With AI"
+sidebar_position: 12
+slug: "/docs/plugins/ai-authoring"
+---
+
+# Creating Plugins With AI
+
+Use BTT's **Plugin Creator / Editor** skills to create or change a plugin. The assistant should retrieve the matching reference from your running BTT before generating code. That reference contains the API and examples available to that build.
+
+## Choose the Reference
+
+| Plugin | Reference tool |
+| --- | --- |
+| [Launcher](/docs/plugins/launcher) | `retrieve_launcher_plugin_reference` |
+| [Action](/docs/plugins/action) | `retrieve_action_plugin_reference` |
+| [Floating Menu Widget](/docs/plugins/floating-menu-widget) | `retrieve_floating_menu_widget_plugin_reference` |
+| [Stream Deck](/docs/plugins/stream-deck) | `retrieve_stream_deck_plugin_reference` |
+| [Touch Bar](/docs/plugins/touch-bar) | `retrieve_touch_bar_plugin_reference` |
+| [Trigger](/docs/plugins/trigger) | `retrieve_trigger_plugin_reference` |
+| [JSON Action](/docs/plugins/json-action-plugins) | `retrieve_json_action_plugin_reference` |
+
+JSON action plugins package existing BTT actions and form fields. They can include scripting or network actions. Choose Swift when the plugin needs native views or a persistent object with lifecycle callbacks.
+
+## Swift Workflow
+
+1. Read the matching reference. For an existing plugin, read its current source and preserve its identifier and configuration keys.
+2. Use the exact protocol signatures from `BTTSwiftPluginHeader.h`. Keep metadata in the first 50 lines and the principal class declaration on one line. For SwiftUI state, use the [compatible `State` property-wrapper alias](/docs/plugins/swift-source-plugins#swiftui-state-with-command-line-tools) so the source also compiles with standalone Command Line Tools whose macOS 27 SDK cannot load `SwiftUIMacros`. See [Swift Source Plugins](/docs/plugins/swift-source-plugins).
+3. For a new file, call `compile_swift_plugin` with `source_code` and `plugin_file_name`. For an existing file, make focused edits, then call it with `swift_file_path`.
+4. Read compiler diagnostics and correct errors, including “nearly matches optional requirement” warnings. Those warnings can mean that BTT will never call the method.
+5. After `SUCCESS:`, configure the plugin in BTT and verify its behavior. Compilation and loading do not verify configuration persistence, keyboard handling, timers or hardware events.
+
+The compile tool handles watcher suppression. Adding `BTT-AI-Managed` to the source does not suppress prompts in the current loader. Direct `source_code` input also avoids an extra JavaScript string-escaping layer.
+
+For Launcher plugins, check stable result IDs, saved-instance editing, async results, keyboard commands and surface cleanup. Parse arguments with the [per-item host query helper](/docs/plugins/launcher#query-keywords-and-arguments) in both previews and actions; keep `context.query` as the full input. A surface refresh updates chrome and layout; update the retained view or observable model to change its content.
+
+## JSON Workflow
+
+1. Build a valid JSON object containing metadata, flat form definitions and an action array. Use a stable `BTTPluginIdentifier` and distinct field IDs.
+2. Look up each action with `lookup_btt_action_definition`. Preserve exact key locations and value encodings.
+3. Put `@@@fieldID@@@` placeholders inside JSON strings. Substitution inserts escaped text, not typed JSON or evaluated expressions.
+4. Validate a concrete copy of the action array with `validate_btt_trigger_json`, using representative form values. Check metadata and form definitions separately.
+5. Save the `.bttjsonplugin` file, select it in BTT, save its configuration and verify execution. JSON plugins do not use `compile_swift_plugin`.
+
+See [JSON Action Plugins](/docs/plugins/json-action-plugins) for supported fields, missing-value behavior and a complete example.
+
+## Tool Availability
+
+Tools depend on the active skills and the installed BTT version. Enable the matching creator/editor skill if its reference or compilation tools are missing. Inside BTT's `run_javascript`, `ai.getAvailableTools()` lists the tool functions available to that JavaScript context. Other AI clients should use their connected BTT tool list; do not assume an unlisted helper exists.
+
+For trigger and action configuration around the plugin, follow the [JSON configuration workflow](/docs/json/overview).
